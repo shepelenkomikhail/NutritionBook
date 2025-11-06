@@ -10,10 +10,10 @@ namespace NutritionalRecipeBook.Api.Configurations
         public static IServiceCollection AddServices(this WebApplicationBuilder builder, IConfiguration config)
         {
             var services = builder.Services;
-
-            //TODO: Add your DI configuration
+            
             services.AddScoped<IRepositoryFactory, RepositoryFactory>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IRecipeService, RecipeService>();    
 
             return services;
         }
