@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NutritionalRecipeBook.Api.Controllers;
 using NutritionalRecipeBook.Application.Contracts;
-using NutritionalRecipeBook.Domain;
+using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Api.UnitTests
 {

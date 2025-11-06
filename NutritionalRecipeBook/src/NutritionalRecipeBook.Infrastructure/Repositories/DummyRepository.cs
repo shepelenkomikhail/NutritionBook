@@ -1,4 +1,4 @@
-﻿using NutritionalRecipeBook.Domain;
+﻿using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 
 namespace NutritionalRecipeBook.Infrastructure.Repositories

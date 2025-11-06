@@ -1,4 +1,5 @@
 using NutritionalRecipeBook.Domain.ConnectionTables;
+using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Domain;
 
