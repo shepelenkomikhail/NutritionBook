@@ -27,7 +27,7 @@ namespace NutritionalRecipeBook.Api.UnitTests
             //Arrange
             var id = Guid.NewGuid();
       
-            _dummyServiceMock.Setup(x => x.GetDummy(id)).Returns(Task.FromResult(new BaseEntity { Id = id }));
+            //_dummyServiceMock.Setup(x => x.GetDummy(id)).Returns(Task.FromResult(new BaseEntity { Id = id }));
 
             //Act
             var result = await _dummyController.Details(id) as OkObjectResult;
@@ -36,7 +36,7 @@ namespace NutritionalRecipeBook.Api.UnitTests
             Assert.NotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(200));
             Assert.That(((BaseEntity)result.Value)?.Id ?? Guid.Empty, Is.EqualTo(id));
-            _dummyServiceMock.Verify(x => x.GetDummy(It.IsAny<Guid>()), Times.Once);
+            //_dummyServiceMock.Verify(x => x.GetDummy(It.IsAny<Guid>()), Times.Once);
         }
     }
 }

@@ -4,6 +4,6 @@ namespace NutritionalRecipeBook.Application.Contracts
 {
     public interface IDummyService
     {
-        public Task<BaseEntity> GetDummy(Guid id);
+        //public Task<BaseEntity> GetDummy(Guid id);
     }
 }
