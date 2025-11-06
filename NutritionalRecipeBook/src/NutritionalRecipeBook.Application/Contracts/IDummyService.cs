@@ -1,4 +1,4 @@
-﻿using NutritionalRecipeBook.Domain;
+﻿using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Application.Contracts
 {

@@ -1,5 +1,5 @@
 ﻿using NutritionalRecipeBook.Application.Contracts;
-using NutritionalRecipeBook.Domain;
+using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 
 namespace NutritionalRecipeBook.Application.Services
