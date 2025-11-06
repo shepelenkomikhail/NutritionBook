@@ -12,8 +12,8 @@ namespace NutritionalRecipeBook.Api.Configurations
             var services = builder.Services;
 
             //TODO: Add your DI configuration
-            services.AddTransient<IDummyService, DummyService>();
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IRepositoryFactory, RepositoryFactory>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }
