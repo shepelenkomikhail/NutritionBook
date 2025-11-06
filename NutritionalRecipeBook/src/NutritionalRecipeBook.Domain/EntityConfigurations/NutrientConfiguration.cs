@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Domain.EntityConfigurations;
 

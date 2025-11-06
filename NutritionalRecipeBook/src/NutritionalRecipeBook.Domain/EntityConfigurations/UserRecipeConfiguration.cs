@@ -9,7 +9,6 @@ namespace NutritionalRecipeBook.Domain.EntityConfigurations
         public void Configure(EntityTypeBuilder<UserRecipe> builder)
         {
             builder.ToTable("UserRecipes");
-            
             builder.HasKey(ur => new { ur.UserId, ur.RecipeId });
             
             builder.HasOne(ur => ur.User)

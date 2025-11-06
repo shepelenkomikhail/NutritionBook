@@ -1,7 +1,6 @@
 using NutritionalRecipeBook.Domain.ConnectionTables;
-using NutritionalRecipeBook.Domain.Entities;
 
-namespace NutritionalRecipeBook.Domain;
+namespace NutritionalRecipeBook.Domain.Entities;
 
 public class Nutrient: BaseEntity
 {
