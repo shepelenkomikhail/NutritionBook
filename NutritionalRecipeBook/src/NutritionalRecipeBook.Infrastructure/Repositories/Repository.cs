@@ -15,7 +15,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         _context = context;
     }
     
-    public IQueryable<T> GetAll()
+    public IEnumerable<T> GetAll()
     {
         return _context.Set<T>();
     }

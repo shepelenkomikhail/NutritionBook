@@ -5,7 +5,7 @@ namespace NutritionalRecipeBook.Infrastructure.Contracts;
 
 public interface IRepository<TEntity> where TEntity : BaseEntity
 {
-    IQueryable<TEntity> GetAll();
+    IEnumerable<TEntity> GetAll();
     Task<TEntity?> GetByIdAsync(Guid id);
     Task<TEntity?> GetSingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
     Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate);
