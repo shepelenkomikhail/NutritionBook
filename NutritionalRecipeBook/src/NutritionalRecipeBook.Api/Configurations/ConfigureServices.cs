@@ -13,7 +13,7 @@ namespace NutritionalRecipeBook.Api.Configurations
 
             //TODO: Add your DI configuration
             services.AddTransient<IDummyService, DummyService>();
-            //services.AddTransient<IDummyRepository, DummyRepository>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
 
             return services;
         }
