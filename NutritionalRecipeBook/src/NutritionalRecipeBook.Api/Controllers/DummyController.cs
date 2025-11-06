@@ -25,10 +25,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         [Route("[controller]/Details/{id}")]
         public async Task<ActionResult> Details(Guid id)
         {
-            _logger.LogInformation($"Request processing started for action GET Dummy/Details/{id}");
-            var dummyEntity = await _dummyService.GetDummy(id);
-
-            return Ok(dummyEntity);
+            return Ok();
         }
     }
 }
