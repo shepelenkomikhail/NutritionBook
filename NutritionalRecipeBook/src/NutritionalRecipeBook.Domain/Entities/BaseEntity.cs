@@ -1,4 +1,4 @@
-﻿namespace NutritionalRecipeBook.Domain
+﻿namespace NutritionalRecipeBook.Domain.Entities
 {
     public class BaseEntity
     {

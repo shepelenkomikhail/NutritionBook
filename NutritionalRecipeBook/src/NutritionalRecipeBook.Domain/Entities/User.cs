@@ -1,6 +1,6 @@
 using NutritionalRecipeBook.Domain.ConnectionTables;
 
-namespace NutritionalRecipeBook.Domain;
+namespace NutritionalRecipeBook.Domain.Entities;
 
 public class User : BaseEntity
 {
@@ -8,5 +8,5 @@ public class User : BaseEntity
     
     public virtual ShoppingList ShoppingList { get; set; } = null!;
     public virtual ICollection<UserRecipe> UserRecipes { get; set; } = new List<UserRecipe>();
-    public virtual ICollection<Comment> Comments { get; set; }
+    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

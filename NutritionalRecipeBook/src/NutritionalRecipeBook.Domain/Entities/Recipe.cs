@@ -1,6 +1,6 @@
 using NutritionalRecipeBook.Domain.ConnectionTables;
 
-namespace NutritionalRecipeBook.Domain;
+namespace NutritionalRecipeBook.Domain.Entities;
 
 public class Recipe: BaseEntity
 {
@@ -11,4 +11,6 @@ public class Recipe: BaseEntity
     public int Servings { get; set; }
     
     public virtual ICollection<UserRecipe> UserRecipes { get; set; } = new List<UserRecipe>();
+    public virtual ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
+    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

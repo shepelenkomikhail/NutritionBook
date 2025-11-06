@@ -1,6 +1,6 @@
 using NutritionalRecipeBook.Domain.ConnectionTables;
 
-namespace NutritionalRecipeBook.Domain;
+namespace NutritionalRecipeBook.Domain.Entities;
 
 public class ShoppingList : BaseEntity
 {

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NutritionalRecipeBook.Domain.ConnectionTables;
+using NutritionalRecipeBook.Domain.Entities;
+using NutritionalRecipeBook.Domain.EntityConfigurations;
 
 namespace NutritionalRecipeBook.Domain;
 
@@ -44,16 +46,16 @@ public class ApplicationDbContext: DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<RecipeIngredient>()
-            .HasKey(ri => new { ri.RecipeId, ri.IngredientId });
-
-        modelBuilder.Entity<NutrientIngredient>()
-            .HasKey(ni => new { ni.NutrientId, ni.IngredientId });
-
-        modelBuilder.Entity<ShoppingListIngredient>()
-            .HasKey(sli => new { sli.ShoppingListId, sli.IngredientId });
-
-        modelBuilder.Entity<UserRecipe>()
-            .HasKey(ur => new { ur.UserId, ur.RecipeId });
+        modelBuilder.ApplyConfiguration(new CommentConfiguration());
+        modelBuilder.ApplyConfiguration(new IngredientConfiguration());
+        modelBuilder.ApplyConfiguration(new NutrientConfiguration());
+        modelBuilder.ApplyConfiguration(new RecipeConfiguration());
+        modelBuilder.ApplyConfiguration(new ShoppingListConfiguration());
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
+        
+        modelBuilder.ApplyConfiguration(new UserRecipeConfiguration());
+        modelBuilder.ApplyConfiguration(new RecipeIngredientConfiguration());
+        modelBuilder.ApplyConfiguration(new NutrientIngredientConfiguration());
+        modelBuilder.ApplyConfiguration(new ShoppingListIngredientConfiguration());
     }
 }

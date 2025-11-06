@@ -1,3 +1,5 @@
+using NutritionalRecipeBook.Domain.Entities;
+
 namespace NutritionalRecipeBook.Domain.ConnectionTables;
 
 public class ShoppingListIngredient
