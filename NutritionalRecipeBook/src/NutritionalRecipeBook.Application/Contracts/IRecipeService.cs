@@ -1,7 +1,10 @@
+using NutritionalRecipeBook.Application.DTOs;
+
 namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface IRecipeService
 {
-    Task<bool> CreateRecipeAsync(DTOs.Recipe recipe);
-    Task<bool> UpdateRecipeAsync(Guid id, DTOs.Recipe recipe);
+    Task<bool> CreateRecipeAsync(RecipeDTO recipeDto);
+    Task<bool> UpdateRecipeAsync(Guid id, RecipeDTO recipeDto);
+    Task<Guid?> GetRecipeIdByNameAsync(string name);
 }

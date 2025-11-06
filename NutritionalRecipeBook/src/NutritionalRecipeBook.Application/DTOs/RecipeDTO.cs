@@ -1,6 +1,6 @@
 namespace NutritionalRecipeBook.Application.DTOs;
 
-public class Recipe
+public class RecipeDTO
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -8,11 +8,11 @@ public class Recipe
     public int CookingTimeInMin { get; set; }
     public int Servings { get; set; }
 
-    public Recipe()
+    public RecipeDTO()
     {
     }
 
-    internal Recipe(Recipe? recipe)
+    internal RecipeDTO(RecipeDTO? recipe)
     {
         ArgumentNullException.ThrowIfNull(recipe, nameof(recipe));
         
