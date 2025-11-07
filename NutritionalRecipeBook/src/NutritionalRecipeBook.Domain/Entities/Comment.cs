@@ -1,6 +1,6 @@
 namespace NutritionalRecipeBook.Domain.Entities;
 
-public class Comment: BaseEntity
+public class Comment: BaseEntity<Guid>
 {
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }

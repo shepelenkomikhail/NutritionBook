@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using NutritionalRecipeBook.Domain;
+using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 
@@ -17,32 +18,17 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
         _repositoryFactory = repositoryFactory;
     }
-
-    public IRepository<T> Repository<T, TId>() where T : BaseEntity
+    
+    public IRepository<T, TId> Repository<T, TId>() where T : class, IBaseEntity<TId>
     {
         var type = typeof(T);
 
         if (_repositories.TryGetValue(type, out var existingRepository))
         {
-            return (IRepository<T>)existingRepository;
+            return (IRepository<T, TId>)existingRepository;
         }
 
-        var repository = _repositoryFactory.GetRepository<T>();
-        _repositories[type] = repository;
-
-        return repository;
-    }
-
-    public IRepository<T> Repository<T>() where T : BaseEntity
-    {
-        var type = typeof(T);
-
-        if (_repositories.TryGetValue(type, out var existingRepository))
-        {
-            return (IRepository<T>)existingRepository;
-        }
-
-        var repository = _repositoryFactory.GetRepository<T>();
+        var repository = _repositoryFactory.GetRepository<T, TId>();
         _repositories[type] = repository;
 
         return repository;

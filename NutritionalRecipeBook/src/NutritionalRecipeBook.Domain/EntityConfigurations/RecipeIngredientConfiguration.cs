@@ -25,6 +25,8 @@ namespace NutritionalRecipeBook.Domain.EntityConfigurations
 
             builder.Property(ri => ri.Amount)
                 .HasPrecision(10, 2);
+            
+            builder.Ignore(ri => ri.Id);
         }
     }
 }

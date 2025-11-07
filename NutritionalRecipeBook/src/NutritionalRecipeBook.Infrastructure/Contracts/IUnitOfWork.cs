@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore.Storage;
+using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Infrastructure.Contracts;
 
 public interface IUnitOfWork : IDisposable
 {
-    IRepository<T> Repository<T>() where T : BaseEntity;
+    IRepository<T, TId> Repository<T, TId>() where T : class, IBaseEntity<TId>;
     Task<bool> SaveAsync();
     IDbContextTransaction BeginTransaction();
 }

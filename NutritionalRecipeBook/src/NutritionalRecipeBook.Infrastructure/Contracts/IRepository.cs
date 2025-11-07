@@ -3,7 +3,7 @@ using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Infrastructure.Contracts;
 
-public interface IRepository<TEntity> where TEntity : BaseEntity
+public interface IRepository<TEntity, TId> where TEntity : class, IBaseEntity<TId>
 {
     IEnumerable<TEntity> GetAll();
     Task<TEntity?> GetByIdAsync(Guid id);

@@ -2,7 +2,7 @@ using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Domain.ConnectionTables;
 
-public class ShoppingListIngredient
+public class ShoppingListIngredient: BaseEntity<(Guid RecipeId, Guid IngredientId)>
 {
     public Guid ShoppingListId { get; set; }
     public virtual ShoppingList ShoppingList { get; set; } = null!;
