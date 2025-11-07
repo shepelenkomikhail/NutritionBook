@@ -2,10 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using NutritionalRecipeBook.Api.Configurations;
 using NutritionalRecipeBook.Domain;
 using Serilog;
-using System.Globalization;
-
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
