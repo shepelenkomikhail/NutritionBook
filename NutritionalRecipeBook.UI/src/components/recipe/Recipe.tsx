@@ -1,52 +1,69 @@
 import { useState } from "react";
-import { Content } from "antd/es/layout/layout";
-import { FloatButton, Modal, Form, Input, InputNumber, Button, Spin} from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 
-import type { RecipeModel } from "@models";
+import { PlusOutlined, MinusCircleOutlined} from "@ant-design/icons";
 import { useCreateRecipeMutation } from '@api';
+import type { IngredientModel, RecipeModel } from "@models";
 import { toast } from '@utils/toast.tsx';
+
+import { Button, Checkbox, FloatButton, Form, Input, InputNumber, Modal, Space, Spin, } from 'antd';
+import { Content } from "antd/es/layout/layout";
 
 function Recipe() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm<RecipeModel>();
+  const [createRecipe, { isLoading, isError }] = useCreateRecipeMutation();
 
   const handleOpen = () => setIsModalOpen(true);
   const handleCancel = () => setIsModalOpen(false);
+  
+  const handleSubmit = async (values: any) => {
+    const payload = {
+      recipeDTO: {
+        name: values.name.trim(),
+        description: values.description?.trim(),
+        instructions: values.instructions?.trim(),
+        cookingTimeInMin: values.cookingTimeInMin,
+        servings: values.servings
+      },
+      ingredients: values.ingredients?.map((ing: IngredientModel) => ({
+        ingredientDTO: {
+          name: ing.name.trim(),
+          isLiquid: ing.isLiquid ?? false
+        },
+        amount: ing.amount,
+        unit: ing.unit.trim()
+      })) ?? []
+    };
 
-  const [createRecipe, { isLoading, isError }] = useCreateRecipeMutation();
-
-  const handleSubmit = async (newRecipe: RecipeModel) => {
-    console.log("Recipe created:", newRecipe);
+    console.log("Recipe Payload Sent to Backend:", payload);
 
     try {
-      await createRecipe(newRecipe).unwrap();
-      toast("Recipe created successfully");
+      await createRecipe(payload).unwrap();
+      toast("Recipe created successfully!");
+      form.resetFields();
+      setIsModalOpen(false);
     } catch (error) {
-      toast("Failed to create recipe");
       console.error("Failed to create recipe:", error);
+      toast("Failed to create recipe");
     }
-
-    form.resetFields();
-    setIsModalOpen(false);
   };
 
-
   return (
-    <Content className={"p-6 relative min-h-screen flex"}>
+    <Content className="p-6 relative min-h-screen flex">
       <FloatButton
         icon={<PlusOutlined />}
         type="primary"
         tooltip={<div>Add Recipe</div>}
         onClick={handleOpen}
       />
+
       <Modal
         title="Create New Recipe"
         open={isModalOpen}
         onCancel={handleCancel}
         destroyOnClose
         footer={null}
-        className={"max-h-[70vh] overflow-y-auto"}
+        className="max-h-[70vh] overflow-y-auto"
       >
         <Spin spinning={isLoading} tip="Creating recipe...">
           <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -66,20 +83,77 @@ function Recipe() {
               <Input.TextArea rows={2} placeholder="Brief description" />
             </Form.Item>
 
-            <Form.Item
-              name="ingredients"
-              label="Ingredients"
-              rules={[{ required: true, message: "Please enter ingredients" }]}
-            >
-              <Input.TextArea rows={3} placeholder="List ingredients..." />
-            </Form.Item>
+            <Form.List name="ingredients">
+              {(fields, { add, remove }) => (
+                <>
+                  <label className="font-medium mb-2 block">Ingredients</label>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Space
+                      key={key}
+                      style={{
+                        display: "flex",
+                        marginBottom: 8,
+                        alignItems: "center",
+                      }}
+                      align="baseline"
+                    >
+                      <Form.Item
+                        {...restField}
+                        name={[name, "name"]}
+                        rules={[{ required: true, message: "Enter ingredient name" }]}
+                      >
+                        <Input placeholder="Ingredient name" />
+                      </Form.Item>
+
+                      <Form.Item
+                        {...restField}
+                        name={[name, "amount"]}
+                        rules={[{ required: true, message: "Enter amount" }]}
+                      >
+                        <InputNumber min={0.1} placeholder="Amount" />
+                      </Form.Item>
+
+                      <Form.Item
+                        {...restField}
+                        name={[name, "unit"]}
+                        rules={[{ required: true, message: "Enter unit" }]}
+                      >
+                        <Input placeholder="e.g. g, ml" />
+                      </Form.Item>
+
+                      <Form.Item
+                        {...restField}
+                        name={[name, "isLiquid"]}
+                        valuePropName="checked"
+                        style={{ marginBottom: 0 }}
+                      >
+                        <Checkbox>Liquid</Checkbox>
+                      </Form.Item>
+
+                      <MinusCircleOutlined
+                        onClick={() => remove(name)}
+                        style={{ color: "red", marginLeft: 8 }}
+                      />
+                    </Space>
+                  ))}
+                  <Form.Item>
+                    <Button
+                      type="dashed"
+                      onClick={() => add()}
+                      block
+                      icon={<PlusOutlined />}
+                    >
+                      Add Ingredient
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
 
             <Form.Item
               name="instructions"
               label="Instructions"
-              rules={[
-                { required: true, message: "Please enter cooking instructions" },
-              ]}
+              rules={[{ required: true, message: "Please enter instructions" }]}
             >
               <Input.TextArea rows={3} placeholder="Step-by-step instructions..." />
             </Form.Item>
@@ -101,12 +175,7 @@ function Recipe() {
             </Form.Item>
 
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                block
-                loading={isLoading}
-              >
+              <Button type="primary" htmlType="submit" block loading={isLoading}>
                 {isLoading ? "Creating..." : "Create Recipe"}
               </Button>
             </Form.Item>
@@ -114,7 +183,7 @@ function Recipe() {
         </Spin>
       </Modal>
 
-      {isError && (toast("Failed to crate a recipe")) }
+      {isError && toast("Failed to create recipe")}
     </Content>
   );
 }

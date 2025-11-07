@@ -1,6 +1,7 @@
+import type { RecipeModel } from '@models';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { RecipeModel } from '@models'
+import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -11,17 +12,10 @@ const recipesApi = createApi({
   endpoints: (builder) => ({
     createRecipe: builder.mutation({
       invalidatesTags: ['Recipe'],
-      query: (newRecipe: RecipeModel) => ({
+      query: (payload) => ({
         url: '/api/recipes',
         method: 'POST',
-        body: {
-          name: newRecipe.name,
-          description: newRecipe.description,
-          ingredients: newRecipe.ingredients,
-          instructions: newRecipe.instructions,
-          cookingTimeInMin: newRecipe.cookingTimeInMin,
-          servings: newRecipe.servings
-        }
+        body: payload
       })
     }),
     updateRecipe: builder.mutation({
