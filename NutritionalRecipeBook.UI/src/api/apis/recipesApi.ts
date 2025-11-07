@@ -12,7 +12,7 @@ const recipesApi = createApi({
     createRecipe: builder.mutation({
       invalidatesTags: ['Recipe'],
       query: (newRecipe: RecipeModel) => ({
-        url: '/Recipe/Create',
+        url: '/api/recipes',
         method: 'POST',
         body: {
           name: newRecipe.name,
@@ -27,7 +27,7 @@ const recipesApi = createApi({
     updateRecipe: builder.mutation({
       invalidatesTags: ['Recipe'],
       query: (updatedRecipe: RecipeModel) => ({
-        url: `/Recipe/Update/${updatedRecipe.id}`,
+        url: `/api/recipes/${updatedRecipe.id}`,
         method: 'PUT',
         body: {
           name: updatedRecipe.name,

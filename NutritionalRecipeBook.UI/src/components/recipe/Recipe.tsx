@@ -14,7 +14,7 @@ function Recipe() {
   const handleOpen = () => setIsModalOpen(true);
   const handleCancel = () => setIsModalOpen(false);
 
-  const [createRecipe, { isLoading, isError, isSuccess }] = useCreateRecipeMutation();
+  const [createRecipe, { isLoading, isError }] = useCreateRecipeMutation();
 
   const handleSubmit = async (newRecipe: RecipeModel) => {
     console.log("Recipe created:", newRecipe);
@@ -115,7 +115,6 @@ function Recipe() {
       </Modal>
 
       {isError && (toast("Failed to crate a recipe")) }
-      {isSuccess && (toast("Recipe created successfully")) }
     </Content>
   );
 }
