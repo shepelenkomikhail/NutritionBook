@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Application.Contracts;
+using NutritionalRecipeBook.Application.Contracts.RecipeControllerDTOs;
 using NutritionalRecipeBook.Application.DTOs;
 
 namespace NutritionalRecipeBook.Api.Controllers
@@ -19,7 +20,7 @@ namespace NutritionalRecipeBook.Api.Controllers
 
         // POST: api/recipes
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RecipeDTO newRecipeDto)
+        public async Task<IActionResult> Create([FromBody] RecipeCreateDTO newRecipeDto)
         {
             Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeDto);
             if (newRecipeId == null)
