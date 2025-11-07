@@ -2,7 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RecipeModel } from '@models'
 
-const BASE_URL = import.meta.env.BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const recipesApi = createApi({
   reducerPath: 'recipes',
