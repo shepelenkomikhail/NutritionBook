@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 
 import { Home } from '@components';
+import { Recipe } from '@components';
 
 import { App } from '@layout';
 import { RequireAuth } from '@router';
@@ -23,6 +24,7 @@ export const routes: RouteObject[] = [
       },
       { path: '/', element: <Home /> },
       { path: '/home', element: <Home /> },
+      { path: '/recipes', element: <Recipe /> },
       { path: '*', element: <Navigate replace to="/not-found" /> },
     ],
   },
