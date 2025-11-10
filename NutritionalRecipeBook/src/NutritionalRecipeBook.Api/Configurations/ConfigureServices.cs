@@ -1,7 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NutritionalRecipeBook.Application.Contracts;
+﻿using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.Services;
-using NutritionalRecipeBook.Domain;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Infrastructure.Repositories;
 
