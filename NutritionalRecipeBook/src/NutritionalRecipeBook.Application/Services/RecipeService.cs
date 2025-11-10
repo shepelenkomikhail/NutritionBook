@@ -209,8 +209,9 @@ namespace NutritionalRecipeBook.Application.Services
                 .ToList();
 
             var toRemove = currentEntries
-                .Where(ri => !newIngredientNames
-                    .Contains(ri.Ingredient.Name, StringComparer.OrdinalIgnoreCase))
+                .Where(ri => ri?.Ingredient != null &&
+                             !newIngredientNames
+                                 .Contains(ri.Ingredient.Name, StringComparer.OrdinalIgnoreCase))
                 .ToList();
 
             foreach (var removeItem in toRemove)
