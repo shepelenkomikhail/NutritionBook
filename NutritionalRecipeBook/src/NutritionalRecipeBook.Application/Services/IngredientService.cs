@@ -9,9 +9,9 @@ namespace NutritionalRecipeBook.Application.Services;
 public class IngredientService : IIngredientService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<RecipeService> _logger;
+    private readonly ILogger<IngredientService> _logger;
 
-    public IngredientService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger)
+    public IngredientService(IUnitOfWork unitOfWork, ILogger<IngredientService> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -59,8 +59,6 @@ public class IngredientService : IIngredientService
 
                 return false;
             }
-
-            await _unitOfWork.SaveAsync();
             
             return true;
         }
@@ -72,7 +70,7 @@ public class IngredientService : IIngredientService
         }
     }
 
-    public async Task<IngredientDTO> GetIngredientAsync(Guid ingredientId)
+    public async Task<IngredientDTO?> GetIngredientByIdAsync(Guid ingredientId)
     {
         var existingIngredient = await _unitOfWork.Repository<Ingredient, Guid>().GetByIdAsync(ingredientId);
         if (existingIngredient == null)
@@ -84,6 +82,7 @@ public class IngredientService : IIngredientService
         
         return new IngredientDTO
         {
+            Id = existingIngredient.Id,
             Name = existingIngredient.Name,
             IsLiquid = existingIngredient.IsLiquid
         };
@@ -96,7 +95,7 @@ public class IngredientService : IIngredientService
             var ingredient = await _unitOfWork.Repository<Ingredient, Guid>().GetSingleOrDefaultAsync(i => i.Name == name);
             if (ingredient == null)
             {
-                _logger.LogWarning("Recipe with name '{IngredienteName}' not found.", name);
+                _logger.LogWarning("Ingredient with name '{IngredienteName}' not found.", name);
                     
                 return null;
             }
@@ -105,9 +104,40 @@ public class IngredientService : IIngredientService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while retrieving recipe name {IngredientName}.", name);
+            _logger.LogError(ex, "An unexpected error occurred while retrieving ingredient name {IngredientName}.", name);
                
             return null;
+        }
+    }
+    
+    public async Task<IngredientDTO?> GetIngredientByNameAsync(string name)
+    {
+        var existingIngredient = await _unitOfWork.Repository<Ingredient, Guid>()
+            .GetSingleOrDefaultAsync(i => i.Name == name);
+        if (existingIngredient == null)
+        {
+            _logger.LogWarning("Ingredient with name '{Name}' not found.", name);
+            
+            return null;
+        }
+        
+        return new IngredientDTO
+        {
+            Id = existingIngredient.Id,
+            Name = existingIngredient.Name,
+            IsLiquid = existingIngredient.IsLiquid
+        };
+    }
+    
+    public async Task EnsureIngredientExistsAsync(IngredientDTO ingredientDto)
+    {
+        if (string.IsNullOrWhiteSpace(ingredientDto?.Name))
+            return;
+
+        bool isCreated = await CreateIngredientAsync(ingredientDto);
+        if (!isCreated)
+        {
+            _logger.LogDebug("Ingredient '{Name}' already exists or was not created.", ingredientDto.Name);
         }
     }
 }

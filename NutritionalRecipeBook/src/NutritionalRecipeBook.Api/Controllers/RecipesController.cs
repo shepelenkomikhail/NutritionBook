@@ -20,20 +20,20 @@ namespace NutritionalRecipeBook.Api.Controllers
 
         // POST: api/recipes
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RecipeCreateDTO newRecipeDto)
+        public async Task<IActionResult> Create([FromBody] RecipeCreateUpdateDTO newRecipeUpdateDto)
         {
-            Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeDto);
+            Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeUpdateDto);
             if (newRecipeId == null)
             {
                 return BadRequest("Failed to create recipe.");
             }
 
-            return Created($"/recipes/{newRecipeId}", newRecipeDto);
+            return Created($"/api/recipes/{newRecipeId}", newRecipeUpdateDto);
         }
 
         // PUT: api/recipes/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeDTO updatedRecipeDto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeCreateUpdateDTO updatedRecipeDto)
         {
             bool updated = await _recipeService.UpdateRecipeAsync(id, updatedRecipeDto);
             if (!updated)

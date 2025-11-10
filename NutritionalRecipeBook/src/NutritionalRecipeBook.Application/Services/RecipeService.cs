@@ -14,145 +14,134 @@ namespace NutritionalRecipeBook.Application.Services
         private readonly ILogger<RecipeService> _logger;
         private readonly IIngredientService _ingredientService;
 
-        public RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger, IIngredientService ingredientService)
+        public RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger, 
+            IIngredientService ingredientService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _ingredientService = ingredientService;
         }
 
-        public async Task<Guid?> CreateRecipeAsync(RecipeCreateDTO? recipeDto)
+        public async Task<Guid?> CreateRecipeAsync(RecipeCreateUpdateDTO? recipeDto)
         {
-            if (recipeDto == null)
+            if (recipeDto?.RecipeDTO == null)
             {
                 _logger.LogWarning("CreateRecipeAsync failed: RecipeDTO is null.");
+                
                 return null;
             }
 
-            if (string.IsNullOrWhiteSpace(recipeDto.RecipeDTO.Name))
+            var recipeData = recipeDto.RecipeDTO;
+
+            if (string.IsNullOrWhiteSpace(recipeData.Name))
             {
                 _logger.LogWarning("CreateRecipeAsync failed: Recipe name is required.");
+                
                 return null;
             }
 
             try
             {
                 var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>()
-                    .GetSingleOrDefaultAsync(r => r.Name == recipeDto.RecipeDTO.Name.Trim());
+                    .GetSingleOrDefaultAsync(r =>
+                        r.Name.ToLower() == recipeData.Name.Trim().ToLower());
 
                 if (existingRecipe != null)
                 {
-                    _logger.LogWarning("CreateRecipeAsync failed: Recipe '{Name}' already exists.", recipeDto.RecipeDTO.Name);
+                    _logger.LogWarning("CreateRecipeAsync failed: Recipe '{Name}' already exists.",
+                        recipeData.Name);
                     
                     return null;
                 }
 
                 var recipeEntity = new Recipe
                 {
-                    Name = recipeDto.RecipeDTO.Name.Trim(),
-                    Description = recipeDto.RecipeDTO.Description.Trim(),
-                    Instructions = recipeDto.RecipeDTO.Instructions.Trim(),
-                    CookingTimeInMin = recipeDto.RecipeDTO.CookingTimeInMin,
-                    Servings = recipeDto.RecipeDTO.Servings
+                    Name = recipeData.Name.Trim(),
+                    Description = recipeData.Description?.Trim() ?? string.Empty,
+                    Instructions = recipeData.Instructions?.Trim() ?? string.Empty,
+                    CookingTimeInMin = recipeData.CookingTimeInMin,
+                    Servings = recipeData.Servings
                 };
 
                 await _unitOfWork.Repository<Recipe, Guid>().InsertAsync(recipeEntity);
-                await _unitOfWork.SaveAsync(); 
 
-                if (recipeDto?.Ingredients != null && recipeDto.Ingredients.Any())
+                if (recipeDto.Ingredients.Count > 0)
                 {
-                    foreach (var ingredientAmount in recipeDto.Ingredients)
-                    {
-                        bool isIngredientCreated = await _ingredientService.CreateIngredientAsync(ingredientAmount.IngredientDTO);
-                        if (!isIngredientCreated)
-                        {
-                            _logger.LogInformation("Ingredient '{Name}' already exists or was not newly created.", ingredientAmount.IngredientDTO.Name);
-                        }
-                        
-                        var ingredientEntity = await _unitOfWork.Repository<Ingredient, Guid>()
-                            .GetSingleOrDefaultAsync(i => i.Name == ingredientAmount.IngredientDTO.Name);
-
-                        if (ingredientEntity == null)
-                        {
-                            _logger.LogWarning("CreateRecipeAsync failed: Ingredient '{Name}' could not be found after creation attempt.", ingredientAmount.IngredientDTO.Name);
-                            
-                            continue;
-                        }
-
-                        var recipeIngredient = new RecipeIngredient
-                        {
-                            RecipeId = recipeEntity.Id,
-                            IngredientId = ingredientEntity.Id,
-                            Recipe = recipeEntity,
-                            Ingredient = ingredientEntity,
-                            Amount = ingredientAmount.Amount,
-                            Unit = ingredientAmount.Unit.Trim()
-                        };
-
-                        await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(recipeIngredient);
-                    }
+                    await ProcessRecipeIngredientsAsync(recipeEntity, recipeDto.Ingredients);
                 }
 
                 bool isSaved = await _unitOfWork.SaveAsync();
                 if (!isSaved)
                 {
                     _logger.LogWarning("CreateRecipeAsync failed: SaveAsync returned false.");
+                    
                     return null;
                 }
 
-                _logger.LogInformation("Recipe '{Name}' created successfully with ID {Id}.", recipeEntity.Name, recipeEntity.Id);
+                _logger.LogInformation("Recipe '{Name}' created successfully with ID {Id}.",
+                    recipeEntity.Name, recipeEntity.Id);
+               
                 return recipeEntity.Id;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unexpected error occurred while creating recipe '{Name}'.", recipeDto.RecipeDTO.Name);
+                _logger.LogError(ex, "An unexpected error occurred while creating recipe '{Name}'.", 
+                    recipeDto.RecipeDTO.Name);
+               
                 return null;
             }
         }
 
-
-        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeDTO? recipeDto)
+        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeCreateUpdateDTO? recipeDto)
         {
-            if (recipeDto == null)
+            if (recipeDto?.RecipeDTO == null)
             {
                 _logger.LogWarning("UpdateRecipeAsync failed: RecipeDTO is null.");
-               
+                
                 return false;
             }
 
             try
             {
-                var existing = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
-                if (existing == null)
+                var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
+                if (existingRecipe == null)
                 {
                     _logger.LogWarning("UpdateRecipeAsync failed: Recipe with ID {Id} not found.", id);
                     
                     return false;
                 }
 
-                existing.Name = recipeDto.Name.Trim();
-                existing.Description = recipeDto.Description.Trim();
-                existing.Instructions = recipeDto.Instructions.Trim();
-                existing.CookingTimeInMin = recipeDto.CookingTimeInMin;
-                existing.Servings = recipeDto.Servings;
+                var recipeData = recipeDto.RecipeDTO;
+                existingRecipe.Name = recipeData.Name?.Trim() ?? existingRecipe.Name;
+                existingRecipe.Description = recipeData.Description?.Trim() ?? string.Empty;
+                existingRecipe.Instructions = recipeData.Instructions?.Trim() ?? string.Empty;
+                existingRecipe.CookingTimeInMin = recipeData.CookingTimeInMin;
+                existingRecipe.Servings = recipeData.Servings;
 
-                await _unitOfWork.Repository<Recipe, Guid>().UpdateAsync(existing);
-                
-                var isSaved = await _unitOfWork.SaveAsync();
+                await _unitOfWork.Repository<Recipe, Guid>().UpdateAsync(existingRecipe);
+
+                if (recipeDto.Ingredients.Count > 0)
+                {
+                    await UpdateRecipeIngredientsAsync(existingRecipe, recipeDto.Ingredients);
+                }
+
+                bool isSaved = await _unitOfWork.SaveAsync();
                 if (!isSaved)
                 {
-                    _logger.LogWarning("UpdateRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
-                    
+                    _logger.LogWarning(
+                        "UpdateRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
+                   
                     return false;
                 }
 
-                _logger.LogInformation("Recipe with ID {Id} updated successfully.", id);
+                _logger.LogInformation("Recipe with ID {Id} and ingredients updated successfully.", id);
                
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unexpected error occurred while updating recipe ID {Id}.", id);
+                _logger.LogError(ex,
+                    "An unexpected error occurred while updating recipe ID {Id}.", id);
                
                 return false;
             }
@@ -162,11 +151,12 @@ namespace NutritionalRecipeBook.Application.Services
         {
             try
             {
-                var recipe = await _unitOfWork.Repository<Recipe, Guid>().GetSingleOrDefaultAsync(r => r.Name == name);
+                var recipe = await _unitOfWork.Repository<Recipe, Guid>()
+                    .GetSingleOrDefaultAsync(r => r.Name.ToLower() == name.ToLower());
+
                 if (recipe == null)
                 {
                     _logger.LogWarning("Recipe with name '{RecipeName}' not found.", name);
-                    
                     return null;
                 }
 
@@ -174,9 +164,108 @@ namespace NutritionalRecipeBook.Application.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unexpected error occurred while retrieving recipe name {RecipeName}.", name);
-               
+                _logger.LogError(ex, 
+                    "An unexpected error occurred while retrieving recipe name {RecipeName}.", name);
+                
                 return null;
+            }
+        }
+
+        private async Task ProcessRecipeIngredientsAsync(Recipe recipeEntity, List<IngredientAmountDTO> ingredientDTOs)
+        {
+            var uniqueIngredients = ingredientDTOs
+                .GroupBy(i => 
+                    i.IngredientDTO.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
+                .ToList();
+
+            foreach (var ingredientAmount in uniqueIngredients)
+            {
+                await _ingredientService.EnsureIngredientExistsAsync(ingredientAmount.IngredientDTO);
+
+                var ingredientEntity = await _unitOfWork.Repository<Ingredient, Guid>()
+                    .GetSingleOrDefaultAsync(i => 
+                        i.Name.ToLower() == ingredientAmount.IngredientDTO.Name.Trim().ToLower());
+
+                if (ingredientEntity == null)
+                {
+                    _logger.LogWarning("Ingredient '{Name}' could not be found after creation attempt.", 
+                        ingredientAmount.IngredientDTO.Name);
+                   
+                    continue;
+                }
+
+                var recipeIngredient = new RecipeIngredient
+                {
+                    RecipeId = recipeEntity.Id,
+                    IngredientId = ingredientEntity.Id,
+                    Amount = ingredientAmount.Amount,
+                    Unit = ingredientAmount.Unit?.Trim() ?? string.Empty
+                };
+
+                await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(recipeIngredient);
+            }
+        }
+
+        private async Task UpdateRecipeIngredientsAsync(Recipe recipeEntity, List<IngredientAmountDTO> ingredientDtos)
+        {
+            var currentEntries = 
+                await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>()
+                .GetWhereAsync(ri => ri.RecipeId == recipeEntity.Id);
+
+            var newIngredientNames = ingredientDtos
+                .Select(i => i.IngredientDTO.Name.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var toRemove = currentEntries
+                .Where(ri => !newIngredientNames
+                    .Contains(ri.Ingredient.Name, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var removeItem in toRemove)
+            {
+                await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().DeleteAsync(removeItem);
+            }
+
+            foreach (var ingredientAmount in ingredientDtos)
+            {
+                await _ingredientService.EnsureIngredientExistsAsync(ingredientAmount.IngredientDTO);
+
+                var ingredientEntityId = await _ingredientService
+                    .GetIngredientIdByNameAsync(ingredientAmount.IngredientDTO.Name.Trim().ToLower());
+
+                if (ingredientEntityId == null)
+                {
+                    _logger.LogWarning("UpdateRecipeAsync: Ingredient '{Name}' could not be found after creation attempt.",
+                        ingredientAmount.IngredientDTO.Name);
+                    
+                    continue;
+                }
+
+                var existingEntry = await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>()
+                    .GetSingleOrDefaultAsync(ri => 
+                        ri.RecipeId == recipeEntity.Id && ri.IngredientId == ingredientEntityId);
+
+                if (existingEntry == null)
+                {
+                    var newLink = new RecipeIngredient
+                    {
+                        RecipeId = recipeEntity.Id,
+                        IngredientId = ingredientEntityId.Value,
+                        Amount = ingredientAmount.Amount,
+                        Unit = ingredientAmount.Unit?.Trim() ?? string.Empty
+                    };
+
+                    await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(newLink);
+                }
+                else
+                {
+                    existingEntry.Amount = ingredientAmount.Amount;
+                    existingEntry.Unit = ingredientAmount.Unit?.Trim() ?? string.Empty;
+                    
+                    await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().UpdateAsync(existingEntry);
+                }
             }
         }
     }

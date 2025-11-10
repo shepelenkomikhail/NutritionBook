@@ -5,7 +5,7 @@ namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface IRecipeService
 {
-    Task<Guid?> CreateRecipeAsync(RecipeCreateDTO recipeDto);
-    Task<bool> UpdateRecipeAsync(Guid id, RecipeDTO recipeDto);
+    Task<Guid?> CreateRecipeAsync(RecipeCreateUpdateDTO recipeUpdateDto);
+    Task<bool> UpdateRecipeAsync(Guid id, RecipeCreateUpdateDTO recipeUpdateDto);
     Task<Guid?> GetRecipeIdByNameAsync(string name);
 }
