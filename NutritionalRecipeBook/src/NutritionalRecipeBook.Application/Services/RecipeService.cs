@@ -246,6 +246,8 @@ namespace NutritionalRecipeBook.Application.Services
             try
             {
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
+                _logger.LogInformation("Building query for recipes with search '{Search}', " +
+                                       "page number {PageNumber}, page size {PageSize}.", search, pageNumber, pageSize);
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
@@ -268,6 +270,9 @@ namespace NutritionalRecipeBook.Application.Services
                     .Select(r => 
                         new RecipeDTO(r.Id, r.Name, r.Description, r.Instructions, r.CookingTimeInMin, r.Servings))
                     .ToList();
+                
+                _logger.LogInformation("Retrieved {Count} recipes for page {PageNumber} with page size {PageSize}.",
+                    recipes.Count, pageNumber, pageSize);
 
                 return new PagedResultDTO<RecipeDTO>(recipes, totalCount, pageNumber, pageSize);
             }
