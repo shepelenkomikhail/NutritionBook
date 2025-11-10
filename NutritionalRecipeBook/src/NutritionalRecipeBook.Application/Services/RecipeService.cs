@@ -165,15 +165,7 @@ namespace NutritionalRecipeBook.Application.Services
         {
             try
             {
-                var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
-                if (existingRecipe == null)
-                {
-                    _logger.LogWarning("DeleteRecipeAsync failed: Recipe with ID {Id} not found.", id);
-                    
-                    return false;
-                }
-
-                await _unitOfWork.Repository<Recipe, Guid>().DeleteAsync(existingRecipe);
+                await _unitOfWork.Repository<Recipe, Guid>().DeleteAsync(id);
 
                 bool isSaved = await _unitOfWork.SaveAsync();
                 if (!isSaved)
