@@ -1,17 +1,17 @@
 import { useCreateRecipeMutation, useUpdateRecipeMutation } from '@api';
+import type { IngredientModel, RecipeModel, RecipePayload } from '@models';
 import { toast } from '@utils/toast.tsx';
-import type { IngredientModel, RecipeModel } from '@models';
 
 export function useRecipeMutation(mode: 'create' | 'update', id?: string) {
   const [createRecipe, createState] = useCreateRecipeMutation();
   const [updateRecipe, updateState] = useUpdateRecipeMutation();
 
-  const execute = async (values: RecipeModel & { id?: number }) => {
+  const execute = async (values: RecipeModel & { id?: string }) => {
     const ingredientsArray: IngredientModel[] = Array.isArray(values.ingredients)
       ? values.ingredients
       : [];
 
-    const mappedIngredients = ingredientsArray.map((ing: IngredientModel) => ({
+    const mappedIngredients = ingredientsArray.map((ing) => ({
       ingredientDTO: {
         name: ing.name.trim(),
         isLiquid: ing.isLiquid ?? false,
@@ -20,7 +20,7 @@ export function useRecipeMutation(mode: 'create' | 'update', id?: string) {
       unit: ing.unit.trim(),
     }));
 
-    const payload = {
+    const payload: RecipePayload = {
       name: values.name.trim(),
       description: values.description?.trim(),
       instructions: values.instructions?.trim(),
@@ -34,7 +34,7 @@ export function useRecipeMutation(mode: 'create' | 'update', id?: string) {
         await createRecipe(payload).unwrap();
         toast('Recipe created successfully!');
       } else if (mode === 'update' && id) {
-        await updateRecipe({ id: id, ...payload }).unwrap();
+        await updateRecipe({ id, data: payload }).unwrap();
         toast('Recipe updated successfully!');
       }
     } catch (error) {
