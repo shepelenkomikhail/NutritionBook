@@ -160,6 +160,40 @@ namespace NutritionalRecipeBook.Application.Services
                 return null;
             }
         }
+        
+        public async Task<bool> DeleteRecipeAsync(Guid id)
+        {
+            try
+            {
+                var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
+                if (existingRecipe == null)
+                {
+                    _logger.LogWarning("DeleteRecipeAsync failed: Recipe with ID {Id} not found.", id);
+                    
+                    return false;
+                }
+
+                await _unitOfWork.Repository<Recipe, Guid>().DeleteAsync(existingRecipe);
+
+                bool isSaved = await _unitOfWork.SaveAsync();
+                if (!isSaved)
+                {
+                    _logger.LogWarning("DeleteRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
+                    
+                    return false;
+                }
+
+                _logger.LogInformation("Recipe with ID {Id} deleted successfully.", id);
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while deleting recipe ID {Id}.", id);
+                
+                return false;
+            }
+        }
 
         private async Task ProcessRecipeIngredientsAsync(Recipe recipeEntity, List<IngredientAmountDTO> ingredientDTOs)
         {

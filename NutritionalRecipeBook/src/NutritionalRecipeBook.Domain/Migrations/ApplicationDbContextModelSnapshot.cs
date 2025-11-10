@@ -52,7 +52,8 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("Unit")
                         .IsRequired()
@@ -75,7 +76,8 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("Unit")
                         .IsRequired()
