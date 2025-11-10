@@ -81,12 +81,13 @@ public class IngredientService : IIngredientService
         }
         
         return new IngredientDTO
-        {
-            Id = existingIngredient.Id,
-            Name = existingIngredient.Name,
-            IsLiquid = existingIngredient.IsLiquid
-        };
+        (
+            existingIngredient.Id, 
+            existingIngredient.Name, 
+            existingIngredient.IsLiquid
+        );
     }
+    
     
     public async Task<Guid?> GetIngredientIdByNameAsync(string name)
     {
@@ -123,11 +124,11 @@ public class IngredientService : IIngredientService
         }
         
         return new IngredientDTO
-        {
-            Id = existingIngredient.Id,
-            Name = existingIngredient.Name,
-            IsLiquid = existingIngredient.IsLiquid
-        };
+        (
+            existingIngredient.Id,
+            existingIngredient.Name,
+            existingIngredient.IsLiquid
+        );
     }
     
     public async Task<bool> EnsureIngredientExistsAsync(IngredientDTO ingredientDto)
