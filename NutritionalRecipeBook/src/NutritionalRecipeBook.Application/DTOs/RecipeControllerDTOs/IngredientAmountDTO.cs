@@ -1,6 +1,4 @@
-using NutritionalRecipeBook.Application.DTOs;
-
-namespace NutritionalRecipeBook.Application.Contracts.RecipeControllerDTOs;
+namespace NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 
 public record IngredientAmountDTO(
    IngredientDTO IngredientDTO,

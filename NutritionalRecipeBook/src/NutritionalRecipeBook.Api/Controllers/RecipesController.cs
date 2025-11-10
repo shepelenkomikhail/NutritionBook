@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Application.Contracts;
-using NutritionalRecipeBook.Application.Contracts.RecipeControllerDTOs;
+using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 
 namespace NutritionalRecipeBook.Api.Controllers
 {
@@ -19,7 +19,7 @@ namespace NutritionalRecipeBook.Api.Controllers
 
         // POST: api/recipes
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RecipeCreateUpdateDTO newRecipeUpdateDto)
+        public async Task<IActionResult> Create([FromBody] RecipeIngredient newRecipeUpdateDto)
         {
             Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeUpdateDto);
             if (newRecipeId == null)
@@ -32,7 +32,7 @@ namespace NutritionalRecipeBook.Api.Controllers
 
         // PUT: api/recipes/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeCreateUpdateDTO updatedRecipeDto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeIngredient updatedRecipeDto)
         {
             bool isUpdated = await _recipeService.UpdateRecipeAsync(id, updatedRecipeDto);
             if (!isUpdated)
@@ -71,11 +71,17 @@ namespace NutritionalRecipeBook.Api.Controllers
         
         // GET: api/recipes
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult Get(
+            [FromQuery] string? search = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var recipes = _recipeService.GetAllRecipesAsync();
-                
-            return Ok(recipes);
+            if (pageNumber <= 0 || pageSize <= 0)
+                return BadRequest("Invalid pagination parameters.");
+
+            var pagedResult = _recipeService.GetRecipesAsync(search, pageNumber, pageSize);
+
+            return Ok(pagedResult);
         }
     }
 }
