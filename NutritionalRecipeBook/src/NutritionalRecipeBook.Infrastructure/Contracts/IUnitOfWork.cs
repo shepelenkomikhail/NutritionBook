@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore.Storage;
-using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Infrastructure.Contracts;

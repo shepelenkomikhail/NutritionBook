@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.Contracts.RecipeControllerDTOs;
-using NutritionalRecipeBook.Application.DTOs;
 
 namespace NutritionalRecipeBook.Api.Controllers
 {
@@ -42,6 +41,19 @@ namespace NutritionalRecipeBook.Api.Controllers
             }
 
             return Ok(updatedRecipeDto);
+        }
+        
+        // DELETE: api/recipes/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            bool isDeleted = await _recipeService.DeleteRecipeAsync(id);
+            if (!isDeleted)
+            {
+                return BadRequest("Failed to update recipe.");
+            }
+
+            return Ok("Recipe deleted successfully.");
         }
     }
 }

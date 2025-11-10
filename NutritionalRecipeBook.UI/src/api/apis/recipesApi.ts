@@ -1,4 +1,4 @@
-import type { RecipeModel } from '@models';
+import { RecipePayload } from '@models';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
@@ -12,26 +12,26 @@ const recipesApi = createApi({
   endpoints: (builder) => ({
     createRecipe: builder.mutation({
       invalidatesTags: ['Recipe'],
-      query: (payload) => ({
+      query: (payload: RecipePayload) => ({
         url: '/api/recipes',
         method: 'POST',
-        body: payload
-      })
+        body: payload,
+      }),
     }),
-    updateRecipe: builder.mutation({
+    updateRecipe: builder.mutation<void, { id: string; data: RecipePayload }>({
       invalidatesTags: ['Recipe'],
-      query: (updatedRecipe: RecipeModel) => ({
-        url: `/api/recipes/${updatedRecipe.id}`,
+      query: ({ id, data }) => ({
+        url: `/api/recipes/${id}`,
         method: 'PUT',
-        body: {
-          name: updatedRecipe.name,
-          description: updatedRecipe.description,
-          ingredients: updatedRecipe.ingredients,
-          instructions: updatedRecipe.instructions,
-          cookingTimeInMin: updatedRecipe.cookingTimeInMin,
-          servings: updatedRecipe.servings
-        }
-      })
+        body: data,
+      }),
+    }),
+    deleteRecipe: builder.mutation({
+      invalidatesTags: ['Recipe'],
+      query: (id: string) => ({
+        url: `/api/recipes/${id}`,
+        method: 'DELETE',
+      }),
     }),
   }),
 });

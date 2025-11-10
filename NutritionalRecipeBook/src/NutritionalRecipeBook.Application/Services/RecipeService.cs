@@ -160,6 +160,33 @@ namespace NutritionalRecipeBook.Application.Services
                 return null;
             }
         }
+        
+        public async Task<bool> DeleteRecipeAsync(Guid id)
+        {
+            try
+            {
+                await CheckExistencyAsync(id);
+                await _unitOfWork.Repository<Recipe, Guid>().DeleteAsync(id);
+
+                bool isSaved = await _unitOfWork.SaveAsync();
+                if (!isSaved)
+                {
+                    _logger.LogWarning("DeleteRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
+                    
+                    return false;
+                }
+
+                _logger.LogInformation("Recipe with ID {Id} deleted successfully.", id);
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while deleting recipe ID {Id}.", id);
+                
+                return false;
+            }
+        }
 
         private async Task ProcessRecipeIngredientsAsync(Recipe recipeEntity, List<IngredientAmountDTO> ingredientDTOs)
         {
@@ -268,16 +295,38 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        private async Task CheckExistencyAsync(RecipeDTO recipeDto)
+        private async Task CheckExistencyAsync(RecipeDTO? recipeDto)
         {
+            if (recipeDto == null || string.IsNullOrWhiteSpace(recipeDto.Name))
+            {
+                _logger.LogWarning("CheckExistencyAsync: recipeDto is null or missing a name.");
+                throw new ArgumentException("Recipe data is invalid.");
+            }
+
+            string normalizedName = recipeDto.Name.Trim().ToLower();
+
             var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>()
-                .GetSingleOrDefaultAsync(r => r.Name.ToLower() == recipeDto.Name.Trim().ToLower());
+                .GetSingleOrDefaultAsync(r => r.Name.ToLower() == normalizedName);
 
             if (existingRecipe != null)
             {
-                _logger.LogWarning("CreateRecipeAsync failed: Recipe '{Name}' already exists.", recipeDto.Name);
+                _logger.LogWarning("CheckExistencyAsync failed: Recipe '{Name}' already exists.", recipeDto.Name);
+                
                 throw new InvalidOperationException($"Recipe '{recipeDto.Name}' already exists.");
             }
         }
+        
+        private async Task CheckExistencyAsync(Guid id)
+        {
+            var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
+
+            if (existingRecipe == null)
+            {
+                _logger.LogWarning("CheckExistencyAsync failed: Recipe with ID {Id} not found.", id);
+                
+                throw new KeyNotFoundException($"Recipe with ID '{id}' does not exist.");
+            }
+        }
+
     }
 }
