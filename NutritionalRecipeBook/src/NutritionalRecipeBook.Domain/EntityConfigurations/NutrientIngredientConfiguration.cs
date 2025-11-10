@@ -18,6 +18,9 @@ namespace NutritionalRecipeBook.Domain.EntityConfigurations
             builder.HasOne(ni => ni.Ingredient)
                 .WithMany(i => i.NutrientIngredients)
                 .HasForeignKey(ni => ni.IngredientId);
+            
+            builder.Ignore(ni => ni.Id);
+            
         }
     }
 }

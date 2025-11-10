@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using NutritionalRecipeBook.Api.Configurations;
+using NutritionalRecipeBook.Domain;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -16,15 +18,27 @@ try
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext());
-
+    
     var config = builder.Configuration;
+    
     builder.AddServices(config);
+    
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
+                           throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+    builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
     
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
     var app = builder.Build();
+    
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+    }
     
     if (app.Environment.IsDevelopment())
     {

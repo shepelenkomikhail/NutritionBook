@@ -2,7 +2,7 @@ using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Domain.ConnectionTables;
 
-public class UserRecipe
+public class UserRecipe: BaseEntity<(Guid RecipeId, Guid IngredientId)>
 {
     public Guid UserId { get; set; }
     public virtual User User { get; set; } = null!;

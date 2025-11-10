@@ -4,5 +4,5 @@ namespace NutritionalRecipeBook.Infrastructure.Contracts;
 
 public interface IRepositoryFactory
 {
-    IRepository<T> GetRepository<T>() where T : BaseEntity;
+    IRepository<T, TId> GetRepository<T, TId>() where T : class, IBaseEntity<TId>;
 }

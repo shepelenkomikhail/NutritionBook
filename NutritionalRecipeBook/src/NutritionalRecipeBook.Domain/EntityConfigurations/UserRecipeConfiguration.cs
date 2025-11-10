@@ -20,6 +20,8 @@ namespace NutritionalRecipeBook.Domain.EntityConfigurations
                 .WithMany(r => r.UserRecipes)
                 .HasForeignKey(ur => ur.RecipeId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            builder.Ignore(ur => ur.Id);
         }
     }
 }

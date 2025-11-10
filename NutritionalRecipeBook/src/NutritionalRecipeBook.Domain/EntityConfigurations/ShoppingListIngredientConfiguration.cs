@@ -22,6 +22,11 @@ namespace NutritionalRecipeBook.Domain.EntityConfigurations
             builder.Property(sli => sli.Unit)
                 .IsRequired()
                 .HasMaxLength(20);
+
+            builder.Property(sli => sli.Amount)
+                .HasPrecision(10, 2);
+            
+            builder.Ignore(sli => sli.Id);
         }
     }
 }

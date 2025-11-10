@@ -1,7 +1,7 @@
 ﻿namespace NutritionalRecipeBook.Domain.Entities
 {
-    public class BaseEntity
+    public class BaseEntity<TId>: IBaseEntity<TId>
     {
-        public Guid Id { get; set; }
+        public TId Id { get; set; }
     }
 }

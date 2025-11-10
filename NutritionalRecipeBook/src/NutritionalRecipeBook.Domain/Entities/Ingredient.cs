@@ -2,7 +2,7 @@ using NutritionalRecipeBook.Domain.ConnectionTables;
 
 namespace NutritionalRecipeBook.Domain.Entities;
 
-public class Ingredient: BaseEntity
+public class Ingredient: BaseEntity<Guid>
 {
     public string Name { get; set; } = string.Empty;
     public bool IsLiquid { get; set; }

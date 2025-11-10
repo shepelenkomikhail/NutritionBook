@@ -13,8 +13,8 @@ public class RepositoryFactory : IRepositoryFactory
         _context = context;
     }
 
-    public IRepository<T> GetRepository<T>() where T : BaseEntity
+    public IRepository<T, TId> GetRepository<T, TId>() where T : class, IBaseEntity<TId>
     {
-        return new Repository<T>(_context);
+        return new Repository<T, TId>(_context);
     }
 }

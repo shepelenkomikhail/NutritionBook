@@ -6,7 +6,7 @@ using NutritionalRecipeBook.Infrastructure.Contracts;
 
 namespace NutritionalRecipeBook.Infrastructure.Repositories;
 
-public class Repository<T> : IRepository<T> where T : BaseEntity
+public class Repository<T, TId> : IRepository<T, TId> where T : class, IBaseEntity<TId>
 {
     private readonly ApplicationDbContext _context;
 
