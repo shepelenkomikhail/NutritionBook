@@ -42,17 +42,7 @@ namespace NutritionalRecipeBook.Application.Services
 
             try
             {
-                var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>()
-                    .GetSingleOrDefaultAsync(r =>
-                        r.Name.ToLower() == recipeData.Name.Trim().ToLower());
-
-                if (existingRecipe != null)
-                {
-                    _logger.LogWarning("CreateRecipeAsync failed: Recipe '{Name}' already exists.",
-                        recipeData.Name);
-                    
-                    return null;
-                }
+                await CheckExistencyAsync(recipeData);
 
                 var recipeEntity = new Recipe
                 {
@@ -230,14 +220,22 @@ namespace NutritionalRecipeBook.Application.Services
 
             foreach (var ingredientAmount in ingredientDtos)
             {
-                await _ingredientService.EnsureIngredientExistsAsync(ingredientAmount.IngredientDTO);
-
+                bool isExists = await _ingredientService.EnsureIngredientExistsAsync(ingredientAmount.IngredientDTO);
+                if(!isExists)
+                {
+                    _logger.LogWarning("UpdateRecipeAsync: Failed to ensure ingredient '{Name}' exists.",
+                        ingredientAmount.IngredientDTO.Name);
+                    
+                    continue;
+                }
+                
                 var ingredientEntityId = await _ingredientService
                     .GetIngredientIdByNameAsync(ingredientAmount.IngredientDTO.Name.Trim().ToLower());
 
                 if (ingredientEntityId == null)
                 {
-                    _logger.LogWarning("UpdateRecipeAsync: Ingredient '{Name}' could not be found after creation attempt.",
+                    _logger.LogWarning(
+                        "UpdateRecipeAsync: Ingredient '{Name}' could not be found after creation attempt.",
                         ingredientAmount.IngredientDTO.Name);
                     
                     continue;
@@ -266,6 +264,18 @@ namespace NutritionalRecipeBook.Application.Services
                     
                     await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().UpdateAsync(existingEntry);
                 }
+            }
+        }
+        
+        private async Task CheckExistencyAsync(RecipeDTO recipeDto)
+        {
+            var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>()
+                .GetSingleOrDefaultAsync(r => r.Name.ToLower() == recipeDto.Name.Trim().ToLower());
+
+            if (existingRecipe != null)
+            {
+                _logger.LogWarning("CreateRecipeAsync failed: Recipe '{Name}' already exists.", recipeDto.Name);
+                throw new InvalidOperationException($"Recipe '{recipeDto.Name}' already exists.");
             }
         }
     }

@@ -8,5 +8,5 @@ public interface IIngredientService
     Task<IngredientDTO?> GetIngredientByIdAsync(Guid ingredientId);
     Task<IngredientDTO?> GetIngredientByNameAsync(string name);
     Task<Guid?> GetIngredientIdByNameAsync(string name);
-    Task EnsureIngredientExistsAsync(IngredientDTO ingredientDto);
+    Task<bool> EnsureIngredientExistsAsync(IngredientDTO ingredientDto);
 }

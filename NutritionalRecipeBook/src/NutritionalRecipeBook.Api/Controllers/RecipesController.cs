@@ -35,8 +35,8 @@ namespace NutritionalRecipeBook.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] RecipeCreateUpdateDTO updatedRecipeDto)
         {
-            bool updated = await _recipeService.UpdateRecipeAsync(id, updatedRecipeDto);
-            if (!updated)
+            bool isUpdated = await _recipeService.UpdateRecipeAsync(id, updatedRecipeDto);
+            if (!isUpdated)
             {
                 return BadRequest("Failed to update recipe.");
             }

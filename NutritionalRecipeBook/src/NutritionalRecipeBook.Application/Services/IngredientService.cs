@@ -92,7 +92,8 @@ public class IngredientService : IIngredientService
     {
         try
         {
-            var ingredient = await _unitOfWork.Repository<Ingredient, Guid>().GetSingleOrDefaultAsync(i => i.Name == name);
+            var ingredient = await _unitOfWork.Repository<Ingredient, Guid>()
+                .GetSingleOrDefaultAsync(i => i.Name == name);
             if (ingredient == null)
             {
                 _logger.LogWarning("Ingredient with name '{IngredienteName}' not found.", name);
@@ -129,15 +130,17 @@ public class IngredientService : IIngredientService
         };
     }
     
-    public async Task EnsureIngredientExistsAsync(IngredientDTO ingredientDto)
+    public async Task<bool> EnsureIngredientExistsAsync(IngredientDTO ingredientDto)
     {
         if (string.IsNullOrWhiteSpace(ingredientDto?.Name))
-            return;
+            return false;
 
         bool isCreated = await CreateIngredientAsync(ingredientDto);
         if (!isCreated)
         {
             _logger.LogDebug("Ingredient '{Name}' already exists or was not created.", ingredientDto.Name);
         }
+
+        return true;
     }
 }
