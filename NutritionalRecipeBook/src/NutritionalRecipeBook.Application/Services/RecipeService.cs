@@ -187,6 +187,59 @@ namespace NutritionalRecipeBook.Application.Services
                 return false;
             }
         }
+        
+        public async Task<RecipeDTO?> GetRecipeByIdAsync(Guid id)
+        {
+            try
+            {
+                await CheckExistencyAsync(id);
+                var recipeEntity = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
+
+                var recipeDto = new RecipeDTO
+                (
+                    recipeEntity.Id,
+                    recipeEntity.Name,
+                    recipeEntity.Description,
+                    recipeEntity.Instructions,
+                    recipeEntity.CookingTimeInMin,
+                    recipeEntity.Servings
+                );
+
+                return recipeDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while retrieving recipe ID {Id}.", id);
+                
+                return null;
+            }
+        }
+        
+        public IEnumerable<RecipeDTO> GetAllRecipesAsync()
+        {
+            try
+            {
+                var recipeEntities = _unitOfWork.Repository<Recipe, Guid>().GetAll();
+                
+                var recipeDtos = recipeEntities.Select(recipeEntity => new RecipeDTO
+                (
+                    recipeEntity.Id,
+                    recipeEntity.Name,
+                    recipeEntity.Description,
+                    recipeEntity.Instructions,
+                    recipeEntity.CookingTimeInMin,
+                    recipeEntity.Servings
+                ));
+
+                return recipeDtos;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while retrieving all recipes.");
+                
+                return Enumerable.Empty<RecipeDTO>();
+            }
+        }
 
         private async Task ProcessRecipeIngredientsAsync(Recipe recipeEntity, List<IngredientAmountDTO> ingredientDTOs)
         {
@@ -326,6 +379,5 @@ namespace NutritionalRecipeBook.Application.Services
                 throw new KeyNotFoundException($"Recipe with ID '{id}' does not exist.");
             }
         }
-
     }
 }

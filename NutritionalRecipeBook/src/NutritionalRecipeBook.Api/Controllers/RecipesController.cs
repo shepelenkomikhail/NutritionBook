@@ -55,5 +55,27 @@ namespace NutritionalRecipeBook.Api.Controllers
 
             return Ok("Recipe deleted successfully.");
         }
+        
+        // GET: api/recipes/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            var recipe = await _recipeService.GetRecipeByIdAsync(id);
+            if (recipe == null)
+            {
+                return BadRequest("Failed to get recipe.");
+            }
+
+            return Ok(recipe);
+        }
+        
+        // GET: api/recipes
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var recipes = _recipeService.GetAllRecipesAsync();
+                
+            return Ok(recipes);
+        }
     }
 }
