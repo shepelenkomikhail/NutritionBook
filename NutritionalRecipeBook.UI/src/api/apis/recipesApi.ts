@@ -33,7 +33,22 @@ const recipesApi = createApi({
         method: 'DELETE',
       }),
     }),
-  }),
+    getRecipes: builder.query({
+      providesTags: ['Recipe'],
+      query: (params?: { search?: string; pageNumber?: number; pageSize?: number }) => ({
+        url: '/api/recipes',
+        method: 'GET',
+        params,
+      }),
+    }),
+    getRecipeById: builder.query({
+      providesTags: ['Recipe'],
+      query: (id: string) => ({
+        url: `/api/recipes/${id}`,
+        method: 'GET',
+      })
+    })
+  })
 });
 
 export default recipesApi;

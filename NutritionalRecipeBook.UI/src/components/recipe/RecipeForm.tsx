@@ -18,6 +18,7 @@ export function RecipeForm({ mode = 'create', initialValues, onSubmit, isLoading
       layout="vertical"
       onFinish={onSubmit}
       initialValues={initialValues}
+      className="w-11/12"
     >
       <Form.Item
         name="name"
