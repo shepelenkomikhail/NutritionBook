@@ -23,11 +23,7 @@ try
     
     builder.AddServices(config);
     
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-                           throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-    builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
-    
+    builder.Services.AddIdentityConfiguration(config);
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
@@ -56,6 +52,7 @@ try
             .WithOrigins("http://localhost:3000");
     });
 
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();
