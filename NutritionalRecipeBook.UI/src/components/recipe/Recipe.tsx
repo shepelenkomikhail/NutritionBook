@@ -26,8 +26,10 @@ function Recipe() {
 
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
 
-  const { recipes, totalCount, search, setSearch, pageNumber, setPageNumber,
-    pageSize, isLoadingQuery, } = useRecipeQuery();
+  const { recipes, totalCount, search, setSearch, pageNumber, setPageNumber, pageSize, isLoadingQuery,
+    minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, setMinCookingTimeInMin,
+    setMaxCookingTimeInMin, setMinServings, setMaxServings,
+  } = useRecipeQuery();
 
   const handleOpenEdit = (recipe: RecipeModel) => {
     setEditingRecipe(recipe);
@@ -63,8 +65,27 @@ function Recipe() {
         <Title className="text-white mb-0">Recipes</Title>
       </Header>
 
-      <Content className="p-6 min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100">
-        <RecipeSearchBar search={search} onSearchChange={setSearch} />
+      <Content className={`flex flex-col p-6 min-h-screen
+      ${theme === 'dark' ? 'bg-slate-900 text-gray-100' : 'bg-orange-200 text-gray-800'}`}>
+        <RecipeSearchBar
+          search={search}
+          onSearchChange={(v) => { setSearch(v); setPageNumber(1); }}
+          minCookingTimeInMin={minCookingTimeInMin}
+          maxCookingTimeInMin={maxCookingTimeInMin}
+          minServings={minServings}
+          maxServings={maxServings}
+          onMinCookingTimeChange={setMinCookingTimeInMin}
+          onMaxCookingTimeChange={setMaxCookingTimeInMin}
+          onMinServingsChange={setMinServings}
+          onMaxServingsChange={setMaxServings}
+          onClearFilters={() => {
+            setMinCookingTimeInMin(undefined);
+            setMaxCookingTimeInMin(undefined);
+            setMinServings(undefined);
+            setMaxServings(undefined);
+            setPageNumber(1);
+          }}
+        />
 
         <RecipeList
           recipes={recipes}

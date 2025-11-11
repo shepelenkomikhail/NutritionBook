@@ -35,7 +35,15 @@ const recipesApi = createApi({
     }),
     getRecipes: builder.query({
       providesTags: ['Recipe'],
-      query: (params?: { search?: string; pageNumber?: number; pageSize?: number }) => ({
+      query: (params?: {
+        search?: string;
+        pageNumber?: number;
+        pageSize?: number;
+        minCookingTimeInMin?: number;
+        maxCookingTimeInMin?: number;
+        minServings?: number;
+        maxServings?: number;
+      }) => ({
         url: '/api/recipes',
         method: 'GET',
         params,
