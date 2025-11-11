@@ -5,19 +5,15 @@ namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface IRecipeService
 {
-    Task<Guid?> CreateRecipeAsync(RecipeIngredient recipeUpdateDto);
-    Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredient recipeUpdateDto);
+    Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO recipeUpdateDto);
+    Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO recipeUpdateDto);
     Task<Guid?> GetRecipeIdByNameAsync(string name);
     Task<bool> DeleteRecipeAsync(Guid id);
     Task<RecipeDTO?> GetRecipeByIdAsync(Guid id);
     IEnumerable<RecipeDTO> GetAllRecipesAsync();
     PagedResultDTO<RecipeDTO> GetRecipesAsync(
-            string? search,
             int pageNumber,
             int pageSize,
-            int? minCookingTimeInMin = null,
-            int? maxCookingTimeInMin = null,
-            int? minServings = null,
-            int? maxServings = null
-        );
+            RecipeFilterDTO? filterDto = null
+    );
 }

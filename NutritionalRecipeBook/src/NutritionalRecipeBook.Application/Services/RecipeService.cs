@@ -2,9 +2,10 @@ using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 using NutritionalRecipeBook.Application.DTOs;
+using NutritionalRecipeBook.Application.DTOs.Mappers;
+using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Infrastructure.Contracts;
-using RecipeIngredient = NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs.RecipeIngredient;
 
 namespace NutritionalRecipeBook.Application.Services
 {
@@ -22,7 +23,7 @@ namespace NutritionalRecipeBook.Application.Services
             _ingredientService = ingredientService;
         }
 
-        public async Task<Guid?> CreateRecipeAsync(RecipeIngredient? recipeDto)
+        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO? recipeDto)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -44,15 +45,7 @@ namespace NutritionalRecipeBook.Application.Services
             {
                 await CheckExistencyAsync(recipeData);
 
-                var recipeEntity = new Recipe
-                {
-                    Name = recipeData.Name.Trim(),
-                    Description = recipeData.Description?.Trim() ?? string.Empty,
-                    Instructions = recipeData.Instructions?.Trim() ?? string.Empty,
-                    CookingTimeInMin = recipeData.CookingTimeInMin,
-                    Servings = recipeData.Servings
-                };
-
+                var recipeEntity = RecipeMapper.ToEntity(recipeData);
                 await _unitOfWork.Repository<Recipe, Guid>().InsertAsync(recipeEntity);
 
                 if (recipeDto.Ingredients.Count > 0)
@@ -82,7 +75,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredient? recipeDto)
+        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO? recipeDto)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -100,14 +93,7 @@ namespace NutritionalRecipeBook.Application.Services
                     
                     return false;
                 }
-
-                var recipeData = recipeDto.RecipeDTO;
-                existingRecipe.Name = recipeData.Name?.Trim() ?? existingRecipe.Name;
-                existingRecipe.Description = recipeData.Description?.Trim() ?? string.Empty;
-                existingRecipe.Instructions = recipeData.Instructions?.Trim() ?? string.Empty;
-                existingRecipe.CookingTimeInMin = recipeData.CookingTimeInMin;
-                existingRecipe.Servings = recipeData.Servings;
-
+                
                 await _unitOfWork.Repository<Recipe, Guid>().UpdateAsync(existingRecipe);
 
                 if (recipeDto.Ingredients.Count > 0)
@@ -194,16 +180,7 @@ namespace NutritionalRecipeBook.Application.Services
             {
                 await CheckExistencyAsync(id);
                 var recipeEntity = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
-
-                var recipeDto = new RecipeDTO
-                (
-                    recipeEntity.Id,
-                    recipeEntity.Name,
-                    recipeEntity.Description,
-                    recipeEntity.Instructions,
-                    recipeEntity.CookingTimeInMin,
-                    recipeEntity.Servings
-                );
+                var recipeDto = RecipeMapper.ToDto(recipeEntity!);
 
                 return recipeDto;
             }
@@ -220,16 +197,7 @@ namespace NutritionalRecipeBook.Application.Services
             try
             {
                 var recipeEntities = _unitOfWork.Repository<Recipe, Guid>().GetAll();
-                
-                var recipeDtos = recipeEntities.Select(recipeEntity => new RecipeDTO
-                (
-                    recipeEntity.Id,
-                    recipeEntity.Name,
-                    recipeEntity.Description,
-                    recipeEntity.Instructions,
-                    recipeEntity.CookingTimeInMin,
-                    recipeEntity.Servings
-                ));
+                var recipeDtos = recipeEntities.Select(recipeEntity => RecipeMapper.ToDto(recipeEntity));
 
                 return recipeDtos;
             }
@@ -241,25 +209,21 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public PagedResultDTO<RecipeDTO> GetRecipesAsync(
-            string? search,
-            int pageNumber,
-            int pageSize,
-            int? minCookingTimeInMin = null,
-            int? maxCookingTimeInMin = null,
-            int? minServings = null,
-            int? maxServings = null)
+        public PagedResultDTO<RecipeDTO> GetRecipesAsync(int pageNumber, int pageSize, RecipeFilterDTO filterDto = null)
         {
             try
             {
                 var repo = _unitOfWork.Repository<Recipe, Guid>();
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
-                _logger.LogInformation("Building query for recipes with search '{Search}', page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, minServ {MinServ}, maxServ {MaxServ}.",
-                    search, pageNumber, pageSize, minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings);
+                _logger.LogInformation("Building query for recipes with search '{Search}', " +
+                                       "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
+                                       "minServ {MinServ}, maxServ {MaxServ}.",
+                    filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
+                    filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);
 
-                if (!string.IsNullOrWhiteSpace(search))
+                if (!string.IsNullOrWhiteSpace(filterDto.Search))
                 {
-                    search = search.ToLower();
+                    var search = filterDto.Search.ToLower();
 
                     query = query.Where(r =>
                         r.Name.ToLower().Contains(search) ||
@@ -269,10 +233,14 @@ namespace NutritionalRecipeBook.Application.Services
                     );
                 }
 
-                query = repo.GetWhereIf(query, minCookingTimeInMin.HasValue, r => r.CookingTimeInMin >= minCookingTimeInMin!.Value);
-                query = repo.GetWhereIf(query, maxCookingTimeInMin.HasValue, r => r.CookingTimeInMin <= maxCookingTimeInMin!.Value);
-                query = repo.GetWhereIf(query, minServings.HasValue, r => r.Servings >= minServings!.Value);
-                query = repo.GetWhereIf(query, maxServings.HasValue, r => r.Servings <= maxServings!.Value);
+                query = repo.GetWhereIf(query, filterDto.MinCookingTimeInMin.HasValue, r => 
+                    r.CookingTimeInMin >= filterDto.MinCookingTimeInMin!.Value);
+                query = repo.GetWhereIf(query, filterDto.MaxCookingTimeInMin.HasValue, r =>
+                    r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin!.Value);
+                query = repo.GetWhereIf(query, filterDto.MinServings.HasValue, r =>
+                    r.Servings >= filterDto.MinServings!.Value);
+                query = repo.GetWhereIf(query, filterDto.MaxServings.HasValue, r =>
+                    r.Servings <= filterDto.MaxServings!.Value);
                 
                 int totalCount = query.Count();
 
@@ -280,8 +248,7 @@ namespace NutritionalRecipeBook.Application.Services
                     .OrderBy(r => r.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
-                    .Select(r => 
-                        new RecipeDTO(r.Id, r.Name, r.Description, r.Instructions, r.CookingTimeInMin, r.Servings))
+                    .Select(r => RecipeMapper.ToDto(r))
                     .ToList();
                 
                 _logger.LogInformation("Retrieved {Count} recipes for page {PageNumber} with page size {PageSize}.",
@@ -321,7 +288,7 @@ namespace NutritionalRecipeBook.Application.Services
                     continue;
                 }
 
-                var recipeIngredient = new Domain.ConnectionTables.RecipeIngredient
+                var recipeIngredient = new RecipeIngredient
                 {
                     RecipeId = recipeEntity.Id,
                     IngredientId = ingredientEntity.Id,
@@ -329,14 +296,14 @@ namespace NutritionalRecipeBook.Application.Services
                     Unit = ingredientAmount.Unit?.Trim() ?? string.Empty
                 };
 
-                await _unitOfWork.Repository<Domain.ConnectionTables.RecipeIngredient, (Guid, Guid)>().InsertAsync(recipeIngredient);
+                await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(recipeIngredient);
             }
         }
 
         private async Task UpdateRecipeIngredientsAsync(Recipe recipeEntity, List<IngredientAmountDTO> ingredientDtos)
         {
             var currentEntries = 
-                await _unitOfWork.Repository<Domain.ConnectionTables.RecipeIngredient, (Guid, Guid)>()
+                await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>()
                 .GetWhereAsync(ri => ri.RecipeId == recipeEntity.Id);
 
             var newIngredientNames = ingredientDtos
@@ -351,7 +318,7 @@ namespace NutritionalRecipeBook.Application.Services
 
             foreach (var removeItem in toRemove)
             {
-                await _unitOfWork.Repository<Domain.ConnectionTables.RecipeIngredient, (Guid, Guid)>().DeleteAsync(removeItem);
+                await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().DeleteAsync(removeItem);
             }
 
             foreach (var ingredientAmount in ingredientDtos)
@@ -377,13 +344,13 @@ namespace NutritionalRecipeBook.Application.Services
                     continue;
                 }
 
-                var existingEntry = await _unitOfWork.Repository<Domain.ConnectionTables.RecipeIngredient, (Guid, Guid)>()
+                var existingEntry = await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>()
                     .GetSingleOrDefaultAsync(ri => 
                         ri.RecipeId == recipeEntity.Id && ri.IngredientId == ingredientEntityId);
 
                 if (existingEntry == null)
                 {
-                    var newLink = new Domain.ConnectionTables.RecipeIngredient
+                    var newLink = new RecipeIngredient
                     {
                         RecipeId = recipeEntity.Id,
                         IngredientId = ingredientEntityId.Value,
@@ -391,14 +358,14 @@ namespace NutritionalRecipeBook.Application.Services
                         Unit = ingredientAmount.Unit?.Trim() ?? string.Empty
                     };
 
-                    await _unitOfWork.Repository<Domain.ConnectionTables.RecipeIngredient, (Guid, Guid)>().InsertAsync(newLink);
+                    await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(newLink);
                 }
                 else
                 {
                     existingEntry.Amount = ingredientAmount.Amount;
                     existingEntry.Unit = ingredientAmount.Unit?.Trim() ?? string.Empty;
                     
-                    await _unitOfWork.Repository<Domain.ConnectionTables.RecipeIngredient, (Guid, Guid)>().UpdateAsync(existingEntry);
+                    await _unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().UpdateAsync(existingEntry);
                 }
             }
         }
