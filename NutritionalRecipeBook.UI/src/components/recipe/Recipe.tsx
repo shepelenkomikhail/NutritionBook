@@ -1,21 +1,20 @@
+import 'simplebar-react/dist/simplebar.min.css';
+import SimpleBar from 'simplebar-react';
 import { useContext, useState } from 'react';
 import { PlusOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
-import { RecipeModel } from '@models'
-import RecipeForm  from './RecipeForm';
 import { FloatButton, Layout, Modal, Spin, Button } from 'antd';
 import Title from 'antd/es/typography/Title';
-import { ThemeContext } from '../../layout/App';
-import RecipeSearchBar  from './RecipeSearchBar';
-import RecipeList from './RecipeList';
-import { useRecipeQuery } from '../../hooks/useRecipeQuery';
 const { Content, Header } = Layout;
-import SimpleBar from 'simplebar-react';
-import 'simplebar-react/dist/simplebar.min.css';
+import { ThemeContext } from '../../layout/App';
+import { useRecipeQuery } from '../../hooks/useRecipeQuery';
+import { RecipeModel } from '@models'
+import { RecipeList, RecipeSearchBar, RecipeForm } from './index.ts';
 
 function Recipe() {
   const { theme, setTheme } = useContext(ThemeContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
 
   const handleOpen = () => setIsModalOpen(true);
   const handleCancel = () => {
@@ -23,9 +22,8 @@ function Recipe() {
     setIsModalOpen(false);
   };
 
-  const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
-
-  const { recipes, totalCount, search, setSearch, pageNumber, setPageNumber, pageSize, isLoadingQuery,
+  const {
+    recipes, totalCount, search, setSearch, pageNumber, setPageNumber, pageSize, isLoadingQuery,
     minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, setMinCookingTimeInMin,
     setMaxCookingTimeInMin, setMinServings, setMaxServings,
   } = useRecipeQuery();
@@ -35,19 +33,24 @@ function Recipe() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit =  () => {
+  const handleSubmit = () => {
     setIsModalOpen(false);
     setEditingRecipe(null);
   };
 
   const handleThemeToggle = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
-    console.log(theme);
-  }
+  };
 
   return (
     <>
-      <Header className="flex items-center justify-center w-full relative">
+      <Header className={`flex items-center justify-center w-full relative`}
+        style={{
+          backgroundColor: theme === 'dark' ? undefined : '#f9f5f0',
+          color: theme === 'dark' ? '#ffffff' : '#ffffff',
+          paddingTop: '24px',
+        }}
+      >
         <Button
           icon={
             theme === 'dark' ? (
@@ -57,17 +60,34 @@ function Recipe() {
             )
           }
           type="primary"
-          className="!absolute top-2 right-4 !h-12 !w-12"
+          className="!absolute !h-12 !w-12"
+          style={{ top: '16px', left: '16px', borderRadius: '50%' }}
           onClick={() => handleThemeToggle()}
         />
-        <Title className="text-white mb-0">Recipes</Title>
+        <Title
+          className="mb-0"
+          style={{
+            color: theme == 'dark' ? 'rgb(203 213 225)' : 'rgb(55 65 81)'
+          }}
+        >
+          Recipes
+        </Title>
       </Header>
 
-      <Content className={`flex flex-col p-6 min-h-screen
-      ${theme === 'dark' ? 'bg-slate-900 text-gray-100' : 'bg-orange-200 text-gray-800'}`}>
+      <Content
+        className={`flex flex-col p-6 transition-all duration-300
+        ${theme === 'dark' ? 'bg-slate-900 text-gray-100' : 'text-gray-800'}`}
+        style={{
+          backgroundColor: theme === 'dark' ? undefined : '#f9f5f0',
+          minHeight: '100vh'
+      }}
+      >
         <RecipeSearchBar
           search={search}
-          onSearchChange={(v) => { setSearch(v); setPageNumber(1); }}
+          onSearchChange={(v) => {
+            setSearch(v);
+            setPageNumber(1);
+          }}
           minCookingTimeInMin={minCookingTimeInMin}
           maxCookingTimeInMin={maxCookingTimeInMin}
           minServings={minServings}
@@ -103,18 +123,22 @@ function Recipe() {
         />
 
         <Modal
-          title={editingRecipe ? "Edit Recipe" : "Create New Recipe"}
+          title={editingRecipe ? 'Edit Recipe' : 'Create New Recipe'}
           open={isModalOpen}
           onCancel={handleCancel}
           destroyOnClose
           footer={null}
           className="max-h-[70vh]"
+          bodyStyle={{
+            color: theme == 'dark' ? undefined : 'rgb(31 41 55)',
+            backgroundColor: theme == 'dark' ? undefined : 'whitesmoke'
+          }}
         >
           <Spin spinning={isLoadingQuery} tip="Processing...">
             <SimpleBar style={{ maxHeight: '60vh' }} autoHide={false}>
               <RecipeForm
                 id={editingRecipe?.id || null}
-                mode={editingRecipe ? "update" : "create"}
+                mode={editingRecipe ? 'update' : 'create'}
                 initialValues={editingRecipe || undefined}
                 onSubmit={handleSubmit}
                 setIsLoading={setIsLoading}

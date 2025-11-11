@@ -1,6 +1,7 @@
 import { Button, Tooltip } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 import { RecipeModel } from '@models';
+import React from 'react';
 
 interface EditRecipeButtonProps {
   recipe: RecipeModel;
@@ -8,7 +9,8 @@ interface EditRecipeButtonProps {
 }
 
 function EditRecipeButton({ recipe, onEdit }: EditRecipeButtonProps) {
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    e.stopPropagation();
     onEdit(recipe);
   };
 
@@ -17,7 +19,7 @@ function EditRecipeButton({ recipe, onEdit }: EditRecipeButtonProps) {
       <Button
         type="default"
         icon={<EditOutlined />}
-        onClick={handleEdit}
+        onClick={(e) => {handleEdit(e)}}
       />
     </Tooltip>
   );

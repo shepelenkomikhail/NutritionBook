@@ -1,5 +1,7 @@
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, InputNumber } from 'antd';
+import { useContext } from 'react';
+import { ThemeContext } from '../../layout/App.tsx';
 
 interface Props {
   search: string;
@@ -16,8 +18,21 @@ interface Props {
 }
 
 function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCookingTimeInMin,
-                                  minServings, maxServings, onMinCookingTimeChange, onMaxCookingTimeChange,
-                                  onMinServingsChange, onMaxServingsChange, onClearFilters, }: Props) {
+                           minServings, maxServings, onMinCookingTimeChange, onMaxCookingTimeChange,
+                           onMinServingsChange, onMaxServingsChange, onClearFilters, }: Props) {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
+  const lightInputStyle = {
+    backgroundColor: 'rgb(245 245 245)',
+    color: 'rgb(17 24 39)',
+  };
+
+  const darkInputStyle = {
+    backgroundColor: 'rgb(30 41 59)',
+    color: 'rgb(241 245 249)',
+  };
+
   return (
     <div className="flex flex-col mb-6 w-3/4 self-center">
       <div className="flex justify-center mb-4">
@@ -28,7 +43,8 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           size="large"
-          className="!w-4/6 shadow-sm"
+          className="!w-4/6 shadow-sm custom-input"
+          style={isDark ? darkInputStyle : lightInputStyle}
         />
       </div>
 
@@ -40,7 +56,9 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
             step={5}
             value={minCookingTimeInMin}
             onChange={(v) => onMinCookingTimeChange(v ?? undefined)}
-            className="w-full"
+            className="w-full custom-input"
+            style={isDark ? darkInputStyle : lightInputStyle}
+            placeholder="Min"
           />
         </div>
 
@@ -51,7 +69,9 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
             step={5}
             value={maxCookingTimeInMin}
             onChange={(v) => onMaxCookingTimeChange(v ?? undefined)}
-            className="w-full"
+            className="w-full custom-input"
+            style={isDark ? darkInputStyle : lightInputStyle}
+            placeholder="Max"
           />
         </div>
 
@@ -61,7 +81,9 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
             min={1}
             value={minServings}
             onChange={(v) => onMinServingsChange(v ?? undefined)}
-            className="w-full"
+            className="w-full custom-input"
+            style={isDark ? darkInputStyle : lightInputStyle}
+            placeholder="Min"
           />
         </div>
 
@@ -71,14 +93,29 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
             min={1}
             value={maxServings}
             onChange={(v) => onMaxServingsChange(v ?? undefined)}
-            className="w-full"
+            className="w-full custom-input"
+            style={isDark ? darkInputStyle : lightInputStyle}
+            placeholder="Max"
           />
         </div>
 
         <div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
-          <Button onClick={onClearFilters}>Clear filters</Button>
+          <Button
+            onClick={onClearFilters}
+            className="custom-input"
+            style={isDark ? darkInputStyle : lightInputStyle}
+          >
+            Clear filters
+          </Button>
         </div>
       </div>
+
+      <style>{`
+        .custom-input input::placeholder {
+          color: ${isDark ? 'rgb(148 163 184)' : 'rgb(107 114 128)'} !important;
+          opacity: 1;
+        }
+      `}</style>
     </div>
   );
 }
