@@ -11,5 +11,13 @@ public interface IRecipeService
     Task<bool> DeleteRecipeAsync(Guid id);
     Task<RecipeDTO?> GetRecipeByIdAsync(Guid id);
     IEnumerable<RecipeDTO> GetAllRecipesAsync();
-    PagedResultDTO<RecipeDTO> GetRecipesAsync(string? search, int pageNumber, int pageSize);
+    PagedResultDTO<RecipeDTO> GetRecipesAsync(
+            string? search,
+            int pageNumber,
+            int pageSize,
+            int? minCookingTimeInMin = null,
+            int? maxCookingTimeInMin = null,
+            int? minServings = null,
+            int? maxServings = null
+        );
 }

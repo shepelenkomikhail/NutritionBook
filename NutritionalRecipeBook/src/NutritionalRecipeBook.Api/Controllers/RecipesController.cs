@@ -74,12 +74,18 @@ namespace NutritionalRecipeBook.Api.Controllers
         public IActionResult Get(
             [FromQuery] string? search = null,
             [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int? minCookingTimeInMin = null,
+            [FromQuery] int? maxCookingTimeInMin = null,
+            [FromQuery] int? minServings = null,
+            [FromQuery] int? maxServings = null)
         {
             if (pageNumber <= 0 || pageSize <= 0)
                 return BadRequest("Invalid pagination parameters.");
 
-            var pagedResult = _recipeService.GetRecipesAsync(search, pageNumber, pageSize);
+            var pagedResult = _recipeService.GetRecipesAsync(
+                search, pageNumber, pageSize, minCookingTimeInMin, maxCookingTimeInMin,
+                minServings, maxServings);
 
             return Ok(pagedResult);
         }

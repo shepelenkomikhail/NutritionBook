@@ -241,13 +241,21 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public PagedResultDTO<RecipeDTO> GetRecipesAsync(string? search, int pageNumber, int pageSize)
+        public PagedResultDTO<RecipeDTO> GetRecipesAsync(
+            string? search,
+            int pageNumber,
+            int pageSize,
+            int? minCookingTimeInMin = null,
+            int? maxCookingTimeInMin = null,
+            int? minServings = null,
+            int? maxServings = null)
         {
             try
             {
+                var repo = _unitOfWork.Repository<Recipe, Guid>();
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
-                _logger.LogInformation("Building query for recipes with search '{Search}', " +
-                                       "page number {PageNumber}, page size {PageSize}.", search, pageNumber, pageSize);
+                _logger.LogInformation("Building query for recipes with search '{Search}', page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, minServ {MinServ}, maxServ {MaxServ}.",
+                    search, pageNumber, pageSize, minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings);
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
@@ -261,6 +269,11 @@ namespace NutritionalRecipeBook.Application.Services
                     );
                 }
 
+                query = repo.GetWhereIf(query, minCookingTimeInMin.HasValue, r => r.CookingTimeInMin >= minCookingTimeInMin!.Value);
+                query = repo.GetWhereIf(query, maxCookingTimeInMin.HasValue, r => r.CookingTimeInMin <= maxCookingTimeInMin!.Value);
+                query = repo.GetWhereIf(query, minServings.HasValue, r => r.Servings >= minServings!.Value);
+                query = repo.GetWhereIf(query, maxServings.HasValue, r => r.Servings <= maxServings!.Value);
+                
                 int totalCount = query.Count();
 
                 var recipes = query
