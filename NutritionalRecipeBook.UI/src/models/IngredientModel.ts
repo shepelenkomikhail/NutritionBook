@@ -1,5 +1,5 @@
 export interface IngredientModel {
-  id?: number;
+  id?: string;
   name: string;
   isLiquid: boolean;
   amount: number;

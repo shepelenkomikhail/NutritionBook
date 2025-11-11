@@ -1,22 +1,44 @@
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Form, Input, InputNumber, Space } from 'antd';
 import type { RecipeModel } from '@models';
+import { useRecipeMutation } from '../../hooks';
+import { useEffect } from 'react';
 
 interface RecipeFormProps {
-  mode?: 'create' | 'update';
+  id?: string | null;
+  mode: 'create' | 'update';
   initialValues?: RecipeModel;
-  onSubmit: (values: RecipeModel) => Promise<void>;
-  isLoading?: boolean;
+  onSubmit: () => void;
+  setIsLoading: (isLoading: boolean) => void;
 }
 
-export function RecipeForm({ mode = 'create', initialValues, onSubmit, isLoading }: RecipeFormProps) {
+export function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeFormProps) {
   const [form] = Form.useForm<RecipeModel>();
+  const { execute, isLoading } = useRecipeMutation();
+
+  useEffect(() => {
+    setIsLoading(isLoading)
+  }, [isLoading, setIsLoading]);
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [initialValues, form]);
+
+  const handleSubmit = async (values: RecipeModel, id: string) => {
+    console.log('Submitting Values:', values);
+    await execute(values, id, mode);
+    onSubmit();
+  }
+
+  console.log('Initial Values:', initialValues, 'Mode:', mode);
 
   return (
     <Form
       form={form}
       layout="vertical"
-      onFinish={onSubmit}
+      onFinish={() => handleSubmit(form.getFieldsValue(), id!)}
       initialValues={initialValues}
       className="w-11/12"
     >

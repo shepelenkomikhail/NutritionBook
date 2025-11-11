@@ -1,7 +1,6 @@
 import { useContext, useState } from 'react';
 import { PlusOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
-import { RecipeModel } from '@models';
-import { useRecipeMutation } from '../../hooks';
+import { RecipeModel } from '@models'
 import { RecipeForm } from './RecipeForm';
 import { FloatButton, Layout, Modal, Spin, Button } from 'antd';
 import Title from 'antd/es/typography/Title';
@@ -16,7 +15,7 @@ import 'simplebar-react/dist/simplebar.min.css';
 function Recipe() {
   const { theme, setTheme } = useContext(ThemeContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { execute, isLoading } = useRecipeMutation('create');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOpen = () => setIsModalOpen(true);
   const handleCancel = () => {
@@ -36,8 +35,7 @@ function Recipe() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (values: Omit<RecipeModel, 'id'>) => {
-    await execute(values);
+  const handleSubmit =  () => {
     setIsModalOpen(false);
     setEditingRecipe(null);
   };
@@ -115,10 +113,11 @@ function Recipe() {
           <Spin spinning={isLoadingQuery} tip="Processing...">
             <SimpleBar style={{ maxHeight: '60vh' }} autoHide={false}>
               <RecipeForm
+                id={editingRecipe?.id || null}
                 mode={editingRecipe ? "update" : "create"}
                 initialValues={editingRecipe || undefined}
                 onSubmit={handleSubmit}
-                isLoading={isLoadingQuery}
+                setIsLoading={setIsLoading}
               />
             </SimpleBar>
           </Spin>
