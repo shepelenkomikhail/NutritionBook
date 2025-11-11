@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
@@ -5,11 +7,10 @@ using NutritionalRecipeBook.Domain.EntityConfigurations;
 
 namespace NutritionalRecipeBook.Domain;
 
-public class ApplicationDbContext: DbContext
+public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     private readonly string _connectionString = string.Empty;
     
-    public virtual DbSet<User> Users { get; set; } 
     public virtual DbSet<Recipe> Recipes { get; set; } 
     public virtual DbSet<Ingredient> Ingredients { get; set; } 
     public virtual DbSet<ShoppingList> ShoppingLists { get; set; }

@@ -12,7 +12,7 @@ public static class SeedData
             users.Add(new User
             {
                 Id = Guid.Parse($"00000000-0000-0000-0000-0000000000{i:D2}"),
-                Username = $"User{i}"
+                UserName = $"User{i}"
             });
         }
         return users;
@@ -27,7 +27,7 @@ public static class SeedData
             lists.Add(new ShoppingList
             {
                 Id = Guid.Parse($"10000000-0000-0000-0000-0000000000{users.IndexOf(user) + 1:D2}"),
-                Name = $"{user.Username}'s Shopping List",
+                Name = $"{user.UserName}'s Shopping List",
                 UserId = user.Id
             });
         }
@@ -97,7 +97,7 @@ public static class SeedData
             comments.Add(new Comment
             {
                 Id = Guid.Parse($"50000000-0000-0000-0000-0000000000{i:D2}"),
-                Content = $"Comment {i} by {user.Username} on {recipe.Name}",
+                Content = $"Comment {i} by {user.UserName} on {recipe.Name}",
                 CreatedAt = DateTime.UtcNow.AddMinutes(-i * 10),
                 UserId = user.Id,
                 RecipeId = recipe.Id
