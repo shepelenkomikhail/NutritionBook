@@ -33,3 +33,5 @@ export function DeleteRecipeButton({ id }: {id: string}) {
     </Popconfirm>
   );
 }
+
+export default DeleteRecipeButton;

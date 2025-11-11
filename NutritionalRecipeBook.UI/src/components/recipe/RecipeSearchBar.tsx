@@ -15,7 +15,7 @@ interface Props {
   onClearFilters: () => void;
 }
 
-export function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCookingTimeInMin,
+function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCookingTimeInMin,
                                   minServings, maxServings, onMinCookingTimeChange, onMaxCookingTimeChange,
                                   onMinServingsChange, onMaxServingsChange, onClearFilters, }: Props) {
   return (

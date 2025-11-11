@@ -1,13 +1,13 @@
 import { useContext, useState } from 'react';
 import { PlusOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { RecipeModel } from '@models'
-import { RecipeForm } from './RecipeForm';
+import RecipeForm  from './RecipeForm';
 import { FloatButton, Layout, Modal, Spin, Button } from 'antd';
 import Title from 'antd/es/typography/Title';
 import { ThemeContext } from '../../layout/App';
-import { RecipeSearchBar } from './RecipeSearchBar.tsx';
-import { RecipeList } from './RecipeList.tsx';
-import { useRecipeQuery } from '../../hooks/useRecipeQuery.ts';
+import RecipeSearchBar  from './RecipeSearchBar';
+import RecipeList from './RecipeList';
+import { useRecipeQuery } from '../../hooks/useRecipeQuery';
 const { Content, Header } = Layout;
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';

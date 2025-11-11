@@ -1,14 +1,14 @@
 import { Card, Space } from 'antd';
 import { RecipeModel } from '@models';
-import { DeleteRecipeButton } from './buttons/DeleteRecipeButton';
-import { EditRecipeButton } from './buttons/EditRecipeButton';
+import DeleteRecipeButton from './buttons/DeleteRecipeButton';
+import EditRecipeButton  from './buttons/EditRecipeButton';
 
 interface RecipeCardProps {
   recipe: RecipeModel;
   onEdit: (recipe: RecipeModel) => void;
 }
 
-export function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
+function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
   return (
     <Card
       hoverable
@@ -32,3 +32,5 @@ export function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
     </Card>
   );
 }
+
+export default RecipeCard;

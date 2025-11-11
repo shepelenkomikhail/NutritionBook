@@ -7,7 +7,7 @@ interface EditRecipeButtonProps {
   onEdit: (recipe: RecipeModel) => void;
 }
 
-export function EditRecipeButton({ recipe, onEdit }: EditRecipeButtonProps) {
+function EditRecipeButton({ recipe, onEdit }: EditRecipeButtonProps) {
   const handleEdit = () => {
     onEdit(recipe);
   };
@@ -22,3 +22,5 @@ export function EditRecipeButton({ recipe, onEdit }: EditRecipeButtonProps) {
     </Tooltip>
   );
 }
+
+export default EditRecipeButton;

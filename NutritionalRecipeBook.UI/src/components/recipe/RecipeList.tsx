@@ -1,5 +1,5 @@
 import { Pagination, Empty, Row, Col, Spin } from 'antd';
-import { RecipeCard } from './RecipeCard';
+import RecipeCard  from './RecipeCard';
 import { RecipeModel } from '@models';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
   onEdit: (recipe: RecipeModel) => void;
 }
 
-export function RecipeList({ recipes, totalCount, pageNumber, pageSize,
+function RecipeList({ recipes, totalCount, pageNumber, pageSize,
                              onPageChange, isLoading, onEdit }: Props) {
 
   if (isLoading) return <Spin className="m-auto" tip="Loading recipes..." />;
@@ -40,3 +40,5 @@ export function RecipeList({ recipes, totalCount, pageNumber, pageSize,
     </div>
   );
 }
+
+export default RecipeList;

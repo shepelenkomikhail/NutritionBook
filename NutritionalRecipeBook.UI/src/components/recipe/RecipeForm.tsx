@@ -12,7 +12,7 @@ interface RecipeFormProps {
   setIsLoading: (isLoading: boolean) => void;
 }
 
-export function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeFormProps) {
+function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeFormProps) {
   const [form] = Form.useForm<RecipeModel>();
   const { execute, isLoading } = useRecipeMutation();
 
@@ -27,12 +27,9 @@ export function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: 
   }, [initialValues, form]);
 
   const handleSubmit = async (values: RecipeModel, id: string) => {
-    console.log('Submitting Values:', values);
     await execute(values, id, mode);
     onSubmit();
   }
-
-  console.log('Initial Values:', initialValues, 'Mode:', mode);
 
   return (
     <Form
