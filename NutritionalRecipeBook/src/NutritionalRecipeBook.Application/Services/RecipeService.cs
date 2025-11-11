@@ -80,48 +80,49 @@ namespace NutritionalRecipeBook.Application.Services
             if (recipeDto?.RecipeDTO == null)
             {
                 _logger.LogWarning("UpdateRecipeAsync failed: RecipeDTO is null.");
-                
                 return false;
             }
 
             try
             {
                 var existingRecipe = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
+
                 if (existingRecipe == null)
                 {
                     _logger.LogWarning("UpdateRecipeAsync failed: Recipe with ID {Id} not found.", id);
-                    
                     return false;
                 }
-                
-                await _unitOfWork.Repository<Recipe, Guid>().UpdateAsync(existingRecipe);
+
+                existingRecipe.Name = recipeDto.RecipeDTO.Name;
+                existingRecipe.Description = recipeDto.RecipeDTO.Description;
+                existingRecipe.Instructions = recipeDto.RecipeDTO.Instructions;
+                existingRecipe.CookingTimeInMin = recipeDto.RecipeDTO.CookingTimeInMin;
+                existingRecipe.Servings = recipeDto.RecipeDTO.Servings;
 
                 if (recipeDto.Ingredients.Count > 0)
                 {
                     await UpdateRecipeIngredientsAsync(existingRecipe, recipeDto.Ingredients);
                 }
 
+                await _unitOfWork.Repository<Recipe, Guid>().UpdateAsync(existingRecipe);
                 bool isSaved = await _unitOfWork.SaveAsync();
+
                 if (!isSaved)
                 {
-                    _logger.LogWarning(
-                        "UpdateRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
-                   
+                    _logger.LogWarning("UpdateRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
                     return false;
                 }
 
                 _logger.LogInformation("Recipe with ID {Id} and ingredients updated successfully.", id);
-               
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "An unexpected error occurred while updating recipe ID {Id}.", id);
-               
+                _logger.LogError(ex, "An unexpected error occurred while updating recipe ID {Id}.", id);
                 return false;
             }
         }
+
 
         public async Task<Guid?> GetRecipeIdByNameAsync(string name)
         {
@@ -174,20 +175,37 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public async Task<RecipeDTO?> GetRecipeByIdAsync(Guid id)
+        public async Task<RecipeIngredientDTO?> GetRecipeByIdAsync(Guid id)
         {
             try
             {
                 await CheckExistencyAsync(id);
+
                 var recipeEntity = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
                 var recipeDto = RecipeMapper.ToDto(recipeEntity!);
 
-                return recipeDto;
+                var recipeIngredients = await LoadRecipeIngredientsAsync(id);
+
+                var ingredientAmountDtos = recipeIngredients
+                    .Select(ri => new IngredientAmountDTO(
+                        new IngredientDTO(
+                            ri.Ingredient!.Id,
+                            ri.Ingredient.Name,
+                            ri.Ingredient.IsLiquid
+                        ),
+                        ri.Amount,
+                        ri.Unit
+                    ))
+                    .ToList();
+
+                _logger.LogInformation("Retrieved {Count} ingredients for recipe ID {Id}.",
+                    ingredientAmountDtos.Count, id);
+
+                return new RecipeIngredientDTO(recipeDto, ingredientAmountDtos);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred while retrieving recipe ID {Id}.", id);
-                
                 return null;
             }
         }
@@ -262,6 +280,47 @@ namespace NutritionalRecipeBook.Application.Services
                 
                 return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
             }
+        }
+        
+        private async Task<IEnumerable<RecipeIngredient>> LoadRecipeIngredientsAsync(Guid recipeId)
+        {
+            var recipeIngredients = (await _unitOfWork
+                    .Repository<RecipeIngredient, (Guid, Guid)>()
+                    .GetWhereAsync(ri => ri.RecipeId == recipeId))
+                .ToList();
+
+            if (recipeIngredients.Count == 0)
+            {
+                return recipeIngredients;
+            }
+
+            var ingredientIds = recipeIngredients
+                .Select(ri => ri.IngredientId)
+                .Distinct()
+                .ToList();
+
+            var ingredients = await _unitOfWork
+                .Repository<Ingredient, Guid>()
+                .GetWhereAsync(i => ingredientIds.Contains(i.Id));
+
+            var ingredientById = ingredients.ToDictionary(i => i.Id);
+
+            foreach (var ri in recipeIngredients)
+            {
+                if (ingredientById.TryGetValue(ri.IngredientId, out var ingredient))
+                {
+                    ri.Ingredient = ingredient;
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "LoadRecipeIngredientsAsync: Ingredient with ID {IngredientId} not found for recipe {RecipeId}.",
+                        ri.IngredientId, recipeId);
+                    ri.Ingredient = null;
+                }
+            }
+
+            return recipeIngredients;
         }
 
         private async Task ProcessRecipeIngredientsAsync(Recipe recipeEntity, List<IngredientAmountDTO> ingredientDTOs)
