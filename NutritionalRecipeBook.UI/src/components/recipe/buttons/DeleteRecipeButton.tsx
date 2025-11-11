@@ -29,7 +29,6 @@ export function DeleteRecipeButton({ id }: {id: string}) {
         icon={<DeleteOutlined />}
         loading={isLoading}
       >
-        Delete
       </Button>
     </Popconfirm>
   );

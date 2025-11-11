@@ -10,5 +10,12 @@ const store = configureStore({
   }
 });
 
-export const { useCreateRecipeMutation, useUpdateRecipeMutation, useDeleteRecipeMutation } = recipesApi;
+export const {
+  useCreateRecipeMutation,
+  useUpdateRecipeMutation,
+  useDeleteRecipeMutation,
+  useLazyGetRecipeByIdQuery,
+  useLazyGetRecipesQuery
+} = recipesApi;
+
 export default store;

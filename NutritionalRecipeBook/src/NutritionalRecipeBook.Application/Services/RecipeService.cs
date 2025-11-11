@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
-using NutritionalRecipeBook.Application.Contracts.RecipeControllerDTOs;
+using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 using NutritionalRecipeBook.Application.DTOs;
+using NutritionalRecipeBook.Application.DTOs.Mappers;
 using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Infrastructure.Contracts;
@@ -22,7 +23,7 @@ namespace NutritionalRecipeBook.Application.Services
             _ingredientService = ingredientService;
         }
 
-        public async Task<Guid?> CreateRecipeAsync(RecipeCreateUpdateDTO? recipeDto)
+        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO? recipeDto)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -44,15 +45,7 @@ namespace NutritionalRecipeBook.Application.Services
             {
                 await CheckExistencyAsync(recipeData);
 
-                var recipeEntity = new Recipe
-                {
-                    Name = recipeData.Name.Trim(),
-                    Description = recipeData.Description?.Trim() ?? string.Empty,
-                    Instructions = recipeData.Instructions?.Trim() ?? string.Empty,
-                    CookingTimeInMin = recipeData.CookingTimeInMin,
-                    Servings = recipeData.Servings
-                };
-
+                var recipeEntity = RecipeMapper.ToEntity(recipeData);
                 await _unitOfWork.Repository<Recipe, Guid>().InsertAsync(recipeEntity);
 
                 if (recipeDto.Ingredients.Count > 0)
@@ -82,7 +75,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeCreateUpdateDTO? recipeDto)
+        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO? recipeDto)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -100,14 +93,7 @@ namespace NutritionalRecipeBook.Application.Services
                     
                     return false;
                 }
-
-                var recipeData = recipeDto.RecipeDTO;
-                existingRecipe.Name = recipeData.Name?.Trim() ?? existingRecipe.Name;
-                existingRecipe.Description = recipeData.Description?.Trim() ?? string.Empty;
-                existingRecipe.Instructions = recipeData.Instructions?.Trim() ?? string.Empty;
-                existingRecipe.CookingTimeInMin = recipeData.CookingTimeInMin;
-                existingRecipe.Servings = recipeData.Servings;
-
+                
                 await _unitOfWork.Repository<Recipe, Guid>().UpdateAsync(existingRecipe);
 
                 if (recipeDto.Ingredients.Count > 0)
@@ -185,6 +171,96 @@ namespace NutritionalRecipeBook.Application.Services
                 _logger.LogError(ex, "An unexpected error occurred while deleting recipe ID {Id}.", id);
                 
                 return false;
+            }
+        }
+        
+        public async Task<RecipeDTO?> GetRecipeByIdAsync(Guid id)
+        {
+            try
+            {
+                await CheckExistencyAsync(id);
+                var recipeEntity = await _unitOfWork.Repository<Recipe, Guid>().GetByIdAsync(id);
+                var recipeDto = RecipeMapper.ToDto(recipeEntity!);
+
+                return recipeDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while retrieving recipe ID {Id}.", id);
+                
+                return null;
+            }
+        }
+        
+        public IEnumerable<RecipeDTO> GetAllRecipesAsync()
+        {
+            try
+            {
+                var recipeEntities = _unitOfWork.Repository<Recipe, Guid>().GetAll();
+                var recipeDtos = recipeEntities.Select(recipeEntity => RecipeMapper.ToDto(recipeEntity));
+
+                return recipeDtos;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while retrieving all recipes.");
+                
+                return Enumerable.Empty<RecipeDTO>();
+            }
+        }
+        
+        public PagedResultDTO<RecipeDTO> GetRecipesAsync(int pageNumber, int pageSize, RecipeFilterDTO filterDto = null)
+        {
+            try
+            {
+                var repo = _unitOfWork.Repository<Recipe, Guid>();
+                var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
+                _logger.LogInformation("Building query for recipes with search '{Search}', " +
+                                       "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
+                                       "minServ {MinServ}, maxServ {MaxServ}.",
+                    filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
+                    filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);
+
+                if (!string.IsNullOrWhiteSpace(filterDto.Search))
+                {
+                    var search = filterDto.Search.ToLower();
+
+                    query = query.Where(r =>
+                        r.Name.ToLower().Contains(search) ||
+                        r.Description.ToLower().Contains(search) ||
+                        r.Instructions.ToLower().Contains(search) ||
+                        r.RecipeIngredients.Any(ri => ri.Ingredient.Name.ToLower().Contains(search))
+                    );
+                }
+
+                query = repo.GetWhereIf(query, filterDto.MinCookingTimeInMin.HasValue, r => 
+                    r.CookingTimeInMin >= filterDto.MinCookingTimeInMin!.Value);
+                query = repo.GetWhereIf(query, filterDto.MaxCookingTimeInMin.HasValue, r =>
+                    r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin!.Value);
+                query = repo.GetWhereIf(query, filterDto.MinServings.HasValue, r =>
+                    r.Servings >= filterDto.MinServings!.Value);
+                query = repo.GetWhereIf(query, filterDto.MaxServings.HasValue, r =>
+                    r.Servings <= filterDto.MaxServings!.Value);
+                
+                int totalCount = query.Count();
+
+                var recipes = query
+                    .OrderBy(r => r.Name)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(r => RecipeMapper.ToDto(r))
+                    .ToList();
+                
+                _logger.LogInformation("Retrieved {Count} recipes for page {PageNumber} with page size {PageSize}.",
+                    recipes.Count, pageNumber, pageSize);
+
+                return new PagedResultDTO<RecipeDTO>(recipes, totalCount, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving filtered/paged recipes.");
+                
+                return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
             }
         }
 
@@ -327,6 +403,5 @@ namespace NutritionalRecipeBook.Application.Services
                 throw new KeyNotFoundException($"Recipe with ID '{id}' does not exist.");
             }
         }
-
     }
 }

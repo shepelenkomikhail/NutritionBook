@@ -10,6 +10,7 @@ public interface IRepository<TEntity, TId> where TEntity : class, IBaseEntity<TI
     Task<TEntity?> GetSingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
     Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate);
     IQueryable<TEntity> GetQueryable();
+    IQueryable<TEntity> GetWhereIf(IQueryable<TEntity> source, bool condition, Expression<Func<TEntity, bool>> predicate);
     Task<bool> InsertAsync(TEntity entity);
     Task<bool> UpdateAsync(TEntity entity);
     Task<bool> DeleteAsync(TEntity entity);

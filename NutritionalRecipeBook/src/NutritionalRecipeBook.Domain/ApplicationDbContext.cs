@@ -46,16 +46,39 @@ public class ApplicationDbContext: DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        var users = SeedData.GetUsers();
+        var ingredients = SeedData.GetIngredients();
+        var nutrients = SeedData.GetNutrients();
+        var recipes = SeedData.GetRecipes();
+        var comments = SeedData.GetComments(users, recipes);
+        var shoppingLists = SeedData.GetShoppingLists(users);
+        var recipeIngredients = SeedData.GetRecipeIngredients(recipes, ingredients);
+        var nutrientIngredients = SeedData.GetNutrientIngredients(nutrients, ingredients);
+        var shoppingListIngredients = SeedData.GetShoppingListIngredients(shoppingLists, ingredients);
+        var userRecipes = SeedData.GetUserRecipes(users, recipes);
+
         modelBuilder.ApplyConfiguration(new CommentConfiguration());
         modelBuilder.ApplyConfiguration(new IngredientConfiguration());
         modelBuilder.ApplyConfiguration(new NutrientConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeConfiguration());
         modelBuilder.ApplyConfiguration(new ShoppingListConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
-        
         modelBuilder.ApplyConfiguration(new UserRecipeConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeIngredientConfiguration());
         modelBuilder.ApplyConfiguration(new NutrientIngredientConfiguration());
         modelBuilder.ApplyConfiguration(new ShoppingListIngredientConfiguration());
+
+        modelBuilder.Entity<User>().HasData(users.ToArray());
+        modelBuilder.Entity<Ingredient>().HasData(ingredients.ToArray());
+        modelBuilder.Entity<Nutrient>().HasData(nutrients.ToArray());
+        modelBuilder.Entity<Recipe>().HasData(recipes.ToArray());
+        modelBuilder.Entity<ShoppingList>().HasData(shoppingLists.ToArray());
+
+        modelBuilder.Entity<Comment>().HasData(comments.ToArray());
+
+        modelBuilder.Entity<UserRecipe>().HasData(userRecipes.ToArray());
+        modelBuilder.Entity<RecipeIngredient>().HasData(recipeIngredients.ToArray());
+        modelBuilder.Entity<NutrientIngredient>().HasData(nutrientIngredients.ToArray());
+        modelBuilder.Entity<ShoppingListIngredient>().HasData(shoppingListIngredients.ToArray());
     }
 }

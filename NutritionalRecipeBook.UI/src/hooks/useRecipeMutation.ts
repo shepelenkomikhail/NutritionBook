@@ -7,30 +7,32 @@ export function useRecipeMutation(mode: 'create' | 'update', id?: string) {
   const [updateRecipe, updateState] = useUpdateRecipeMutation();
 
   const execute = async (values: RecipeModel & { id?: string }) => {
-    const ingredientsArray: IngredientModel[] = Array.isArray(values.ingredients)
-      ? values.ingredients
+    const mappedIngredients = Array.isArray(values.ingredients)
+        ? values.ingredients.map((ing: IngredientModel) => ({
+        ingredientDTO: {
+          id: null,
+          name: ing.name.trim(),
+          isLiquid: ing.isLiquid ?? false,
+        },
+        amount: ing.amount,
+        unit: ing.unit.trim(),
+      }))
       : [];
 
-    const mappedIngredients = ingredientsArray.map((ing) => ({
-      ingredientDTO: {
-        name: ing.name.trim(),
-        isLiquid: ing.isLiquid ?? false,
-      },
-      amount: ing.amount,
-      unit: ing.unit.trim(),
-    }));
-
     const payload: RecipePayload = {
-      name: values.name.trim(),
-      description: values.description?.trim(),
-      instructions: values.instructions?.trim(),
-      cookingTimeInMin: values.cookingTimeInMin,
-      servings: values.servings,
-      ingredients: JSON.stringify(mappedIngredients),
+      recipeDTO: {
+        name: values.name.trim(),
+        description: values.description?.trim(),
+        instructions: values.instructions?.trim(),
+        cookingTimeInMin: values.cookingTimeInMin,
+        servings: values.servings,
+      },
+      ingredients: mappedIngredients,
     };
 
     try {
       if (mode === 'create') {
+        console.log('Creating recipe with payload:',payload);
         await createRecipe(payload).unwrap();
         toast('Recipe created successfully!');
       } else if (mode === 'update' && id) {

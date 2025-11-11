@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NutritionalRecipeBook.Api.Models;
 using NutritionalRecipeBook.Application.Contracts;
-using NutritionalRecipeBook.Application.Contracts.RecipeControllerDTOs;
+using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 
 namespace NutritionalRecipeBook.Api.Controllers
 {
@@ -19,7 +20,7 @@ namespace NutritionalRecipeBook.Api.Controllers
 
         // POST: api/recipes
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RecipeCreateUpdateDTO newRecipeUpdateDto)
+        public async Task<IActionResult> Create([FromBody] RecipeIngredientDTO newRecipeUpdateDto)
         {
             Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeUpdateDto);
             if (newRecipeId == null)
@@ -32,7 +33,7 @@ namespace NutritionalRecipeBook.Api.Controllers
 
         // PUT: api/recipes/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeCreateUpdateDTO updatedRecipeDto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeIngredientDTO updatedRecipeDto)
         {
             bool isUpdated = await _recipeService.UpdateRecipeAsync(id, updatedRecipeDto);
             if (!isUpdated)
@@ -54,6 +55,43 @@ namespace NutritionalRecipeBook.Api.Controllers
             }
 
             return Ok("Recipe deleted successfully.");
+        }
+        
+        // GET: api/recipes/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            var recipe = await _recipeService.GetRecipeByIdAsync(id);
+            if (recipe == null)
+            {
+                return BadRequest("Failed to get recipe.");
+            }
+
+            return Ok(recipe);
+        }
+        
+        // GET: api/recipes
+        [HttpGet]
+        public IActionResult Get(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] RecipeFilter? filter = null)
+        {
+            if (pageNumber <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Invalid pagination parameters.");
+            }
+
+            var filterDto = new RecipeFilterDTO(
+                filter?.Search,
+                filter?.MinCookingTimeInMin, 
+                filter?.MaxCookingTimeInMin,
+                filter?.MinServings,
+                filter?.MaxServings
+            );
+            var pagedResult = _recipeService.GetRecipesAsync(pageNumber, pageSize, filterDto);
+            
+            return Ok(pagedResult);
         }
     }
 }
