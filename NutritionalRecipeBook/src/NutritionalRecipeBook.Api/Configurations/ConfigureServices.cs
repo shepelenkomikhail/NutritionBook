@@ -15,6 +15,7 @@ namespace NutritionalRecipeBook.Api.Configurations
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRecipeService, RecipeService>();    
             services.AddScoped<IIngredientService, IngredientService>();
+            services.AddScoped<IUserService, UserService>();
             
             return services;
         }
