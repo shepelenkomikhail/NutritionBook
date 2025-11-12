@@ -6,6 +6,7 @@ import { formContainerLightStyle, lightInputStyle, lightLabelStyle, } from '../.
 import { Button, Form, Input, Layout } from 'antd';
 import Title from 'antd/es/typography/Title';
 import { ThemeContext } from '../../layout/App.tsx';
+import { ThemeToggleButton } from '../shared';
 const { Content  } = Layout;
 
 function Register(){
@@ -35,15 +36,21 @@ function Register(){
         minHeight: '100vh'
       }}
     >
-      <div className={`flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 
-                        rounded-lg bg-gray-800 shadow-md items-center`}
+      <div className={`flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 rounded-lg shadow-md items-center
+                        ${isDark ? 'bg-slate-800' : 'bg-white'}`}
       >
-        <Title level={2}>Registration Form</Title>
+        <ThemeToggleButton />
+        <Title
+          level={2}
+          className={`${isDark ? '!text-gray-100' : '!text-gray-700'}`}
+        >
+          Registration Form
+        </Title>
         <Form
           form={form}
           layout="vertical"
           onFinish={() => handleSubmit(form.getFieldsValue())}
-          className="w-11/12"
+          className="w-11/12 !p-4 rounded-lg"
           style={ !isDark ? formContainerLightStyle : {}}
         >
           <Form.Item

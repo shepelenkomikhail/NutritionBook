@@ -1,17 +1,18 @@
 import 'simplebar-react/dist/simplebar.min.css';
 import SimpleBar from 'simplebar-react';
 import { useContext, useState } from 'react';
-import { PlusOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
-import { FloatButton, Layout, Modal, Spin, Button } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { FloatButton, Layout, Modal, Spin } from 'antd';
 import Title from 'antd/es/typography/Title';
 const { Content, Header } = Layout;
 import { ThemeContext } from '../../layout/App';
-import { useRecipeQuery } from '../../hooks/useRecipeQuery';
+import { useRecipeQuery } from '../../hooks';
 import { RecipeModel } from '@models'
 import { RecipeList, RecipeSearchBar, RecipeForm } from './index.ts';
+import { ThemeToggleButton } from '../shared';
 
 function Recipe() {
-  const { theme, setTheme } = useContext(ThemeContext);
+  const { theme, } = useContext(ThemeContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
@@ -38,9 +39,6 @@ function Recipe() {
     setEditingRecipe(null);
   };
 
-  const handleThemeToggle = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
 
   return (
     <>
@@ -51,19 +49,7 @@ function Recipe() {
           paddingTop: '24px',
         }}
       >
-        <Button
-          icon={
-            theme === 'dark' ? (
-              <SunOutlined style={{ color: 'white', fontSize: '24px' }} />
-            ) : (
-              <MoonOutlined style={{ color: 'white', fontSize: '24px' }} />
-            )
-          }
-          type="primary"
-          className="!absolute !h-12 !w-12"
-          style={{ top: '16px', left: '16px', borderRadius: '50%' }}
-          onClick={() => handleThemeToggle()}
-        />
+        <ThemeToggleButton />
         <Title
           className="mb-0"
           style={{
