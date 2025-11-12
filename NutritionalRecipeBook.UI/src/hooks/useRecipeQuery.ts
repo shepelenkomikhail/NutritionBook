@@ -4,7 +4,7 @@ import { useLazyGetRecipesQuery } from '@api';
 export const useRecipeQuery = () => {
   const [search, setSearch] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(5);
+  const [pageSize] = useState(10);
   const [minCookingTimeInMin, setMinCookingTimeInMin] = useState<number | undefined>(undefined);
   const [maxCookingTimeInMin, setMaxCookingTimeInMin] = useState<number | undefined>(undefined);
   const [minServings, setMinServings] = useState<number | undefined>(undefined);
@@ -17,7 +17,7 @@ export const useRecipeQuery = () => {
       getData({ search, pageNumber, pageSize, minCookingTimeInMin,
         maxCookingTimeInMin, minServings, maxServings,
       });
-    }, 400);
+    }, 200);
 
     return () => clearTimeout(handler);
   }, [search, pageNumber, minCookingTimeInMin,

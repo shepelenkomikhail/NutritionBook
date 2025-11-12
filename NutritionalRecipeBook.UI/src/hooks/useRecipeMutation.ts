@@ -2,15 +2,15 @@ import { useCreateRecipeMutation, useUpdateRecipeMutation } from '@api';
 import type { IngredientModel, RecipeModel, RecipePayload } from '@models';
 import { toast } from '@utils/toast.tsx';
 
-export function useRecipeMutation(mode: 'create' | 'update', id?: string) {
+export function useRecipeMutation() {
   const [createRecipe, createState] = useCreateRecipeMutation();
   const [updateRecipe, updateState] = useUpdateRecipeMutation();
 
-  const execute = async (values: RecipeModel & { id?: string }) => {
+  const execute = async (values: RecipeModel, id?: string, mode?: 'create' | 'update') => {
     const mappedIngredients = Array.isArray(values.ingredients)
         ? values.ingredients.map((ing: IngredientModel) => ({
         ingredientDTO: {
-          id: null,
+          id: id || null,
           name: ing.name.trim(),
           isLiquid: ing.isLiquid ?? false,
         },
@@ -30,13 +30,17 @@ export function useRecipeMutation(mode: 'create' | 'update', id?: string) {
       ingredients: mappedIngredients,
     };
 
+    console.log('EXECUTE')
+    console.log('id - ', id);
+
     try {
-      if (mode === 'create') {
-        console.log('Creating recipe with payload:',payload);
+      if (mode == "create") {
+        console.log('Creating recipe with payload:', payload);
         await createRecipe(payload).unwrap();
         toast('Recipe created successfully!');
-      } else if (mode === 'update' && id) {
-        await updateRecipe({ id, data: payload }).unwrap();
+      } else if (mode == "update" && id) {
+        console.log('Update recipe with id ', id);
+        await updateRecipe({ id: id, data: payload }).unwrap();
         toast('Recipe updated successfully!');
       }
     } catch (error) {
