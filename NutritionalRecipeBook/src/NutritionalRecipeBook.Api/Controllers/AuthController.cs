@@ -20,8 +20,8 @@ public class AuthController: ControllerBase
         _userService = userService;
     }
     
-    // POST: api/auth/register
-    [HttpPost("register")]
+    // POST: api/auth
+    [HttpPost]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
         var newUser = new RegisterUserDTO
@@ -39,6 +39,6 @@ public class AuthController: ControllerBase
             return BadRequest("Failed to register user.");
         }
 
-        return Ok(newUser);
+        return Ok(registeredUser);
     }
 }

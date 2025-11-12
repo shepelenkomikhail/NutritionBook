@@ -16,9 +16,9 @@ public class UserService : IUserService
     private readonly ILogger<UserService> _logger;
     private readonly UserManager<User> _userManager;
     private readonly IConfiguration _configuration;
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     
-    public UserService(ILogger<UserService> logger, RoleManager<IdentityRole> roleManager,
+    public UserService(ILogger<UserService> logger, RoleManager<IdentityRole<Guid>> roleManager,
         UserManager<User> userManager, IConfiguration configuration)
     {
         _logger = logger;
@@ -111,7 +111,7 @@ public class UserService : IUserService
     {
         var roleExists = await _roleManager.RoleExistsAsync("User");
         if (!roleExists)
-            await _roleManager.CreateAsync(new IdentityRole("User"));
+            await _roleManager.CreateAsync(new IdentityRole<Guid>("User"));
 
         var result = _userManager.AddToRoleAsync(newUser, "User");
 
