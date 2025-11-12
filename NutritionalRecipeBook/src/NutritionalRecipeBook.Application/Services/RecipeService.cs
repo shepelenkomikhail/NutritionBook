@@ -93,11 +93,7 @@ namespace NutritionalRecipeBook.Application.Services
                     return false;
                 }
 
-                existingRecipe.Name = recipeDto.RecipeDTO.Name;
-                existingRecipe.Description = recipeDto.RecipeDTO.Description;
-                existingRecipe.Instructions = recipeDto.RecipeDTO.Instructions;
-                existingRecipe.CookingTimeInMin = recipeDto.RecipeDTO.CookingTimeInMin;
-                existingRecipe.Servings = recipeDto.RecipeDTO.Servings;
+                existingRecipe = RecipeMapper.ToEntity(recipeDto.RecipeDTO);
 
                 if (recipeDto.Ingredients.Count > 0)
                 {
