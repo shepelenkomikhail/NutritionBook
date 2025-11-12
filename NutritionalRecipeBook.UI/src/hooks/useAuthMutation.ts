@@ -14,7 +14,7 @@ export function useAuthMutation() {
           localStorage.setItem('token', response.token);
           console.log('JWT stored:', response.token);
         }
-        toast('Recipe created successfully!');
+        toast('Registration is successful!');
     } catch (error) {
       console.error(`Failed to register user:`, error);
       toast(`Failed to register user`);

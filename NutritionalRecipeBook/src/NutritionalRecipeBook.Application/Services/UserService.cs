@@ -2,6 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -17,14 +19,21 @@ public class UserService : IUserService
     private readonly UserManager<User> _userManager;
     private readonly IConfiguration _configuration;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+    private readonly IEmailSender _emailSender;
     
-    public UserService(ILogger<UserService> logger, RoleManager<IdentityRole<Guid>> roleManager,
-        UserManager<User> userManager, IConfiguration configuration)
+    public UserService(
+        ILogger<UserService> logger, 
+        RoleManager<IdentityRole<Guid>> roleManager,
+        UserManager<User> userManager,
+        IConfiguration configuration,
+        IEmailSender emailSender
+        )
     {
         _logger = logger;
         _userManager = userManager;
         _configuration = configuration;
         _roleManager = roleManager;
+        _emailSender = emailSender;
     }
 
     public async Task<ReturnRegisteredUserDTO?> RegisterUserAsync(RegisterUserDTO registerUserDto)
@@ -39,10 +48,39 @@ public class UserService : IUserService
                 Surname = registerUserDto.Surname
             };
             
-            var result = _userManager.CreateAsync(newUser, registerUserDto.Password);
-            if (result.Result.Succeeded)
+            var result = await _userManager.CreateAsync(newUser, registerUserDto.Password);
+            if (result.Succeeded)
             {
                 var token = await GenerateJwtTokenAsync(newUser);
+                
+                bool isRoleAdded = await AssignRole(newUser);
+                if (!isRoleAdded)
+                {
+                    _logger.LogWarning("Failed to assign role to user {UserName}.", newUser.UserName);
+                }
+
+                _logger.LogInformation("User {UserName } created a new account with password.",
+                    newUser.UserName);
+                
+                var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailToken));
+                var confirmationLink = $"{_configuration["App:ClientUrl"]}" +
+                                       $"/confirm-email?userId={newUser.Id}&token={encodedToken}";
+                
+                try
+                {
+                    await _emailSender.SendEmailAsync(
+                        newUser.Email!,
+                        "Confirm your email",
+                        $"<p>Please confirm your account by clicking <a href='{confirmationLink}'>here</a>.</p>"
+                    );
+
+                    _logger.LogInformation("Confirmation email sent to {Email}.", newUser.Email);
+                }
+                catch (Exception emailEx)
+                {
+                    _logger.LogError(emailEx, "Failed to send confirmation email to {Email}.", newUser.Email);
+                }
                 
                 var registeredUserDto = new ReturnRegisteredUserDTO
                 (
@@ -54,20 +92,11 @@ public class UserService : IUserService
                     token
                 );
                 
-                bool isRoleAdded = await AssignRole(newUser);
-                if (!isRoleAdded)
-                {
-                    _logger.LogWarning("Failed to assign role to user {UserName}.", newUser.UserName);
-                }
-
-                _logger.LogInformation("User {UserName } created a new account with password.",
-                    newUser.UserName);
-                
                 return registeredUserDto;
             }
 
             _logger.LogWarning("User registration failed: "
-                               + string.Join(", ", result.Result.Errors.Select(e => e.Description)));
+                               + string.Join(", ", result.Errors.Select(e => e.Description)));
             
             return null;
         }
@@ -105,6 +134,30 @@ public class UserService : IUserService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
+    public async Task<bool> ConfirmEmailAsync(Guid userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            _logger.LogWarning("User with ID {UserId} not found for email confirmation.", userId);
+            
+            return false;
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("Email for user {UserName} confirmed successfully.", user.UserName);
+            
+            return true;
+        }
+
+        _logger.LogWarning("Email confirmation failed for user {UserName}: "
+                           + string.Join(", ", result.Errors.Select(e => e.Description)), user.UserName);
+        
+        return false;
     }
 
     private async Task<bool> AssignRole(User newUser)

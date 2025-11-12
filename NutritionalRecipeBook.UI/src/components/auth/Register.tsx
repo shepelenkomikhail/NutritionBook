@@ -1,19 +1,27 @@
-import { useContext } from 'react';
-import { useAuthMutation } from '../../hooks';
-import type { RegisterModel, RegisterFormModel } from '@models';
+import { useContext, useEffect } from 'react';
+
+
+
 import { EyeInvisibleOutlined, EyeTwoTone, MailOutlined, UserOutlined } from '@ant-design/icons';
-import { formContainerLightStyle, lightInputStyle, lightLabelStyle, } from '../../themes/modelStyles.ts';
+import type { RegisterFormModel, RegisterModel } from '@models';
+
+
+
+import { useAuthMutation } from '../../hooks';
+import { ThemeContext } from '../../layout/App.tsx';
+import { formContainerLightStyle, lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
+import { ThemeToggleButton } from '../shared';
 import { Button, Form, Input, Layout } from 'antd';
 import Title from 'antd/es/typography/Title';
-import { ThemeContext } from '../../layout/App.tsx';
-import { ThemeToggleButton } from '../shared';
+
+
 const { Content  } = Layout;
 
 function Register(){
   const {theme, } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [form] = Form.useForm<RegisterFormModel>();
-  const { execute, isLoading } = useAuthMutation();
+  const { execute, isLoading, isError } = useAuthMutation();
 
   const handleSubmit = async (values: RegisterFormModel) => {
     const registerData: RegisterModel = {
@@ -26,6 +34,12 @@ function Register(){
 
     await execute(registerData);
   };
+
+  useEffect(() => {
+    if (isError) {
+      form.resetFields();
+    }
+  }, [isError, form])
 
   return (
     <Content

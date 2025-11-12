@@ -184,6 +184,9 @@
   }
 }
 @layer utilities {
+  .visible {
+    visibility: visible;
+  }
   .\!absolute {
     position: absolute !important;
   }
@@ -388,6 +391,9 @@
   }
   .text-gray-900 {
     color: var(--color-gray-900);
+  }
+  .uppercase {
+    text-transform: uppercase;
   }
   .shadow-md {
     --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));

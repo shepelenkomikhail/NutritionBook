@@ -5,4 +5,5 @@ namespace NutritionalRecipeBook.Application.Contracts;
 public interface IUserService
 {
     Task<ReturnRegisteredUserDTO?> RegisterUserAsync(RegisterUserDTO registerUserDto);
+    Task<bool> ConfirmEmailAsync(Guid userId, string token);
 }
