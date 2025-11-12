@@ -6,5 +6,6 @@ public record ReturnRegisteredUserDTO
     string Username,
     string Email,
     string Name,
-    string Surname
+    string Surname,
+    string Token
 );

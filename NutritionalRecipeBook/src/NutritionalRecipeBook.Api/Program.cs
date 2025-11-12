@@ -24,6 +24,7 @@ try
     builder.AddServices(config);
     
     builder.Services.AddIdentityConfiguration(config);
+    builder.Services.AddTokenConfiguration(config);
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
