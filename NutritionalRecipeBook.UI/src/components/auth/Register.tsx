@@ -51,12 +51,19 @@ function Register(){
           layout="vertical"
           onFinish={() => handleSubmit(form.getFieldsValue())}
           className="w-11/12 !p-4 rounded-lg"
-          style={ !isDark ? formContainerLightStyle : {}}
+          style={!isDark ? formContainerLightStyle : {}}
         >
           <Form.Item
             name="username"
             label={<span style={isDark ? {} : lightLabelStyle}>Username</span>}
-            rules={[{ required: true, message: 'Please enter the username' }]}
+            rules={[
+              { required: true, message: 'Please enter your username' },
+              {
+                pattern: /^[a-zA-Z0-9_]{3,20}$/,
+                message:
+                  'Username must be 3–20 characters and contain only letters, numbers, or underscores',
+              },
+            ]}
           >
             <Input
               prefix={<UserOutlined className="mr-2" />}
@@ -68,7 +75,10 @@ function Register(){
           <Form.Item
             name="email"
             label={<span style={isDark ? {} : lightLabelStyle}>Email</span>}
-            rules={[{ required: true, message: 'Please enter your email' }]}
+            rules={[
+              { required: true, message: 'Please enter your email' },
+              { type: 'email', message: 'Please enter a valid email address' },
+            ]}
           >
             <Input
               prefix={<MailOutlined className="mr-2" />}
@@ -76,33 +86,46 @@ function Register(){
               style={isDark ? {} : lightInputStyle}
             />
           </Form.Item>
-          <Form.Item
 
+          <Form.Item
             name="name"
             label={<span style={isDark ? {} : lightLabelStyle}>Name</span>}
-            rules={[{ required: true, message: 'Please enter your name' }]}
+            rules={[
+              { required: true, message: 'Please enter your name' },
+              {
+                pattern: /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]{2,50}$/,
+                message: 'Name must be 2–50 letters',
+              },
+            ]}
           >
-            <Input
-              placeholder="e.g. John"
-              style={isDark ? {} : lightInputStyle}
-            />
+            <Input placeholder="e.g. John" style={isDark ? {} : lightInputStyle} />
           </Form.Item>
 
           <Form.Item
             name="surname"
             label={<span style={isDark ? {} : lightLabelStyle}>Surname</span>}
-            rules={[{ required: true, message: 'Please enter your surname' }]}
+            rules={[
+              { required: true, message: 'Please enter your surname' },
+              {
+                pattern: /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]{2,50}$/,
+                message: 'Surname must be 2–50 letters',
+              },
+            ]}
           >
-            <Input
-              placeholder="e.g. Smith"
-              style={isDark ? {} : lightInputStyle}
-            />
+            <Input placeholder="e.g. Smith" style={isDark ? {} : lightInputStyle} />
           </Form.Item>
 
           <Form.Item
             name="password"
             label={<span style={isDark ? {} : lightLabelStyle}>Password</span>}
-            rules={[{ required: true, message: 'Please enter your password' }]}
+            rules={[
+              { required: true, message: 'Please enter your password' },
+              {
+                pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`]).{8,}$/,
+                message:
+                  'Password must be at least 8 characters long and include one uppercase letter, one number, and one special character',
+              },
+            ]}
           >
             <Input.Password
               placeholder="e.g. StrongPassword123!"
@@ -133,17 +156,18 @@ function Register(){
               placeholder="e.g. StrongPassword123!"
               style={isDark ? {} : lightInputStyle}
               iconRender={(visible) =>
-                (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
             />
           </Form.Item>
 
-          <Form.Item className={"flex justify-center"}>
+          <Form.Item className="flex justify-center">
             <Button
               type="primary"
               htmlType="submit"
               block
               loading={isLoading}
-              className={"!w-[12rem] mt-4"}
+              className="!w-[12rem] mt-4"
             >
               {isLoading ? 'Registering...' : 'Register'}
             </Button>
