@@ -10,22 +10,31 @@ namespace NutritionalRecipeBook.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+
 public class AuthController: ControllerBase
 {
     private readonly ILogger<AuthController> _logger;
     private readonly IUserService _userService;
-    
     public AuthController(ILogger<AuthController> logger, IUserService userService)
     {
         _logger = logger;
         _userService = userService;
     }
     
-    // POST: api/auth
-    [HttpPost]
-    public async Task<IActionResult> Register([FromBody] RegisterUserDTO newUserDTO)
+    // POST: api/auth/register
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
-        var registeredUser = await _userService.RegisterUserAsync(newUserDTO);
+        var newUser = new RegisterUserDTO
+        (
+            model.UserName,
+            model.Password,
+            model.Email,
+            model.Name,
+            model.Surname
+        );
+        
+        var registeredUser = await _userService.RegisterUserAsync(newUser);
         if (registeredUser == null)
         {
             return BadRequest("Failed to register user.");
@@ -34,8 +43,27 @@ public class AuthController: ControllerBase
         return Ok(registeredUser);
     }
     
-    // PATCH: /api/users/{userId}/email-confirmation
-    [HttpPatch("users/{userId}/email-confirmation")]
+    // POST: api/auth/login
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    {
+        var loginUser = new LoginUserDTO
+        (
+            model.UserName,
+            model.Password
+        );
+        
+        var userCredentials = await _userService.LoginUserAsync(loginUser);
+        if (userCredentials.Token == null)
+        {
+            return Unauthorized("Invalid username or password.");
+        }
+
+        return Ok(userCredentials);
+    }
+    
+    // GET: api/auth/confirm-email
+    [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail(Guid userId, string token)
     {
         var result = await _userService.ConfirmEmailAsync(userId, token);

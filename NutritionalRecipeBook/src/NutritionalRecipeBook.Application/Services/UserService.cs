@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.AuthControllerDTOs;
-using NutritionalRecipeBook.Application.DTOs.Mappers;
 using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Application.Services;
@@ -21,15 +20,13 @@ public class UserService : IUserService
     private readonly IConfiguration _configuration;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly IEmailSender _emailSender;
-    private readonly IJWTService _jwtService;
     
     public UserService(
         ILogger<UserService> logger, 
         RoleManager<IdentityRole<Guid>> roleManager,
         UserManager<User> userManager,
         IConfiguration configuration,
-        IEmailSender emailSender,
-        IJWTService jwtService
+        IEmailSender emailSender
         )
     {
         _logger = logger;
@@ -37,23 +34,24 @@ public class UserService : IUserService
         _configuration = configuration;
         _roleManager = roleManager;
         _emailSender = emailSender;
-        _jwtService = jwtService;
     }
 
     public async Task<ReturnRegisteredUserDTO?> RegisterUserAsync(RegisterUserDTO registerUserDto)
     {
         try
         {
-            var newUser = UserMapper.RegisterDtoToEntity(registerUserDto);
+            var newUser = new User
+            {
+                UserName = registerUserDto.Username,
+                Email = registerUserDto.Email,
+                Name = registerUserDto.Name,
+                Surname = registerUserDto.Surname
+            };
             
             var result = await _userManager.CreateAsync(newUser, registerUserDto.Password);
             if (result.Succeeded)
             {
-                var token = await _jwtService.GenerateJwtTokenAsync(
-                        newUser,
-                        _configuration,
-                        _userManager
-                    );
+                var token = await GenerateJwtTokenAsync(newUser);
                 
                 bool isRoleAdded = await AssignRole(newUser);
                 if (!isRoleAdded)
@@ -109,7 +107,33 @@ public class UserService : IUserService
              return null;
         }
     }
-    
+    public async Task<ReturnLoggedUserDTO> LoginUserAsync(LoginUserDTO loginUserDto)
+    {
+        var user = await _userManager.FindByNameAsync(loginUserDto.UserName);
+        if (user == null)
+        {
+            _logger.LogWarning("Login failed: User {UserName} not found.", 
+                loginUserDto.UserName);
+            
+            return new ReturnLoggedUserDTO(loginUserDto.UserName, null);
+        }
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, 
+            loginUserDto.Password);
+        if (!passwordValid)
+        {
+            _logger.LogWarning("Login failed: Invalid password for user {UserName}.", 
+                loginUserDto.UserName);
+            
+            return new ReturnLoggedUserDTO(loginUserDto.UserName, null);
+        }
+
+        var token = await GenerateJwtTokenAsync(user);
+        _logger.LogInformation("User {UserName} logged in successfully.", 
+            loginUserDto.UserName);
+
+        return new ReturnLoggedUserDTO(loginUserDto.UserName, token);
+    }
     public async Task<bool> ConfirmEmailAsync(Guid userId, string token)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -133,7 +157,33 @@ public class UserService : IUserService
         
         return false;
     }
+    private async Task<string> GenerateJwtTokenAsync(User user)
+    {
+        var jwtSettings = _configuration.GetSection("Jwt");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Email!),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName!)
+        };
+
+        var roles = await _userManager.GetRolesAsync(user);
+        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+
+        var token = new JwtSecurityToken(
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpireMinutes"])),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
     private async Task<bool> AssignRole(User newUser)
     {
         var roleExists = await _roleManager.RoleExistsAsync("User");
