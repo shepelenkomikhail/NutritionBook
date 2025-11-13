@@ -18,6 +18,7 @@ namespace NutritionalRecipeBook.Api.Configurations
             services.AddScoped<IIngredientService, IngredientService>();
             services.AddScoped<IUserService, UserService>();
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IJWTService, JWTService>();
             
             return services;
         }

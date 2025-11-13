@@ -29,6 +29,10 @@ function Register(){
     await execute(registerData);
   };
 
+  const handleRedirect = () => {
+    window.location.href = '/login';
+  }
+
   useEffect(() => {
     if (isError) {
       form.resetFields();
@@ -179,6 +183,10 @@ function Register(){
             >
               {isLoading ? 'Registering...' : 'Register'}
             </Button>
+          </Form.Item>
+
+          <Form.Item className="flex justify-center">
+            <a onClick={handleRedirect} className={"self-center"}>Login</a>
           </Form.Item>
         </Form>
       </div>

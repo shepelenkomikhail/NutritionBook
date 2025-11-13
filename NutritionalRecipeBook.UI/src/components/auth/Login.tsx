@@ -6,7 +6,7 @@ import { useAuthMutation } from '../../hooks';
 import { ThemeToggleButton } from '../shared';
 import Title from 'antd/es/typography/Title';
 import { formContainerLightStyle, lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
-import { EyeInvisibleOutlined, EyeTwoTone, UserOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 const { Content  } = Layout;
 
 function Login(){
@@ -23,6 +23,10 @@ function Login(){
 
     await execute(loginData);
   };
+
+  const handleRedirect = () => {
+    window.location.href = '/register';
+  }
 
   useEffect(() => {
     if (isError) {
@@ -47,7 +51,7 @@ function Login(){
           level={2}
           className={`${isDark ? '!text-gray-100' : '!text-gray-700'}`}
         >
-          Registration Form
+          Login Form
         </Title>
         <Form
           form={form}
@@ -89,8 +93,7 @@ function Login(){
             ]}
           >
             <Input.Password
-              prefix={<EyeTwoTone className="mr-2" />}
-              iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+
               placeholder="e.g. StrongPassword123!"
               style={isDark ? {} : lightInputStyle}
             />
@@ -105,8 +108,12 @@ function Login(){
               loading={isLoading}
               className="!w-[12rem] mt-4"
             >
-              {isLoading ? 'Registering...' : 'Register'}
+              {isLoading ? 'Login...' : 'Login'}
             </Button>
+          </Form.Item>
+
+          <Form.Item className="flex justify-center">
+            <a onClick={handleRedirect} className={"self-center"}>Register</a>
           </Form.Item>
         </Form>
       </div>

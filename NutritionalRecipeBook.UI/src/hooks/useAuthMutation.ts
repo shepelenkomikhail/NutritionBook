@@ -8,21 +8,15 @@ export function useAuthMutation(mode: 'register' | 'login') {
 
   const execute = async (payload: RegisterModel | LoginFormModel) => {
     try {
-      let response;
         if(mode === 'register') {
           console.log('Registering user with payload:', payload);
-          response = await registerUser(payload).unwrap();
+          await registerUser(payload).unwrap();
 
-          toast('Registration is successful!');
         } else if (mode === 'login') {
           console.log('Login user with payload:', payload);
-          response = await loginUser(payload).unwrap();
+          await loginUser(payload).unwrap();
         }
 
-      if (response?.token) {
-        localStorage.setItem('token', response.token);
-        console.log('JWT stored:', response.token);
-      }
       toast(`${mode} is successful!`);
     } catch (error) {
       console.error(`Failed to ${mode} user:`, error);
