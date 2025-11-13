@@ -13,24 +13,24 @@ public class EmailSender : IEmailSender
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        var host = _config["Smtp:Host"];
-        var port = _config["Smtp:Port"];
-        var pass = _config["Smtp:Pass"];
-        var user = _config["Smtp:User"];
-        var fromEmail = _config["Smtp:FromEmail"];
-        var displayName = _config["Smtp:DisplayName"];
+        var host = "Smtp:Host";
+        var port = "Smtp:Port";
+        var pass = "Smtp:Pass";
+        var user = "Smtp:User";
+        var fromEmail = "Smtp:FromEmail";
+        var displayName = "Smtp:DisplayName";
         
-        var smtpClient = new SmtpClient(host)
+        var smtpClient = new SmtpClient(_config[host]!)
         {
-            Port = int.Parse(port!),
+            Port = int.Parse(_config[port]!),
             UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(user, pass),
+            Credentials = new NetworkCredential(_config[user]!, _config[pass]!),
             EnableSsl = true,
         };
 
         var mailMessage = new MailMessage
         {
-            From = new MailAddress(fromEmail!, displayName!),
+            From = new MailAddress(_config[fromEmail]!, _config[displayName]!),
             Subject = subject,
             Body = htmlMessage,
             IsBodyHtml = true,
