@@ -1,9 +1,21 @@
-import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, InputNumber, Space } from 'antd';
-import type { RecipeModel } from '@models';
-import { useRecipeMutation } from '../../hooks';
 import { useContext, useEffect } from 'react';
+
+
+
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import type { RecipeModel } from '@models';
+
+
+
+import { useRecipeMutation } from '../../hooks';
 import { ThemeContext } from '../../layout/App.tsx';
+import {
+  formContainerLightStyle,
+  lightInputStyle,
+  lightLabelStyle,
+} from '../../themes/modelStyles.ts';
+import { Button, Checkbox, Form, Input, InputNumber, Space } from 'antd';
+
 
 interface RecipeFormProps {
   id?: string | null;
@@ -34,15 +46,7 @@ function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeF
     onSubmit();
   }
 
-  const lightInputStyle = {
-    backgroundColor: 'rgb(249 250 251)',
-    color: 'rgb(17 24 39)',
-    borderColor: 'rgb(209 213 219)',
-  };
 
-  const lightLabelStyle = {
-    color: 'rgb(55 65 81)',
-  };
 
   return (
     <Form
@@ -51,10 +55,7 @@ function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeF
       onFinish={() => handleSubmit(form.getFieldsValue(), id!)}
       initialValues={initialValues}
       className="w-11/12"
-      style={{
-        color: isDark ? undefined : 'rgb(31 41 55)',
-        backgroundColor: isDark ? undefined : 'whitesmoke',
-      }}
+      style={ !isDark ? formContainerLightStyle : {}}
     >
       <Form.Item
         name="name"

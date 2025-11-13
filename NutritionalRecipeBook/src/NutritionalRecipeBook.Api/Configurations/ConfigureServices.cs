@@ -1,4 +1,5 @@
-﻿using NutritionalRecipeBook.Application.Contracts;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.Services;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Infrastructure.Repositories;
@@ -15,6 +16,8 @@ namespace NutritionalRecipeBook.Api.Configurations
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRecipeService, RecipeService>();    
             services.AddScoped<IIngredientService, IngredientService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddTransient<IEmailSender, EmailSender>();
             
             return services;
         }

@@ -2,3 +2,6 @@ export * from './RecipeModel';
 export * from './IngredientModel';
 export * from './RecipePayload';
 export * from './ThemeModel';
+export * from './RegisterModel';
+export * from './RegisterFormModel';
+export * from './RegisterResponseModel';

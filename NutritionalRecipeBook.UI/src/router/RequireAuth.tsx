@@ -1,14 +1,10 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 export function RequireAuth() {
-  // const {
-  //   dummyAuthStore: { isLoggedIn },
-  // } = useStore();
-
-  const isLoggedIn = true;
+  const token = localStorage.getItem('token');
   const location = useLocation();
 
-  if (!isLoggedIn) {
+  if (!token) {
     return <Navigate to="/" state={{ from: location }} />;
   }
 

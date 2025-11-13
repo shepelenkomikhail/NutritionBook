@@ -1,0 +1,195 @@
+import { useContext, useEffect } from 'react';
+
+
+
+import { EyeInvisibleOutlined, EyeTwoTone, MailOutlined, UserOutlined } from '@ant-design/icons';
+import type { RegisterFormModel, RegisterModel } from '@models';
+
+
+
+import { useAuthMutation } from '../../hooks';
+import { ThemeContext } from '../../layout/App.tsx';
+import { formContainerLightStyle, lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
+import { ThemeToggleButton } from '../shared';
+import { Button, Form, Input, Layout } from 'antd';
+import Title from 'antd/es/typography/Title';
+
+
+const { Content  } = Layout;
+
+function Register(){
+  const {theme, } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+  const [form] = Form.useForm<RegisterFormModel>();
+  const { execute, isLoading, isError } = useAuthMutation();
+
+  const handleSubmit = async (values: RegisterFormModel) => {
+    const registerData: RegisterModel = {
+      username: values.username,
+      password: values.password,
+      email: values.email,
+      name: values.name,
+      surname: values.surname,
+    };
+
+    await execute(registerData);
+  };
+
+  useEffect(() => {
+    if (isError) {
+      form.resetFields();
+    }
+  }, [isError, form])
+
+  return (
+    <Content
+      className={`flex flex-col p-6 transition-all duration-300 items-center justify-center
+        ${isDark ? 'bg-slate-900 text-gray-100' : 'text-gray-800'}`}
+      style={{
+        backgroundColor: isDark ? undefined : '#f9f5f0',
+        minHeight: '100vh'
+      }}
+    >
+      <div className={`flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 rounded-lg shadow-md items-center
+                        ${isDark ? 'bg-slate-800' : 'bg-white'}`}
+      >
+        <ThemeToggleButton />
+        <Title
+          level={2}
+          className={`${isDark ? '!text-gray-100' : '!text-gray-700'}`}
+        >
+          Registration Form
+        </Title>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={() => handleSubmit(form.getFieldsValue())}
+          className="w-11/12 !p-4 rounded-lg"
+          style={!isDark ? formContainerLightStyle : {}}
+        >
+          <Form.Item
+            name="username"
+            label={<span style={isDark ? {} : lightLabelStyle}>Username</span>}
+            rules={[
+              { required: true, message: 'Please enter your username' },
+              {
+                pattern: /^[a-zA-Z0-9_]{3,20}$/,
+                message:
+                  'Username must be 3–20 characters and contain only letters, numbers, or underscores',
+              },
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined className="mr-2" />}
+              placeholder="e.g. JohnSmith"
+              style={isDark ? {} : lightInputStyle}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="email"
+            label={<span style={isDark ? {} : lightLabelStyle}>Email</span>}
+            rules={[
+              { required: true, message: 'Please enter your email' },
+              { type: 'email', message: 'Please enter a valid email address' },
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined className="mr-2" />}
+              placeholder="e.g. johnsmith@nixs.com"
+              style={isDark ? {} : lightInputStyle}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="name"
+            label={<span style={isDark ? {} : lightLabelStyle}>Name</span>}
+            rules={[
+              { required: true, message: 'Please enter your name' },
+              {
+                pattern: /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]{2,50}$/,
+                message: 'Name must be 2–50 letters',
+              },
+            ]}
+          >
+            <Input placeholder="e.g. John" style={isDark ? {} : lightInputStyle} />
+          </Form.Item>
+
+          <Form.Item
+            name="surname"
+            label={<span style={isDark ? {} : lightLabelStyle}>Surname</span>}
+            rules={[
+              { required: true, message: 'Please enter your surname' },
+              {
+                pattern: /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]{2,50}$/,
+                message: 'Surname must be 2–50 letters',
+              },
+            ]}
+          >
+            <Input placeholder="e.g. Smith" style={isDark ? {} : lightInputStyle} />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            label={<span style={isDark ? {} : lightLabelStyle}>Password</span>}
+            rules={[
+              { required: true, message: 'Please enter your password' },
+              {
+                pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`]).{8,}$/,
+                message:
+                  'Password must be at least 8 characters long and include one uppercase letter, one number, and one special character',
+              },
+            ]}
+          >
+            <Input.Password
+              placeholder="e.g. StrongPassword123!"
+              style={isDark ? {} : lightInputStyle}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="repeatPassword"
+            label={<span style={isDark ? {} : lightLabelStyle}>Repeat Password</span>}
+            dependencies={['password']}
+            hasFeedback
+            rules={[
+              { required: true, message: 'Please confirm your password' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error('Passwords do not match')
+                  );
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              placeholder="e.g. StrongPassword123!"
+              style={isDark ? {} : lightInputStyle}
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+            />
+          </Form.Item>
+
+          <Form.Item className="flex justify-center">
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={isLoading}
+              className="!w-[12rem] mt-4"
+            >
+              {isLoading ? 'Registering...' : 'Register'}
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+    </Content>
+  );
+}
+
+export default Register;

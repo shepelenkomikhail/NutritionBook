@@ -12,7 +12,9 @@ public static class SeedData
             users.Add(new User
             {
                 Id = Guid.Parse($"00000000-0000-0000-0000-0000000000{i:D2}"),
-                UserName = $"User{i}"
+                UserName = $"UserName{i}",
+                Name = $"Name{i}",
+                Surname = $"Surname{i}",
             });
         }
         return users;
