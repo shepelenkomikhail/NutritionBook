@@ -1,12 +1,6 @@
 import { useContext, useEffect } from 'react';
-
-
-
 import { EyeInvisibleOutlined, EyeTwoTone, MailOutlined, UserOutlined } from '@ant-design/icons';
 import type { RegisterFormModel, RegisterModel } from '@models';
-
-
-
 import { useAuthMutation } from '../../hooks';
 import { ThemeContext } from '../../layout/App.tsx';
 import { formContainerLightStyle, lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
@@ -21,7 +15,7 @@ function Register(){
   const {theme, } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [form] = Form.useForm<RegisterFormModel>();
-  const { execute, isLoading, isError } = useAuthMutation();
+  const { execute, isLoading, isError } = useAuthMutation("register");
 
   const handleSubmit = async (values: RegisterFormModel) => {
     const registerData: RegisterModel = {

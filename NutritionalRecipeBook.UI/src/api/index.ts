@@ -20,6 +20,6 @@ export const {
   useLazyGetRecipesQuery
 } = recipesApi;
 
-export const { useRegisterMutation } = authApi;
+export const { useRegisterMutation, useLoginMutation } = authApi;
 
 export default store;
