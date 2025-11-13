@@ -8,21 +8,29 @@ namespace NutritionalRecipeBook.Application.Services;
 public class EmailSender : IEmailSender
 {
     private readonly IConfiguration _config;
+    
     public EmailSender(IConfiguration config) => _config = config;
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        var smtpClient = new SmtpClient(_config["Smtp:Host"])
+        var host = _config["Smtp:Host"];
+        var port = _config["Smtp:Port"];
+        var pass = _config["Smtp:Pass"];
+        var user = _config["Smtp:User"];
+        var fromEmail = _config["Smtp:FromEmail"];
+        var displayName = _config["Smtp:DisplayName"];
+        
+        var smtpClient = new SmtpClient(host)
         {
-            Port = int.Parse(_config["Smtp:Port"]!),
+            Port = int.Parse(port!),
             UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(_config["Smtp:User"], _config["Smtp:Pass"]),
+            Credentials = new NetworkCredential(user, pass),
             EnableSsl = true,
         };
 
         var mailMessage = new MailMessage
         {
-            From = new MailAddress(_config["Smtp:FromEmail"], _config["Smtp:DisplayName"]),
+            From = new MailAddress(fromEmail!, displayName!),
             Subject = subject,
             Body = htmlMessage,
             IsBodyHtml = true,
