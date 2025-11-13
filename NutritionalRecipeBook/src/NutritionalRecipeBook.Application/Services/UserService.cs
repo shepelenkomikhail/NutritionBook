@@ -107,7 +107,56 @@ public class UserService : IUserService
              return null;
         }
     }
-    
+    public async Task<ReturnLoggedUserDTO> LoginUserAsync(LoginUserDTO loginUserDto)
+    {
+        var user = await _userManager.FindByNameAsync(loginUserDto.UserName);
+        if (user == null)
+        {
+            _logger.LogWarning("Login failed: User {UserName} not found.", 
+                loginUserDto.UserName);
+            
+            return new ReturnLoggedUserDTO(loginUserDto.UserName, null);
+        }
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, 
+            loginUserDto.Password);
+        if (!passwordValid)
+        {
+            _logger.LogWarning("Login failed: Invalid password for user {UserName}.", 
+                loginUserDto.UserName);
+            
+            return new ReturnLoggedUserDTO(loginUserDto.UserName, null);
+        }
+
+        var token = await GenerateJwtTokenAsync(user);
+        _logger.LogInformation("User {UserName} logged in successfully.", 
+            loginUserDto.UserName);
+
+        return new ReturnLoggedUserDTO(loginUserDto.UserName, token);
+    }
+    public async Task<bool> ConfirmEmailAsync(Guid userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            _logger.LogWarning("User with ID {UserId} not found for email confirmation.", userId);
+            
+            return false;
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("Email for user {UserName} confirmed successfully.", user.UserName);
+            
+            return true;
+        }
+
+        _logger.LogWarning("Email confirmation failed for user {UserName}: "
+                           + string.Join(", ", result.Errors.Select(e => e.Description)), user.UserName);
+        
+        return false;
+    }
     private async Task<string> GenerateJwtTokenAsync(User user)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
@@ -135,31 +184,6 @@ public class UserService : IUserService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-    
-    public async Task<bool> ConfirmEmailAsync(Guid userId, string token)
-    {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
-        if (user == null)
-        {
-            _logger.LogWarning("User with ID {UserId} not found for email confirmation.", userId);
-            
-            return false;
-        }
-
-        var result = await _userManager.ConfirmEmailAsync(user, token);
-        if (result.Succeeded)
-        {
-            _logger.LogInformation("Email for user {UserName} confirmed successfully.", user.UserName);
-            
-            return true;
-        }
-
-        _logger.LogWarning("Email confirmation failed for user {UserName}: "
-                           + string.Join(", ", result.Errors.Select(e => e.Description)), user.UserName);
-        
-        return false;
-    }
-
     private async Task<bool> AssignRole(User newUser)
     {
         var roleExists = await _roleManager.RoleExistsAsync("User");

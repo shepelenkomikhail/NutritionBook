@@ -21,8 +21,8 @@ public class AuthController: ControllerBase
         _userService = userService;
     }
     
-    // POST: api/auth
-    [HttpPost]
+    // POST: api/auth/register
+    [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
         var newUser = new RegisterUserDTO
@@ -41,6 +41,25 @@ public class AuthController: ControllerBase
         }
 
         return Ok(registeredUser);
+    }
+    
+    // POST: api/auth/login
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    {
+        var loginUser = new LoginUserDTO
+        (
+            model.UserName,
+            model.Password
+        );
+        
+        var userCredentials = await _userService.LoginUserAsync(loginUser);
+        if (userCredentials.Token == null)
+        {
+            return Unauthorized("Invalid username or password.");
+        }
+
+        return Ok(userCredentials);
     }
     
     // GET: api/auth/confirm-email

@@ -6,4 +6,5 @@ public interface IUserService
 {
     Task<ReturnRegisteredUserDTO?> RegisterUserAsync(RegisterUserDTO registerUserDto);
     Task<bool> ConfirmEmailAsync(Guid userId, string token);
+    Task<ReturnLoggedUserDTO> LoginUserAsync(LoginUserDTO loginUserDto);
 }
