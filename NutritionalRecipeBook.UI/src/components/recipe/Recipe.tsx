@@ -1,8 +1,8 @@
 import 'simplebar-react/dist/simplebar.min.css';
 import SimpleBar from 'simplebar-react';
 import { useContext, useState } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
-import { FloatButton, Layout, Modal, Spin } from 'antd';
+import { PlusOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Button, FloatButton, Layout, Modal, Spin } from 'antd';
 import Title from 'antd/es/typography/Title';
 const { Content, Header } = Layout;
 import { ThemeContext } from '../../layout/App';
@@ -10,12 +10,23 @@ import { useRecipeQuery } from '../../hooks';
 import { RecipeModel } from '@models'
 import { RecipeList, RecipeSearchBar, RecipeForm } from './index.ts';
 import { ThemeToggleButton } from '../shared';
+import { RootState } from '@api';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../api/slices/authSlice.ts';
 
 function Recipe() {
   const { theme, } = useContext(ThemeContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
+  const { username } = useSelector((state: RootState) => state.auth);
+
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    window.location.reload();
+  };
 
   const handleOpen = () => setIsModalOpen(true);
   const handleCancel = () => {
@@ -39,7 +50,6 @@ function Recipe() {
     setEditingRecipe(null);
   };
 
-
   return (
     <>
       <Header className={`flex items-center justify-center w-full relative`}
@@ -58,6 +68,20 @@ function Recipe() {
         >
           Recipes
         </Title>
+        <div className="!absolute !right-8 top-4 flex items-center gap-3">
+          <Title level={5} className="!mb-0">
+            Hello, {username || 'Guest'}!
+          </Title>
+          <Button
+            type="primary"
+            icon={<LogoutOutlined />}
+            danger
+            size="small"
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </div>
       </Header>
 
       <Content

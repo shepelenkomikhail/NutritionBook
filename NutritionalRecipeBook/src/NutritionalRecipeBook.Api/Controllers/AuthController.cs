@@ -1,10 +1,7 @@
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
 using NutritionalRecipeBook.Api.Models;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.AuthControllerDTOs;
-using NutritionalRecipeBook.Application.Services;
 
 namespace NutritionalRecipeBook.Api.Controllers;
 
@@ -32,6 +29,22 @@ public class AuthController: ControllerBase
         }
 
         return Ok(registeredUser);
+    }
+    
+    // POST: api/auth/login
+    [HttpPost("login")]    
+    public async Task<IActionResult> Login([FromBody] LoginModel model)     
+    {
+        var loginUser = new LoginUserDTO(model.UserName, model.Password);    
+        
+        var userCredentials = await _userService.LoginUserAsync(loginUser);         
+        
+        if (userCredentials.Token == null)         
+        {
+            return Unauthorized("Invalid username or password.");
+        }          
+        
+        return Ok(userCredentials);
     }
     
     // PATCH: /api/users/{userId}/email-confirmation

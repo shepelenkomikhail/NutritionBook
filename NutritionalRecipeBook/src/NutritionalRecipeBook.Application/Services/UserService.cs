@@ -1,15 +1,11 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.AuthControllerDTOs;
-using NutritionalRecipeBook.Application.DTOs.Mappers;
 using NutritionalRecipeBook.Domain.Entities;
 
 namespace NutritionalRecipeBook.Application.Services;
@@ -44,15 +40,21 @@ public class UserService : IUserService
     {
         try
         {
-            var newUser = UserMapper.RegisterDtoToEntity(registerUserDto);
+            var newUser = new User
+            {
+                UserName = registerUserDto.Username,
+                Email = registerUserDto.Email,
+                Name = registerUserDto.Name,
+                Surname = registerUserDto.Surname
+            };
             
             var result = await _userManager.CreateAsync(newUser, registerUserDto.Password);
             if (result.Succeeded)
             {
                 var token = await _jwtService.GenerateJwtTokenAsync(
-                        newUser,
-                        _configuration,
-                        _userManager
+                    newUser,
+                    _configuration,
+                    _userManager
                     );
                 
                 bool isRoleAdded = await AssignRole(newUser);
@@ -109,7 +111,37 @@ public class UserService : IUserService
              return null;
         }
     }
-    
+    public async Task<ReturnLoggedUserDTO> LoginUserAsync(LoginUserDTO loginUserDto)
+    {
+        var user = await _userManager.FindByNameAsync(loginUserDto.UserName);
+        if (user == null)
+        {
+            _logger.LogWarning("Login failed: User {UserName} not found.", 
+                loginUserDto.UserName);
+            
+            return new ReturnLoggedUserDTO(loginUserDto.UserName, null);
+        }
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, 
+            loginUserDto.Password);
+        if (!passwordValid)
+        {
+            _logger.LogWarning("Login failed: Invalid password for user {UserName}.", 
+                loginUserDto.UserName);
+            
+            return new ReturnLoggedUserDTO(loginUserDto.UserName, null);
+        }
+
+        var token = await _jwtService.GenerateJwtTokenAsync(
+            user,
+            _configuration,
+            _userManager
+            );
+        _logger.LogInformation("User {UserName} logged in successfully.", 
+            loginUserDto.UserName);
+
+        return new ReturnLoggedUserDTO(loginUserDto.UserName, token);
+    }
     public async Task<bool> ConfirmEmailAsync(Guid userId, string token)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -133,7 +165,7 @@ public class UserService : IUserService
         
         return false;
     }
-
+    
     private async Task<bool> AssignRole(User newUser)
     {
         var roleExists = await _roleManager.RoleExistsAsync("User");
