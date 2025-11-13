@@ -1,28 +1,37 @@
-import { useRegisterMutation } from '@api';
-import type { RegisterModel, } from '@models';
+import { useRegisterMutation, useLoginMutation } from '@api';
+import type { RegisterModel, LoginFormModel } from '@models';
 import { toast } from '@utils/toast.tsx';
 
-export function useAuthMutation() {
+export function useAuthMutation(mode: 'register' | 'login') {
   const [registerUser, registerUserState] = useRegisterMutation();
+  const [loginUser, loginUserState] = useLoginMutation();
 
-  const execute = async (payload: RegisterModel) => {
+  const execute = async (payload: RegisterModel | LoginFormModel) => {
     try {
-        console.log('Registering user with payload:', payload);
-        const response = await registerUser(payload).unwrap();
+      let response;
+        if(mode === 'register') {
+          console.log('Registering user with payload:', payload);
+          response = await registerUser(payload).unwrap();
 
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-          console.log('JWT stored:', response.token);
+          toast('Registration is successful!');
+        } else if (mode === 'login') {
+          console.log('Login user with payload:', payload);
+          response = await loginUser(payload).unwrap();
         }
-        toast('Registration is successful!');
+
+      if (response?.token) {
+        localStorage.setItem('token', response.token);
+        console.log('JWT stored:', response.token);
+      }
+      toast(`${mode} is successful!`);
     } catch (error) {
-      console.error(`Failed to register user:`, error);
-      toast(`Failed to register user`);
+      console.error(`Failed to ${mode} user:`, error);
+      toast(`Failed to ${mode} user`);
     }
   };
 
-  const isLoading = registerUserState.isLoading || registerUserState.isLoading;
-  const isError = registerUserState.isError || registerUserState.isError;
+  const isLoading = registerUserState.isLoading || loginUserState.isLoading;
+  const isError = registerUserState.isError || loginUserState.isError;
 
   return { execute, isLoading, isError };
 }

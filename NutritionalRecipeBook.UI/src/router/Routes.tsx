@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
-import { ConfirmEmail, Home, Recipe, Register } from '@components';
+import { ConfirmEmail, Home, Recipe, Register, Login } from '@components';
 import { App } from '@layout';
 import { RedirectIfAuthenticated, RequireAuth } from '@router';
 import Title from 'antd/es/typography/Title';
@@ -15,6 +15,7 @@ export const routes: RouteObject[] = [
         children: [
           { path: '/', element: <Home /> },
           { path: '/register', element: <Register /> },
+          { path: '/login', element: <Login /> },
           { path: '/confirm-email', element: <ConfirmEmail /> },
         ],
       },
