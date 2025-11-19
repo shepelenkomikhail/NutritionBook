@@ -39,7 +39,7 @@ function Register() {
       <div className="flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 ds-card shadow-md items-center">
         <ThemeToggleButton />
         <Title level={2} className="!text-[var(--fg)]">
-          Registration Form
+          Registration
         </Title>
         <Form
           form={form}
@@ -108,8 +108,15 @@ function Register() {
               { required: true, message: 'Please enter your password' },
               {
                 pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`]).{8,}$/,
-                message:
-                  'Password must be at least 8 characters long and include one uppercase letter, one number, and one special character',
+                message: (
+                  <>
+                    Password must follow the rules:<br/>
+                    - at least 8 characters long<br/>
+                    - include one uppercase letter<br/>
+                    - one number<br/>
+                    - one special character
+                  </>
+                ),
               },
             ]}
           >
@@ -146,7 +153,7 @@ function Register() {
             </Button>
           </Form.Item>
 
-          <Form.Item className="flex justify-center">
+          <Form.Item className="flex justify-center !-mt-4 !mb-0">
             <a onClick={handleRedirect} className="self-center">
               Login
             </a>

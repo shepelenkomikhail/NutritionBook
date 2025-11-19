@@ -32,7 +32,7 @@ function Login() {
       <div className="flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 ds-card shadow-md items-center">
         <ThemeToggleButton />
         <Title level={2} className="!text-[var(--fg)]">
-          Login Form
+          Login
         </Title>
         <Form
           form={form}
@@ -47,6 +47,7 @@ function Login() {
               { required: true, message: 'Please enter your username' },
               {
                 pattern: /^[a-zA-Z0-9_]{3,20}$/,
+                message: ""
               },
             ]}
           >
@@ -60,6 +61,7 @@ function Login() {
               { required: true, message: 'Please enter your password' },
               {
                 pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`]).{8,}$/,
+                message: ""
               },
             ]}
           >
@@ -72,7 +74,7 @@ function Login() {
             </Button>
           </Form.Item>
 
-          <Form.Item className="flex justify-center !-mt-4">
+          <Form.Item className="flex justify-center !-mt-4 !mb-0">
             <a onClick={handleRedirect} className="self-center">
               Register
             </a>

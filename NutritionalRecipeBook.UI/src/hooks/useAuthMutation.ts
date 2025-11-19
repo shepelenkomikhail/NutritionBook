@@ -13,6 +13,7 @@ export function useAuthMutation(mode: 'register' | 'login') {
     try {
         if(mode === 'register') {
           console.log('Registering user with payload:', payload);
+          // @ts-ignore
           await registerUser(payload).unwrap();
         } else if (mode === 'login') {
           console.log('Login user with payload:', payload);
