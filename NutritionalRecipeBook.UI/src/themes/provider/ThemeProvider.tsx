@@ -40,7 +40,25 @@ export default function ThemeProvider({ mode, children }: ThemeProviderProps) {
 }
 
 export function useTheme() {
-  const get = () => (document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+  const [mode, setMode] = useState<ThemeMode>(() => {
+    const attr = document.body.getAttribute('data-theme');
+    if (attr === 'light' || attr === 'dark') return attr;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const attr = document.body.getAttribute('data-theme');
+      if (attr === 'light' || attr === 'dark') {
+        setMode(attr);
+      } else {
+        setMode('light');
+      }
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
   const set = (m: ThemeMode) => document.body.setAttribute('data-theme', m);
-  return { get, set };
+  return { mode, set };
 }

@@ -1,21 +1,17 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { EyeInvisibleOutlined, EyeTwoTone, MailOutlined, UserOutlined } from '@ant-design/icons';
 import type { RegisterFormModel, RegisterModel } from '@models';
 import { useAuthMutation } from '../../hooks';
-import { ThemeContext } from '../../layout/App.tsx';
-import { formContainerLightStyle, lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
+import { lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
 import { ThemeToggleButton } from '../shared';
 import { Button, Form, Input, Layout } from 'antd';
 import Title from 'antd/es/typography/Title';
 
+const { Content } = Layout;
 
-const { Content  } = Layout;
-
-function Register(){
-  const {theme, } = useContext(ThemeContext);
-  const isDark = theme === 'dark';
+function Register() {
   const [form] = Form.useForm<RegisterFormModel>();
-  const { execute, isLoading, isError } = useAuthMutation("register");
+  const { execute, isLoading, isError } = useAuthMutation('register');
 
   const handleSubmit = async (values: RegisterFormModel) => {
     const registerData: RegisterModel = {
@@ -25,49 +21,35 @@ function Register(){
       name: values.name,
       surname: values.surname,
     };
-
     await execute(registerData);
   };
 
   const handleRedirect = () => {
     window.location.href = '/login';
-  }
+  };
 
   useEffect(() => {
     if (isError) {
       form.resetFields();
     }
-  }, [isError, form])
+  }, [isError, form]);
 
   return (
-    <Content
-      className={`flex flex-col p-6 transition-all duration-300 items-center justify-center
-        ${isDark ? 'bg-slate-900 text-gray-100' : 'text-gray-800'}`}
-      style={{
-        backgroundColor: isDark ? undefined : '#f9f5f0',
-        minHeight: '100vh'
-      }}
-    >
-      <div className={`flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 rounded-lg shadow-md items-center
-                        ${isDark ? 'bg-slate-800' : 'bg-white'}`}
-      >
+    <Content className="flex flex-col p-6 transition-all duration-300 items-center justify-center text-[var(--fg)] bg-[var(--bg)] min-h-screen">
+      <div className="flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 ds-card shadow-md items-center">
         <ThemeToggleButton />
-        <Title
-          level={2}
-          className={`${isDark ? '!text-gray-100' : '!text-gray-700'}`}
-        >
+        <Title level={2} className="!text-[var(--fg)]">
           Registration Form
         </Title>
         <Form
           form={form}
           layout="vertical"
           onFinish={() => handleSubmit(form.getFieldsValue())}
-          className="w-11/12 !p-4 rounded-lg"
-          style={!isDark ? formContainerLightStyle : {}}
+          className="w-11/12 !p-4 rounded-lg bg-[var(--card)] text-[var(--fg)] border border-[var(--border)]"
         >
           <Form.Item
             name="username"
-            label={<span style={isDark ? {} : lightLabelStyle}>Username</span>}
+            label={<span style={lightLabelStyle}>Username</span>}
             rules={[
               { required: true, message: 'Please enter your username' },
               {
@@ -77,31 +59,23 @@ function Register(){
               },
             ]}
           >
-            <Input
-              prefix={<UserOutlined className="mr-2" />}
-              placeholder="e.g. JohnSmith"
-              style={isDark ? {} : lightInputStyle}
-            />
+            <Input prefix={<UserOutlined className="mr-2" />} placeholder="e.g. JohnSmith" style={lightInputStyle} />
           </Form.Item>
 
           <Form.Item
             name="email"
-            label={<span style={isDark ? {} : lightLabelStyle}>Email</span>}
+            label={<span style={lightLabelStyle}>Email</span>}
             rules={[
               { required: true, message: 'Please enter your email' },
               { type: 'email', message: 'Please enter a valid email address' },
             ]}
           >
-            <Input
-              prefix={<MailOutlined className="mr-2" />}
-              placeholder="e.g. johnsmith@nixs.com"
-              style={isDark ? {} : lightInputStyle}
-            />
+            <Input prefix={<MailOutlined className="mr-2" />} placeholder="e.g. johnsmith@nixs.com" style={lightInputStyle} />
           </Form.Item>
 
           <Form.Item
             name="name"
-            label={<span style={isDark ? {} : lightLabelStyle}>Name</span>}
+            label={<span style={lightLabelStyle}>Name</span>}
             rules={[
               { required: true, message: 'Please enter your name' },
               {
@@ -110,12 +84,12 @@ function Register(){
               },
             ]}
           >
-            <Input placeholder="e.g. John" style={isDark ? {} : lightInputStyle} />
+            <Input placeholder="e.g. John" style={lightInputStyle} />
           </Form.Item>
 
           <Form.Item
             name="surname"
-            label={<span style={isDark ? {} : lightLabelStyle}>Surname</span>}
+            label={<span style={lightLabelStyle}>Surname</span>}
             rules={[
               { required: true, message: 'Please enter your surname' },
               {
@@ -124,12 +98,12 @@ function Register(){
               },
             ]}
           >
-            <Input placeholder="e.g. Smith" style={isDark ? {} : lightInputStyle} />
+            <Input placeholder="e.g. Smith" style={lightInputStyle} />
           </Form.Item>
 
           <Form.Item
             name="password"
-            label={<span style={isDark ? {} : lightLabelStyle}>Password</span>}
+            label={<span style={lightLabelStyle}>Password</span>}
             rules={[
               { required: true, message: 'Please enter your password' },
               {
@@ -139,15 +113,12 @@ function Register(){
               },
             ]}
           >
-            <Input.Password
-              placeholder="e.g. StrongPassword123!"
-              style={isDark ? {} : lightInputStyle}
-            />
+            <Input.Password placeholder="e.g. StrongPassword123!" style={lightInputStyle} />
           </Form.Item>
 
           <Form.Item
             name="repeatPassword"
-            label={<span style={isDark ? {} : lightLabelStyle}>Repeat Password</span>}
+            label={<span style={lightLabelStyle}>Repeat Password</span>}
             dependencies={['password']}
             hasFeedback
             rules={[
@@ -157,36 +128,28 @@ function Register(){
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(
-                    new Error('Passwords do not match')
-                  );
+                  return Promise.reject(new Error('Passwords do not match'));
                 },
               }),
             ]}
           >
             <Input.Password
               placeholder="e.g. StrongPassword123!"
-              style={isDark ? {} : lightInputStyle}
-              iconRender={(visible) =>
-                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-              }
+              style={lightInputStyle}
+              iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
             />
           </Form.Item>
 
           <Form.Item className="flex justify-center">
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              loading={isLoading}
-              className="!w-[12rem] mt-4"
-            >
+            <Button type="primary" htmlType="submit" block loading={isLoading} className="!w-[12rem] mt-4">
               {isLoading ? 'Registering...' : 'Register'}
             </Button>
           </Form.Item>
 
           <Form.Item className="flex justify-center">
-            <a onClick={handleRedirect} className={"self-center"}>Login</a>
+            <a onClick={handleRedirect} className="self-center">
+              Login
+            </a>
           </Form.Item>
         </Form>
       </div>

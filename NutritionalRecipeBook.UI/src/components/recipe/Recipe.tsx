@@ -1,11 +1,10 @@
 import 'simplebar-react/dist/simplebar.min.css';
 import SimpleBar from 'simplebar-react';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { PlusOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Button, FloatButton, Layout, Modal, Spin } from 'antd';
 import Title from 'antd/es/typography/Title';
 const { Content, Header } = Layout;
-import { ThemeContext } from '../../layout/App';
 import { useRecipeQuery } from '../../hooks';
 import { RecipeModel } from '@models'
 import { RecipeList, RecipeSearchBar, RecipeForm } from './index.ts';
@@ -15,7 +14,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../api/slices/authSlice.ts';
 
 function Recipe() {
-  const { theme, } = useContext(ThemeContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
@@ -52,46 +50,37 @@ function Recipe() {
 
   return (
     <>
-      <Header className={`flex items-center justify-center w-full relative`}
-        style={{
-          backgroundColor: theme === 'dark' ? undefined : '#f9f5f0',
-          color: theme === 'dark' ? '#ffffff' : '#ffffff',
-          paddingTop: '24px',
-        }}
+      <Header className={`w-full !bg-[var(--bg)] !text-[var(--fg)] border-b border-[var(--border)]`}
       >
-        <ThemeToggleButton />
-        <Title
-          className="mb-0"
-          style={{
-            color: theme == 'dark' ? 'rgb(203 213 225)' : 'rgb(55 65 81)'
-          }}
-        >
-          Recipes
-        </Title>
-        <div className="!absolute !right-8 top-4 flex items-center gap-3">
-          <Title level={5} className="!mb-0">
-            Hello, {username || 'Guest'}!
-          </Title>
-          <Button
-            type="primary"
-            icon={<LogoutOutlined />}
-            danger
-            size="small"
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
+        <div className="max-w-7xl mx-auto px-4 h-16 grid grid-cols-3 items-center">
+          <div className="flex items-center gap-3">
+            <ThemeToggleButton variant="inline" />
+          </div>
+
+          <div className="flex items-center justify-center">
+            <Title level={3} className="!mb-0 !text-[var(--fg)]">
+              Recipes
+            </Title>
+          </div>
+
+          <div className="flex items-center justify-end gap-6">
+            <Title level={5} className="!mb-0 !text-[var(--fg-muted)]">
+              Hello, {username || 'Guest'}
+            </Title>
+            <Button
+              type="primary"
+              icon={<LogoutOutlined />}
+              danger
+              size="small"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
         </div>
       </Header>
 
-      <Content
-        className={`flex flex-col p-6 transition-all duration-300
-        ${theme === 'dark' ? 'bg-slate-900 text-gray-100' : 'text-gray-800'}`}
-        style={{
-          backgroundColor: theme === 'dark' ? undefined : '#f9f5f0',
-          minHeight: '100vh'
-      }}
-      >
+      <Content className={`flex flex-col p-6 transition-all duration-100 bg-[var(--bg)] text-[var(--fg)] min-h-screen`}>
         <RecipeSearchBar
           search={search}
           onSearchChange={(v) => {
@@ -140,8 +129,9 @@ function Recipe() {
           footer={null}
           className="max-h-[70vh]"
           bodyStyle={{
-            color: theme == 'dark' ? undefined : 'rgb(31 41 55)',
-            backgroundColor: theme == 'dark' ? undefined : 'whitesmoke'
+            color: 'var(--fg)',
+            backgroundColor: 'var(--card)',
+            borderColor: 'var(--border)'
           }}
         >
           <Spin spinning={isLoadingQuery} tip="Processing...">
