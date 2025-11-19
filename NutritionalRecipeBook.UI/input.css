@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+:root {
+  --brand: #722ED1;
+  --brand-fg: #ffffff;
+  --fg: #111827;
+  --fg-muted: #4B5563;
+  --fg-on-muted: #111827;
+  --bg: #FFFFFF;
+  --bg-muted: #F9FAFB;
+  --card: #FFFFFF;
+  --border: #E5E7EB;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #2563EB;
+  --ring: rgba(114, 46, 209, 0.4);
+  --radius: 8;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.ds-card {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 1px);
+}
+
+.ds-muted {
+  background: var(--bg-muted);
+  color: var(--fg-muted);
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}

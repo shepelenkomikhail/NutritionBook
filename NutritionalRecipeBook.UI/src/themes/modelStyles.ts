@@ -1,14 +1,14 @@
 export const lightInputStyle = {
-  backgroundColor: 'rgb(249 250 251)',
-  color: 'rgb(17 24 39)',
-  borderColor: 'rgb(209 213 219)',
+  backgroundColor: 'var(--bg-muted)',
+  color: 'var(--fg)',
+  borderColor: 'var(--border)',
 };
 
 export const lightLabelStyle = {
-  color: 'rgb(55 65 81)',
+  color: 'var(--fg-muted)',
 };
 
 export const formContainerLightStyle = {
-  backgroundColor: 'whitesmoke',
-  color: 'rgb(31 41 55)',
+  backgroundColor: 'var(--card)',
+  color: 'var(--fg)',
 };
