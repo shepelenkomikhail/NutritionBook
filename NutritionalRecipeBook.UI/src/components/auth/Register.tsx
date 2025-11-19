@@ -4,6 +4,7 @@ import type { RegisterFormModel, RegisterModel } from '@models';
 import { useAuthMutation } from '../../hooks';
 import { lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
 import { ThemeToggleButton } from '../shared';
+import HomeNavigateButton from './HomeNavigateButton';
 import { Button, Form, Input, Layout } from 'antd';
 import Title from 'antd/es/typography/Title';
 
@@ -38,6 +39,7 @@ function Register() {
     <Content className="flex flex-col p-6 transition-all duration-300 items-center justify-center text-[var(--fg)] bg-[var(--bg)] min-h-screen">
       <div className="flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 ds-card shadow-md items-center">
         <ThemeToggleButton />
+        <HomeNavigateButton />
         <Title level={2} className="!text-[var(--fg)]">
           Registration
         </Title>
