@@ -7,7 +7,7 @@ import {
   lightInputStyle,
   lightLabelStyle,
 } from '../../themes/modelStyles.ts';
-import { Button, Checkbox, Form, Input, InputNumber, Space } from 'antd';
+import { Button, Checkbox, Form, Input, InputNumber, Select, Space } from 'antd';
 
 
 interface RecipeFormProps {
@@ -119,9 +119,20 @@ function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeF
                   name={[name, 'unit']}
                   rules={[{ required: true, message: 'Enter unit' }]}
                 >
-                  <Input
-                    placeholder="e.g. g, ml"
+                  <Select
+                    defaultValue="g"
                     style={lightInputStyle}
+                    className={"!w-16"}
+                    options={[
+                      { value: "g", label: "g" },
+                      { value: "kg", label: "kg" },
+                      { value: "ml", label: "ml" },
+                      { value: "l", label: "l" },
+                      { value: "tsp", label: "tsp" },
+                      { value: "tbsp", label: "tbsp" },
+                      { value: "cup", label: "cup" },
+                      { value: "pcs", label: "pcs" }
+                    ]}
                   />
                 </Form.Item>
 
