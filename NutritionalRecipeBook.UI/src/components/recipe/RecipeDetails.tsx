@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLazyGetRecipeByIdQuery } from '@api';
-import { Descriptions, Divider, List, Modal, Spin, Typography } from 'antd';
+import { Descriptions, Divider, Image, List, Modal, Spin, Typography } from 'antd';
+import { PictureOutlined } from '@ant-design/icons';
 import { ShowIngredientModel } from '@models';
 const { Title } = Typography;
 
@@ -12,6 +13,20 @@ interface RecipeModalProps {
 
 function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   const [getData, { data: recipeData, isLoading }] = useLazyGetRecipeByIdQuery();
+
+  const buildImageSrc = (url?: string) => {
+    if (!url || url.trim() === '') return undefined;
+    const trimmed = url.trim();
+    if (/^(https?:)?\/\//i.test(trimmed) || /^(data:|blob:)/i.test(trimmed)) {
+      return trimmed;
+    }
+    const base = import.meta.env.VITE_API_URL as string | undefined;
+    if (base) {
+      const sep = trimmed.startsWith('/') ? '' : '/';
+      return `${base}${sep}${trimmed}`;
+    }
+    return trimmed;
+  };
 
   useEffect(() => {
     if (open && recipeId) {
@@ -26,6 +41,7 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
       onCancel={onClose}
       footer={null}
       width={700}
+      rootClassName="recipe-details-modal"
       destroyOnClose
       styles={{ body: {
         color: 'var(--fg)',
@@ -38,6 +54,29 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
         <Spin className="w-full flex justify-center py-10" tip="Loading recipe details..." />
       ) : recipeData ? (
         <div className="p-4 rounded-lg bg-[var(--card)] text-[var(--fg)]">
+          <div className="w-full mb-4">
+            {(() => {
+              const src = buildImageSrc((recipeData as any).recipeDTO?.imageUrl);
+              return src ? (
+                <Image
+                  alt={recipeData.recipeDTO?.name || 'Recipe image'}
+                  src={src}
+                  preview={false}
+                  className="object-cover"
+                  style={{ height: '180px', width: '100%', padding: '12px', borderRadius: '20px' }}
+
+                />
+              ) : (
+                <div
+                  className="h-56 w-full flex items-center justify-center bg-[var(--card)] text-[var(--fg-muted)] rounded-md"
+                  aria-label="No image available"
+                  title="No image available"
+                >
+                  <PictureOutlined style={{ fontSize: 56 }} />
+                </div>
+              );
+            })()}
+          </div>
 
           <Title level={4} className="!text-[var(--fg)]">
             Description

@@ -1,6 +1,7 @@
 import { RecipeModel } from '@models';
 import { DeleteRecipeButton, EditRecipeButton } from './buttons/index.ts';
-import { Card, Space } from 'antd';
+import { Card, Image, Space } from 'antd';
+import { PictureOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { RecipeDetails } from './index.ts';
 
@@ -11,6 +12,22 @@ interface RecipeCardProps {
 
 function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const buildImageSrc = (url?: string) => {
+    if (!url || url.trim() === '') return undefined;
+    const trimmed = url.trim();
+    // If absolute or data/blob URL, return as-is
+    if (/^(https?:)?\/\//i.test(trimmed) || /^(data:|blob:)/i.test(trimmed)) {
+      return trimmed;
+    }
+    // Otherwise treat as relative to API base if configured, else use as-is
+    const base = import.meta.env.VITE_API_URL as string | undefined;
+    if (base) {
+      const sep = trimmed.startsWith('/') ? '' : '/';
+      return `${base}${sep}${trimmed}`;
+    }
+    return trimmed;
+  };
 
   const handleOpen = () => {
     setIsModalOpen(true);
@@ -24,6 +41,26 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
         <Card
           hoverable
           className={`!rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 relative ds-card`}
+          cover={(() => {
+            const src = buildImageSrc(recipe.imageUrl);
+            return src ? (
+              <Image
+                alt={recipe.name}
+                src={src}
+                preview={false}
+                className="object-cover"
+                style={{ height: '180px', width: '100%', padding: '12px', borderRadius: '20px' }}
+              />
+            ) : (
+              <div
+                className="h-44 w-full flex items-center justify-center bg-[var(--card)] text-[var(--fg-muted)]"
+                aria-label="No image available"
+                title="No image available"
+              >
+                <PictureOutlined style={{ fontSize: 48 }} />
+              </div>
+            );
+          })()}
           title={
             <span
               className={`font-semibold text-lg flex justify-between items-center text-[var(--fg)]`}
