@@ -1,4 +1,7 @@
 using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 using NutritionalRecipeBook.Application.DTOs;
@@ -132,6 +135,62 @@ namespace NutritionalRecipeBook.Application.Services
             {
                 _logger.LogError(ex, "An unexpected error occurred while updating recipe ID {Id}.", id);
                 return false;
+            }
+        }
+
+        public async Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath)
+        {
+            if (fileStream == null || string.IsNullOrWhiteSpace(originalFileName))
+            {
+                _logger.LogWarning("UploadImageAsync: Invalid file input.");
+                
+                return null;
+            }
+
+            try
+            {
+                var ext = Path.GetExtension(originalFileName).ToLowerInvariant();
+                var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp" };
+                
+                if (Array.IndexOf(allowed, ext) < 0)
+                {
+                    _logger.LogWarning("UploadImageAsync: Unsupported file extension {Ext}.", ext);
+                   
+                    return null;
+                }
+
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                {
+                    webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                }
+
+                var imagesPath = Path.Combine(webRootPath, "images");
+                if (!Directory.Exists(imagesPath))
+                {
+                    Directory.CreateDirectory(imagesPath);
+                }
+
+                var newFileName = $"{Guid.NewGuid():N}{ext}";
+                var fullPath = Path.Combine(imagesPath, newFileName);
+
+                if (fileStream.CanSeek)
+                {
+                    fileStream.Seek(0, SeekOrigin.Begin);
+                }
+
+                await using (var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await fileStream.CopyToAsync(fs);
+                }
+
+                var apiUrl = $"/api/recipes/image/{newFileName}";
+                return apiUrl;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UploadImageAsync: Error saving file {Name}.", originalFileName);
+                
+                return null;
             }
         }
 

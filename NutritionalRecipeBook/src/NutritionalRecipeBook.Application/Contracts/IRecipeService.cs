@@ -1,3 +1,4 @@
+using System.IO;
 using NutritionalRecipeBook.Application.DTOs;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 
@@ -16,4 +17,5 @@ public interface IRecipeService
             int pageSize,
             RecipeFilterDTO? filterDto = null
     );
+    Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath);
 }
