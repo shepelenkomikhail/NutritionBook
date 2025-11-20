@@ -194,7 +194,6 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-
         public async Task<Guid?> GetRecipeIdByNameAsync(string name)
         {
             try

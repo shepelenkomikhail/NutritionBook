@@ -44,11 +44,14 @@ namespace NutritionalRecipeBook.Api.Controllers
         public async Task<IActionResult> UploadImage([FromForm(Name = "file")] IFormFile file)
         {
             var webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            _logger.LogInformation("Uploading image to {FileName}", file.FileName);
             var url = await _recipeService.UploadImageAsync(file.OpenReadStream(), file.FileName, webRootPath);
             if (string.IsNullOrWhiteSpace(url))
             {
                 return BadRequest("Failed to upload image.");
             }
+            
+            _logger.LogInformation("Image uploaded successfully: {Url}", url);
 
             return Created(new Uri(url, UriKind.Relative), new { url });
         }

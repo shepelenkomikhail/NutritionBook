@@ -19,6 +19,9 @@ public class RecipeConfiguration : IEntityTypeConfiguration<Recipe>
         builder.Property(r => r.Instructions)
             .HasMaxLength(10000)
             .IsRequired();
+        
+        builder.Property(r => r.ImageUrl)
+            .HasMaxLength(500);
 
         builder.Property(r => r.Description)
             .HasMaxLength(1000);

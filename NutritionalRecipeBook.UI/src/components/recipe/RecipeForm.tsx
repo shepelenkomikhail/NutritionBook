@@ -41,6 +41,8 @@ function LoadingOutlined() {
   return null;
 }
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeFormProps) {
   const [form] = Form.useForm<RecipeModel>();
   const { execute, isLoading } = useRecipeMutation();
@@ -106,7 +108,7 @@ function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeF
     >
       <Form.Item className={"!w-full"}>
         <Upload
-          name="avatar"
+          name="file"
           listType="picture-card"
           className="avatar-uploader !w-full"
           showUploadList={false}
@@ -116,7 +118,8 @@ function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeF
           style={{ width: '100%' }}
         >
           {imageUrl ? (
-            <img draggable={false} src={imageUrl} alt="avatar" style={{ width: '100%' }} />
+            <img draggable={false} src={BASE_URL + imageUrl} alt="avatar"
+                 style={{ width: '100%', height: '140px', borderRadius: '10px', marginTop: '16px' }} />
           ) : (
             uploadButton
           )}
