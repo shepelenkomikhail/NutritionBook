@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { PlusOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Button, FloatButton, Layout, Modal, Spin } from 'antd';
 import Title from 'antd/es/typography/Title';
-const { Content, Header } = Layout;
-import { useRecipeQuery } from '../../hooks';
+import { useRecipeQuery } from '@hooks';
 import { RecipeModel } from '@models'
 import { RecipeList, RecipeSearchBar, RecipeForm } from './index.ts';
 import { ThemeToggleButton } from '../shared';
 import { RootState } from '@api';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../api/slices/authSlice.ts';
+const { Content, Header } = Layout;
 
 function Recipe() {
   const [isModalOpen, setIsModalOpen] = useState(false);

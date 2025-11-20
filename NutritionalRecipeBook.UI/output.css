@@ -7,17 +7,6 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
-    --color-slate-800: oklch(27.9% 0.041 260.031);
-    --color-slate-900: oklch(20.8% 0.042 265.755);
-    --color-gray-100: oklch(96.7% 0.003 264.542);
-    --color-gray-300: oklch(87.2% 0.01 258.338);
-    --color-gray-400: oklch(70.7% 0.022 261.325);
-    --color-gray-500: oklch(55.1% 0.027 264.364);
-    --color-gray-600: oklch(44.6% 0.03 256.802);
-    --color-gray-700: oklch(37.3% 0.034 259.733);
-    --color-gray-800: oklch(27.8% 0.033 256.848);
-    --color-gray-900: oklch(21% 0.034 264.665);
-    --color-white: #fff;
     --spacing: 0.25rem;
     --container-7xl: 80rem;
     --text-xs: 0.75rem;
@@ -200,12 +189,6 @@
   .relative {
     position: relative;
   }
-  .top-4 {
-    top: calc(var(--spacing) * 4);
-  }
-  .\!right-8 {
-    right: calc(var(--spacing) * 8) !important;
-  }
   .container {
     width: 100%;
     @media (width >= 40rem) {
@@ -236,9 +219,6 @@
   .\!-mt-4 {
     margin-top: calc(var(--spacing) * -4) !important;
   }
-  .-mt-4 {
-    margin-top: calc(var(--spacing) * -4);
-  }
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
   }
@@ -251,14 +231,8 @@
   .mr-2 {
     margin-right: calc(var(--spacing) * 2);
   }
-  .mr-4 {
-    margin-right: calc(var(--spacing) * 4);
-  }
   .\!mb-0 {
     margin-bottom: calc(var(--spacing) * 0) !important;
-  }
-  .mb-0 {
-    margin-bottom: calc(var(--spacing) * 0);
   }
   .mb-1 {
     margin-bottom: calc(var(--spacing) * 1);
@@ -281,6 +255,9 @@
   .grid {
     display: grid;
   }
+  .hidden {
+    display: none;
+  }
   .inline {
     display: inline;
   }
@@ -296,12 +273,6 @@
   .h-16 {
     height: calc(var(--spacing) * 16);
   }
-  .h-24 {
-    height: calc(var(--spacing) * 24);
-  }
-  .h-32 {
-    height: calc(var(--spacing) * 32);
-  }
   .max-h-\[70vh\] {
     max-height: 70vh;
   }
@@ -311,9 +282,6 @@
   .min-h-screen {
     min-height: 100vh;
   }
-  .\!w-2 {
-    width: calc(var(--spacing) * 2) !important;
-  }
   .\!w-4\/6 {
     width: calc(4/6 * 100%) !important;
   }
@@ -322,12 +290,6 @@
   }
   .\!w-16 {
     width: calc(var(--spacing) * 16) !important;
-  }
-  .\!w-20 {
-    width: calc(var(--spacing) * 20) !important;
-  }
-  .\!w-24 {
-    width: calc(var(--spacing) * 24) !important;
   }
   .\!w-\[12rem\] {
     width: 12rem !important;
@@ -349,12 +311,6 @@
   }
   .w-full {
     width: 100%;
-  }
-  .max-w-1 {
-    max-width: calc(var(--spacing) * 1);
-  }
-  .max-w-1\/2 {
-    max-width: calc(1/2 * 100%);
   }
   .max-w-7xl {
     max-width: var(--container-7xl);
@@ -412,15 +368,6 @@
   }
   .self-center {
     align-self: center;
-  }
-  .overflow-auto {
-    overflow: auto;
-  }
-  .overflow-hidden {
-    overflow: hidden;
-  }
-  .overflow-x-auto {
-    overflow-x: auto;
   }
   .\!rounded-2xl {
     border-radius: var(--radius-2xl) !important;
@@ -484,14 +431,8 @@
   .py-16 {
     padding-block: calc(var(--spacing) * 16);
   }
-  .pt-6 {
-    padding-top: calc(var(--spacing) * 6);
-  }
   .pb-20 {
     padding-bottom: calc(var(--spacing) * 20);
-  }
-  .\!text-center {
-    text-align: center !important;
   }
   .text-center {
     text-align: center;
@@ -662,6 +603,19 @@ body {
 .focus-ring:focus {
   outline: none;
   box-shadow: 0 0 0 3px var(--ring);
+}
+.input:hover {
+  border-color: var(--ring);
+}
+.avatar-uploader .ant-upload-select-picture-card {
+  width: 100% !important;
+  height: auto !important;
+}
+.avatar-uploader .ant-upload {
+  width: 100% !important;
+}
+.avatar-uploader .ant-upload-select-picture-card {
+  min-height: 180px;
 }
 @property --tw-border-style {
   syntax: "*";

@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { Button, Form, Input, Layout } from 'antd';
 import type { LoginFormModel } from '@models';
-import { useAuthMutation } from '../../hooks';
+import { useAuthMutation } from '@hooks';
 import { ThemeToggleButton } from '../shared';
 import HomeNavigateButton from './HomeNavigateButton';
 import Title from 'antd/es/typography/Title';
-import { lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
+import { lightLabelStyle } from '../../themes/modelStyles.ts';
 import { UserOutlined } from '@ant-design/icons';
 
 const { Content } = Layout;
@@ -53,7 +53,7 @@ function Login() {
               },
             ]}
           >
-            <Input prefix={<UserOutlined className="mr-2" />} placeholder="e.g. JohnSmith" style={lightInputStyle} />
+            <Input prefix={<UserOutlined className="mr-2" />} placeholder="e.g. JohnSmith"  />
           </Form.Item>
 
           <Form.Item
@@ -67,11 +67,12 @@ function Login() {
               },
             ]}
           >
-            <Input.Password placeholder="e.g. StrongPassword123!" style={lightInputStyle} />
+            <Input.Password placeholder="e.g. StrongPassword123!" />
           </Form.Item>
 
           <Form.Item className="flex justify-center">
-            <Button type="primary" htmlType="submit" block loading={isLoading} className="!w-[12rem] mt-4" onClick={() => handleSubmit(form.getFieldsValue())}>
+            <Button type="primary" htmlType="submit" block loading={isLoading} className="!w-[12rem] mt-4"
+                    onClick={() => handleSubmit(form.getFieldsValue())}>
               {isLoading ? 'Login...' : 'Login'}
             </Button>
           </Form.Item>

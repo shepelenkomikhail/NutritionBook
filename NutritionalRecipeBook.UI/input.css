@@ -43,3 +43,19 @@ body {
   outline: none;
   box-shadow: 0 0 0 3px var(--ring);
 }
+
+.input:hover {
+    border-color: var(--ring);
+}
+
+.avatar-uploader .ant-upload-select-picture-card {
+    width: 100% !important;
+    height: auto !important;
+}
+.avatar-uploader .ant-upload {
+    width: 100% !important;
+}
+
+.avatar-uploader .ant-upload-select-picture-card {
+    min-height: 180px;
+}

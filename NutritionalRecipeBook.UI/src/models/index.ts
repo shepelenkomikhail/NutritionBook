@@ -6,3 +6,4 @@ export * from './RegisterModel';
 export * from './RegisterFormModel';
 export * from './RegisterResponseModel';
 export * from './LoginFormModel';
+export * from './ShowIngredientModel';

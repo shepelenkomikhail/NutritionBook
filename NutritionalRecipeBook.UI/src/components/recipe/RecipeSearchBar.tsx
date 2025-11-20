@@ -1,6 +1,6 @@
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, InputNumber } from 'antd';
-import { lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
+import {  lightLabelStyle } from '../../themes/modelStyles.ts';
 
 interface Props {
   search: string;
@@ -31,7 +31,6 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
           onChange={(e) => onSearchChange(e.target.value)}
           size="large"
           className="!w-4/6 shadow-sm custom-input"
-          style={lightInputStyle}
         />
       </div>
 
@@ -44,7 +43,6 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
             value={minCookingTimeInMin}
             onChange={(v) => onMinCookingTimeChange(v ?? undefined)}
             className="w-full custom-input"
-            style={lightInputStyle}
             placeholder="Min"
           />
         </div>
@@ -57,7 +55,6 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
             value={maxCookingTimeInMin}
             onChange={(v) => onMaxCookingTimeChange(v ?? undefined)}
             className="w-full custom-input"
-            style={lightInputStyle}
             placeholder="Max"
           />
         </div>
@@ -69,7 +66,6 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
             value={minServings}
             onChange={(v) => onMinServingsChange(v ?? undefined)}
             className="w-full custom-input"
-            style={lightInputStyle}
             placeholder="Min"
           />
         </div>
@@ -81,7 +77,6 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
             value={maxServings}
             onChange={(v) => onMaxServingsChange(v ?? undefined)}
             className="w-full custom-input"
-            style={lightInputStyle}
             placeholder="Max"
           />
         </div>
@@ -90,7 +85,6 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
           <Button
             onClick={onClearFilters}
             className="custom-input"
-            style={lightInputStyle}
           >
             Clear filters
           </Button>

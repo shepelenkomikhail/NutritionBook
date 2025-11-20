@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { EyeInvisibleOutlined, EyeTwoTone, MailOutlined, UserOutlined } from '@ant-design/icons';
 import type { RegisterFormModel, RegisterModel } from '@models';
-import { useAuthMutation } from '../../hooks';
-import { lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
+import { useAuthMutation } from '@hooks';
+import {  lightLabelStyle } from '../../themes/modelStyles.ts';
 import { ThemeToggleButton } from '../shared';
 import HomeNavigateButton from './HomeNavigateButton';
 import { Button, Form, Input, Layout } from 'antd';
@@ -61,7 +61,7 @@ function Register() {
               },
             ]}
           >
-            <Input prefix={<UserOutlined className="mr-2" />} placeholder="e.g. JohnSmith" style={lightInputStyle} />
+            <Input prefix={<UserOutlined className="mr-2" />} placeholder="e.g. JohnSmith"  />
           </Form.Item>
 
           <Form.Item
@@ -72,7 +72,7 @@ function Register() {
               { type: 'email', message: 'Please enter a valid email address' },
             ]}
           >
-            <Input prefix={<MailOutlined className="mr-2" />} placeholder="e.g. johnsmith@nixs.com" style={lightInputStyle} />
+            <Input prefix={<MailOutlined className="mr-2" />} placeholder="e.g. johnsmith@nixs.com" />
           </Form.Item>
 
           <Form.Item
@@ -86,7 +86,7 @@ function Register() {
               },
             ]}
           >
-            <Input placeholder="e.g. John" style={lightInputStyle} />
+            <Input placeholder="e.g. John"  />
           </Form.Item>
 
           <Form.Item
@@ -100,7 +100,7 @@ function Register() {
               },
             ]}
           >
-            <Input placeholder="e.g. Smith" style={lightInputStyle} />
+            <Input placeholder="e.g. Smith"  />
           </Form.Item>
 
           <Form.Item
@@ -122,7 +122,7 @@ function Register() {
               },
             ]}
           >
-            <Input.Password placeholder="e.g. StrongPassword123!" style={lightInputStyle} />
+            <Input.Password placeholder="e.g. StrongPassword123!"  />
           </Form.Item>
 
           <Form.Item
@@ -144,7 +144,6 @@ function Register() {
           >
             <Input.Password
               placeholder="e.g. StrongPassword123!"
-              style={lightInputStyle}
               iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
             />
           </Form.Item>
