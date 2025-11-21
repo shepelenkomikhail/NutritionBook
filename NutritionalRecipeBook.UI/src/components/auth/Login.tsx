@@ -1,104 +1,74 @@
-import { useContext, useEffect } from 'react';
-import { ThemeContext } from '../../layout/App.tsx';
+import { useEffect } from 'react';
 import { Button, Form, Input, Layout } from 'antd';
 import type { LoginFormModel } from '@models';
-import { useAuthMutation } from '../../hooks';
+import { useAuthMutation } from '@hooks';
 import { ThemeToggleButton } from '../shared';
+import HomeNavigateButton from './HomeNavigateButton';
 import Title from 'antd/es/typography/Title';
-import { formContainerLightStyle, lightInputStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
+import { lightLabelStyle } from '../../themes/modelStyles.ts';
 import { UserOutlined } from '@ant-design/icons';
-const { Content  } = Layout;
 
-function Login(){
-  const {theme, } = useContext(ThemeContext);
-  const isDark = theme === 'dark';
+const { Content } = Layout;
+
+function Login() {
   const [form] = Form.useForm<LoginFormModel>();
-  const { execute, isLoading, isError } = useAuthMutation("login");
+  const { execute, isLoading, isError } = useAuthMutation('login');
 
   const handleSubmit = async (values: LoginFormModel) => {
-    const loginData: LoginFormModel = {
-      username: values.username,
-      password: values.password,
-    };
-
-    await execute(loginData);
+    await execute({ username: values.username, password: values.password });
   };
 
   const handleRedirect = () => {
     window.location.href = '/register';
-  }
+  };
 
   useEffect(() => {
     if (isError) {
       form.resetFields();
     }
-  }, [isError, form])
+  }, [isError, form]);
 
   return (
-    <Content
-      className={`flex flex-col p-6 transition-all duration-300 items-center justify-center
-        ${isDark ? 'bg-slate-900 text-gray-100' : 'text-gray-800'}`}
-      style={{
-        backgroundColor: isDark ? undefined : '#f9f5f0',
-        minHeight: '100vh'
-      }}
-    >
-      <div className={`flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 rounded-lg shadow-md items-center
-                        ${isDark ? 'bg-slate-800' : 'bg-white'}`}
-      >
+    <Content className="flex flex-col p-6 transition-all duration-300 items-center justify-center text-[var(--fg)] bg-[var(--bg)] min-h-screen">
+      <div className="flex flex-col p-6 transition-all duration-300 !min-h-2/3 !min-w-1/2 ds-card shadow-md items-center">
         <ThemeToggleButton />
-        <Title
-          level={2}
-          className={`${isDark ? '!text-gray-100' : '!text-gray-700'}`}
-        >
-          Login Form
+        <HomeNavigateButton />
+        <Title level={2} className="!text-[var(--fg)]">
+          Login
         </Title>
         <Form
           form={form}
           layout="vertical"
-          onFinish={() => handleSubmit(form.getFieldsValue())}
-          className="w-11/12 !p-4 rounded-lg"
-          style={!isDark ? formContainerLightStyle : {}}
+          onFinish={handleSubmit}
+          className="w-11/12 !p-4 rounded-lg bg-[var(--card)] text-[var(--fg)] border border-[var(--border)]"
         >
           <Form.Item
             name="username"
-            label={<span style={isDark ? {} : lightLabelStyle}>Username</span>}
+            label={<span style={lightLabelStyle}>Username</span>}
             rules={[
               { required: true, message: 'Please enter your username' },
               {
                 pattern: /^[a-zA-Z0-9_]{3,20}$/,
-                message:
-                  'Username must be 3–20 characters and contain only letters, numbers, or underscores',
+                message: ""
               },
             ]}
           >
-            <Input
-              prefix={<UserOutlined className="mr-2" />}
-              placeholder="e.g. JohnSmith"
-              style={isDark ? {} : lightInputStyle}
-            />
+            <Input prefix={<UserOutlined className="mr-2" />} placeholder="e.g. JohnSmith"  />
           </Form.Item>
-
 
           <Form.Item
             name="password"
-            label={<span style={isDark ? {} : lightLabelStyle}>Password</span>}
+            label={<span style={lightLabelStyle}>Password</span>}
             rules={[
               { required: true, message: 'Please enter your password' },
               {
                 pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`]).{8,}$/,
-                message:
-                  'Password must be at least 8 characters long and include one uppercase letter, one number, and one special character',
+                message: ""
               },
             ]}
           >
-            <Input.Password
-
-              placeholder="e.g. StrongPassword123!"
-              style={isDark ? {} : lightInputStyle}
-            />
+            <Input.Password placeholder="e.g. StrongPassword123!" />
           </Form.Item>
-
 
           <Form.Item className="flex justify-center">
             <Button
@@ -112,8 +82,10 @@ function Login(){
             </Button>
           </Form.Item>
 
-          <Form.Item className="flex justify-center">
-            <a onClick={handleRedirect} className={"self-center"}>Register</a>
+          <Form.Item className="flex justify-center !-mt-4 !mb-0">
+            <a onClick={handleRedirect} className="self-center">
+              Register
+            </a>
           </Form.Item>
         </Form>
       </div>

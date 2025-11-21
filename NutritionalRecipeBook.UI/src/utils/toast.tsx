@@ -1,16 +1,18 @@
 import hotToast from 'react-hot-toast';
 
-import { darkTheme } from '@themes';
-
 export function toast(message: string, opts?: any) {
-  const { token } = darkTheme;
+  const styles = getComputedStyle(document.body);
+  const colorPrimary = styles.getPropertyValue('--brand').trim() || '#722ED1';
+  const colorInfo = styles.getPropertyValue('--fg').trim() || '#ffffff';
+  const colorBg = styles.getPropertyValue('--card').trim() || '#181818';
+
   const baseOpts = {
     icon: '👀',
-    position: 'top-right',
+    position: 'top-right' as const,
     style: {
-      border: `1px solid ${token.colorPrimary}`,
-      color: token.colorInfo,
-      backgroundColor: token.colorBgContainer,
+      border: `1px solid ${colorPrimary}`,
+      color: colorInfo,
+      backgroundColor: colorBg,
     },
   };
 

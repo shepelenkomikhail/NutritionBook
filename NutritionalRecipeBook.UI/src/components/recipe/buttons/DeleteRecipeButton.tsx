@@ -32,6 +32,7 @@ export function DeleteRecipeButton({ id }: {id: string}) {
         danger
         icon={<DeleteOutlined />}
         loading={isLoading}
+        onClick={(e) => e.stopPropagation()}
       >
       </Button>
     </Popconfirm>

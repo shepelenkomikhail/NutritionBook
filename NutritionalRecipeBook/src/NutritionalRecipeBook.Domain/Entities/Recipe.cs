@@ -9,6 +9,7 @@ public class Recipe: BaseEntity<Guid>
     public string Instructions { get; set; } = string.Empty;
     public int CookingTimeInMin { get; set; }
     public int Servings { get; set; }
+    public string ImageUrl { get; set; } = string.Empty;
     
     public virtual ICollection<UserRecipe> UserRecipes { get; set; } = new List<UserRecipe>();
     public virtual ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();

@@ -1,9 +1,13 @@
 using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 using NutritionalRecipeBook.Application.DTOs;
 using NutritionalRecipeBook.Application.DTOs.Mappers;
 using NutritionalRecipeBook.Domain.Entities;
+using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Application.Services.Extensions;
 
@@ -23,7 +27,7 @@ namespace NutritionalRecipeBook.Application.Services
             _ingredientService = ingredientService;
         }
 
-        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO? recipeDto)
+        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO? recipeDto, Guid userId)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -52,6 +56,16 @@ namespace NutritionalRecipeBook.Application.Services
                 var recipeEntity = RecipeMapper.ToEntity(recipeData);
                 await _unitOfWork.Repository<Recipe, Guid>().InsertAsync(recipeEntity);
 
+                var userRecipe = new UserRecipe
+                {
+                    UserId = userId,
+                    RecipeId = recipeEntity.Id,
+                    IsOwner = true,
+                    IsFavourite = false,
+                    Rating = 0
+                };
+                await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>().InsertAsync(userRecipe);
+
                 if (recipeDto.Ingredients.Count > 0)
                 {
                     await this.ProcessRecipeIngredientsAsync(
@@ -71,8 +85,8 @@ namespace NutritionalRecipeBook.Application.Services
                     return null;
                 }
 
-                _logger.LogInformation("Recipe '{Name}' created successfully with ID {Id}.",
-                    recipeEntity.Name, recipeEntity.Id);
+                _logger.LogInformation("Recipe '{Name}' created successfully with ID {Id}. Linked to user {UserId}.",
+                    recipeEntity.Name, recipeEntity.Id, userId);
                
                 return recipeEntity.Id;
             }
@@ -102,8 +116,14 @@ namespace NutritionalRecipeBook.Application.Services
                     _logger.LogWarning("UpdateRecipeAsync failed: Recipe with ID {Id} not found.", id);
                     return false;
                 }
-
-                existingRecipe = RecipeMapper.ToEntity(recipeDto.RecipeDTO);
+                
+                var updated = recipeDto.RecipeDTO;
+                existingRecipe.Name = updated.Name?.Trim() ?? existingRecipe.Name;
+                existingRecipe.Description = updated.Description?.Trim() ?? string.Empty;
+                existingRecipe.Instructions = updated.Instructions?.Trim() ?? string.Empty;
+                existingRecipe.CookingTimeInMin = updated.CookingTimeInMin;
+                existingRecipe.Servings = updated.Servings;
+                existingRecipe.ImageUrl = updated.ImageUrl;
 
                 if (recipeDto.Ingredients.Count > 0)
                 {
@@ -135,6 +155,61 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
+        public async Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath)
+        {
+            if (fileStream == null || string.IsNullOrWhiteSpace(originalFileName))
+            {
+                _logger.LogWarning("UploadImageAsync: Invalid file input.");
+                
+                return null;
+            }
+
+            try
+            {
+                var ext = Path.GetExtension(originalFileName).ToLowerInvariant();
+                var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp" };
+                
+                if (Array.IndexOf(allowed, ext) < 0)
+                {
+                    _logger.LogWarning("UploadImageAsync: Unsupported file extension {Ext}.", ext);
+                   
+                    return null;
+                }
+
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                {
+                    webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                }
+
+                var imagesPath = Path.Combine(webRootPath, "images");
+                if (!Directory.Exists(imagesPath))
+                {
+                    Directory.CreateDirectory(imagesPath);
+                }
+
+                var newFileName = $"{Guid.NewGuid():N}{ext}";
+                var fullPath = Path.Combine(imagesPath, newFileName);
+
+                if (fileStream.CanSeek)
+                {
+                    fileStream.Seek(0, SeekOrigin.Begin);
+                }
+
+                await using (var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await fileStream.CopyToAsync(fs);
+                }
+
+                var apiUrl = $"/api/recipes/image/{newFileName}";
+                return apiUrl;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UploadImageAsync: Error saving file {Name}.", originalFileName);
+                
+                return null;
+            }
+        }
 
         public async Task<Guid?> GetRecipeIdByNameAsync(string name)
         {
@@ -287,6 +362,36 @@ namespace NutritionalRecipeBook.Application.Services
                 
                 _logger.LogInformation("Retrieved {Count} recipes for page {PageNumber} with page size {PageSize}.",
                     recipes.Count, pageNumber, pageSize);
+
+                return new PagedResultDTO<RecipeDTO>(recipes, totalCount, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving filtered/paged recipes.");
+                
+                return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
+            }
+        }
+
+        public PagedResultDTO<RecipeDTO> GetRecipesForUserAsync(int pageNumber, int pageSize, Guid? userId)
+        {
+            try
+            {
+                var repo = _unitOfWork.Repository<Recipe, Guid>();
+                var query = repo.GetQueryable()
+                    .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId));
+                
+                var totalCount = query.Count();
+                
+                var recipes = query
+                    .OrderBy(r => r.Name)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(r => RecipeMapper.ToDto(r))
+                    .ToList();
+                
+                _logger.LogInformation("Retrieved {Count} recipes for page {PageNumber} with page size {PageSize} for user ID {UserId}.",
+                    totalCount, pageNumber, pageSize, userId);
 
                 return new PagedResultDTO<RecipeDTO>(recipes, totalCount, pageNumber, pageSize);
             }

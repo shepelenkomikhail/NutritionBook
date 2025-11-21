@@ -1,20 +1,28 @@
 import { useRegisterMutation, useLoginMutation } from '@api';
 import type { RegisterModel, LoginFormModel } from '@models';
 import { toast } from '@utils/toast.tsx';
+import { useNavigate } from 'react-router-dom';
 
 export function useAuthMutation(mode: 'register' | 'login') {
   const [registerUser, registerUserState] = useRegisterMutation();
   const [loginUser, loginUserState] = useLoginMutation();
 
+  const navigate = useNavigate();
+
   const execute = async (payload: RegisterModel | LoginFormModel) => {
     try {
         if(mode === 'register') {
           console.log('Registering user with payload:', payload);
+          // @ts-ignore
           await registerUser(payload).unwrap();
-
         } else if (mode === 'login') {
           console.log('Login user with payload:', payload);
-          await loginUser(payload).unwrap();
+          const res = await loginUser(payload).unwrap();
+
+          if(res.token) {
+            localStorage.setItem('token', res.token);
+            navigate('/recipes');
+          }
         }
 
       toast(`${mode} is successful!`);

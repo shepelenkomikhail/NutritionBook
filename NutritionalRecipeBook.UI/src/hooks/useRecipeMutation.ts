@@ -26,6 +26,7 @@ export function useRecipeMutation() {
         instructions: values.instructions?.trim(),
         cookingTimeInMin: values.cookingTimeInMin,
         servings: values.servings,
+        imageUrl: values.imageUrl,
       },
       ingredients: mappedIngredients,
     };

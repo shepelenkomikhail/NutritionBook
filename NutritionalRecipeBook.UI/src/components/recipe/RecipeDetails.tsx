@@ -1,7 +1,8 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLazyGetRecipeByIdQuery } from '@api';
-import { ThemeContext } from '../../layout/App.tsx';
-import { Descriptions, Divider, List, Modal, Spin, Typography } from 'antd';
+import { Descriptions, Divider, Image, List, Modal, Spin, Typography } from 'antd';
+import { PictureOutlined } from '@ant-design/icons';
+import { ShowIngredientModel } from '@models';
 const { Title } = Typography;
 
 interface RecipeModalProps {
@@ -12,20 +13,26 @@ interface RecipeModalProps {
 
 function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   const [getData, { data: recipeData, isLoading }] = useLazyGetRecipeByIdQuery();
-  const { theme } = useContext(ThemeContext);
+
+  const buildImageSrc = (url?: string) => {
+    if (!url || url.trim() === '') return undefined;
+    const trimmed = url.trim();
+    if (/^(https?:)?\/\//i.test(trimmed) || /^(data:|blob:)/i.test(trimmed)) {
+      return trimmed;
+    }
+    const base = import.meta.env.VITE_API_URL as string | undefined;
+    if (base) {
+      const sep = trimmed.startsWith('/') ? '' : '/';
+      return `${base}${sep}${trimmed}`;
+    }
+    return trimmed;
+  };
 
   useEffect(() => {
     if (open && recipeId) {
       getData(recipeId);
     }
   }, [open, recipeId, getData]);
-
-  const isDark = theme === 'dark';
-
-  const containerClass = `
-    p-4 rounded-lg
-   ${isDark ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'}
-  `;
 
   return (
     <Modal
@@ -34,67 +41,57 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
       onCancel={onClose}
       footer={null}
       width={700}
+      rootClassName="recipe-details-modal"
       destroyOnClose
-      className={isDark ? 'dark-modal' : ''}
-      bodyStyle={{
-        backgroundColor: isDark ? '#1e293b' : 'whitesmoke',
+      styles={{ body: {
+        color: 'var(--fg)',
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)'
+        }
       }}
     >
       {isLoading ? (
         <Spin className="w-full flex justify-center py-10" tip="Loading recipe details..." />
       ) : recipeData ? (
-        <div className={containerClass}>
-          <Descriptions
-            bordered
-            column={1}
-            size="small"
-            labelStyle={{
-              color: isDark ? 'rgb(203 213 225)' : 'rgb(55 65 81)',
-              backgroundColor: isDark ? 'rgb(30 41 59)' : 'rgb(243 244 246)',
-              borderColor: isDark ? 'rgb(71 85 105)' : 'rgb(209 213 219)',
-            }}
-            contentStyle={{
-              color: isDark ? 'rgb(241 245 249)' : 'rgb(17 24 39)',
-              backgroundColor: isDark ? 'rgb(15 23 42)' : 'rgb(255 255 255)',
-              borderColor: isDark ? 'rgb(71 85 105)' : 'rgb(209 213 219)',
-            }}
-          >
-            <Descriptions.Item label="Description">
-              {recipeData.recipeDTO.description}
-            </Descriptions.Item>
-            <Descriptions.Item label="Instructions">
-              {recipeData.recipeDTO.instructions}
-            </Descriptions.Item>
-            <Descriptions.Item label="Cooking Time">
-              {recipeData.recipeDTO.cookingTimeInMin} min
-            </Descriptions.Item>
-            <Descriptions.Item label="Servings">
-              {recipeData.recipeDTO.servings}
-            </Descriptions.Item>
-          </Descriptions>
+        <div className="p-4 rounded-lg bg-[var(--card)] text-[var(--fg)]">
+          <div className="w-full mb-4">
+            {(() => {
+              const src = buildImageSrc((recipeData as any).recipeDTO?.imageUrl);
+              return src ? (
+                <Image
+                  alt={recipeData.recipeDTO?.name || 'Recipe image'}
+                  src={src}
+                  preview={false}
+                  className="object-cover"
+                  style={{ height: '180px', width: '100%', padding: '12px', borderRadius: '20px' }}
 
-          <Divider className={`my-4}`} style={{
-            borderColor: isDark ? 'rgb(71 85 105)' : 'rgb(209 213 219)',
-          }}/>
+                />
+              ) : (
+                <div
+                  className="h-56 w-full flex items-center justify-center bg-[var(--card)] text-[var(--fg-muted)] rounded-md"
+                  aria-label="No image available"
+                  title="No image available"
+                >
+                  <PictureOutlined style={{ fontSize: 56 }} />
+                </div>
+              );
+            })()}
+          </div>
 
-          <Title
-            level={4}
-            style={{
-              color: isDark ? 'rgb(203 213 225)' : 'rgb(55 65 81)'
-            }}
-          >
+          <Title level={4} className="!text-[var(--fg)]">
+            Description
+          </Title>
+          <Title level={5}> { recipeData.recipeDTO.description } </Title>
+
+          <Divider className="my-4" />
+
+          <Title level={4} className="!text-[var(--fg)]">
             Ingredients
           </Title>
           <List
             dataSource={recipeData.ingredients}
-            renderItem={(item: any) => (
-              <List.Item
-                className="border-b last:border-0"
-                style={{
-                  borderColor: isDark ? 'rgb(51 65 85)' : 'rgb(209 213 219)',
-                  color: isDark ? 'rgb(203 213 225)' : 'rgb(55 65 81)'
-                }}
-              >
+            renderItem={(item: ShowIngredientModel) => (
+              <List.Item className="border-b last:border-0 border-[var(--border)] text-[var(--fg)]">
                 <div className="flex justify-between w-full">
                   <span>{item.ingredientDTO.name}</span>
                   <span>
@@ -104,13 +101,27 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
               </List.Item>
             )}
           />
+
+          <Divider className="my-4" />
+
+          <Title level={4} className="!text-[var(--fg)]">
+            Instructions
+          </Title>
+          <Title level={5}> { recipeData.recipeDTO.instructions } </Title>
+
+          <Divider className="my-4" />
+
+          <Descriptions bordered column={1} size="small">
+            <Descriptions.Item label="Cooking Time">
+              {recipeData.recipeDTO.cookingTimeInMin} min
+            </Descriptions.Item>
+            <Descriptions.Item label="Servings">
+              {recipeData.recipeDTO.servings}
+            </Descriptions.Item>
+          </Descriptions>
         </div>
       ) : (
-        <p
-          className={`text-center py-6 ${
-            isDark ? 'text-gray-400' : 'text-gray-500'
-          }`}
-        >
+        <p className="text-center py-6 text-[var(--fg-muted)]">
           No recipe data found.
         </p>
       )}

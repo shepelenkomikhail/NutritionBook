@@ -15,6 +15,9 @@ const recipesApi = createApi({
       query: (payload: RecipePayload) => ({
         url: '/api/recipes',
         method: 'POST',
+        headers: localStorage.getItem('token')
+          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          : undefined,
         body: payload,
       }),
     }),
@@ -23,6 +26,9 @@ const recipesApi = createApi({
       query: ({ id, data }) => ({
         url: `/api/recipes/${id}`,
         method: 'PUT',
+        headers: localStorage.getItem('token')
+          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          : undefined,
         body: data,
       }),
     }),
@@ -31,6 +37,9 @@ const recipesApi = createApi({
       query: (id: string) => ({
         url: `/api/recipes/${id}`,
         method: 'DELETE',
+        headers: localStorage.getItem('token')
+          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          : undefined,
       }),
     }),
     getRecipes: builder.query({
@@ -54,6 +63,25 @@ const recipesApi = createApi({
       query: (id: string) => ({
         url: `/api/recipes/${id}`,
         method: 'GET',
+      })
+    }),
+    getRecipesByUser: builder.query({
+      providesTags: ['Recipe'],
+      query: (params?: {
+        search?: string;
+        pageNumber?: number;
+        pageSize?: number;
+        minCookingTimeInMin?: number;
+        maxCookingTimeInMin?: number;
+        minServings?: number;
+        maxServings?: number;
+      })=>  ({
+        url: `/api/users/recipes`,
+        method: 'GET',
+        headers: localStorage.getItem('token')
+          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          : undefined,
+        params,
       })
     })
   })
