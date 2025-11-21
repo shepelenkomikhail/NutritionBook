@@ -37,6 +37,8 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
 
   const ownedRecipes = useSelector((state: RootState) => state.userRecipes.recipes || []);
   const isOwnedRecipe = ownedRecipes.some((r: RecipeModel) => r.id === recipe.id);
+
+  console.log('Owned Recipes:', ownedRecipes);
   
   return (
     <>
