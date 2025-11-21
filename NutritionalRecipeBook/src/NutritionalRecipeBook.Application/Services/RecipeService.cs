@@ -355,5 +355,35 @@ namespace NutritionalRecipeBook.Application.Services
                 return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
             }
         }
+
+        public PagedResultDTO<RecipeDTO> GetRecipesForUserAsync(int pageNumber, int pageSize, Guid? userId)
+        {
+            try
+            {
+                var repo = _unitOfWork.Repository<Recipe, Guid>();
+                var query = repo.GetQueryable()
+                    .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId));
+                
+                var totalCount = query.Count();
+                
+                var recipes = query
+                    .OrderBy(r => r.Name)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(r => RecipeMapper.ToDto(r))
+                    .ToList();
+                
+                _logger.LogInformation("Retrieved {Count} recipes for page {PageNumber} with page size {PageSize}.",
+                    totalCount, pageNumber, pageSize);
+
+                return new PagedResultDTO<RecipeDTO>(recipes, totalCount, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving filtered/paged recipes.");
+                
+                return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
+            }
+        }
     }
 }
