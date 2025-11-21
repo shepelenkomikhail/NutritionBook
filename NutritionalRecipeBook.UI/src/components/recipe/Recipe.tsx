@@ -5,6 +5,7 @@ import { PlusOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Button, FloatButton, Layout, Modal, Spin } from 'antd';
 import Title from 'antd/es/typography/Title';
 import { useRecipeQuery } from '@hooks';
+import { useLazyGetRecipesByUserQuery } from '@api';
 import { RecipeModel } from '@models'
 import { RecipeList, RecipeSearchBar, RecipeForm } from './index.ts';
 import { ThemeToggleButton } from '../shared';
@@ -19,10 +20,12 @@ function Recipe() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
-  const { username } = useSelector((state: RootState) => state.auth);
+  const { username, token } = useSelector((state: RootState) => state.auth);
+  const ownedRecipes = useSelector((state: RootState) => state.userRecipes.recipes || []);
   const [isPersonalizedRecipes, setIsPersonalizedRecipes] = useState<boolean>(false)
 
   const dispatch = useDispatch();
+  const [triggerOwnedFetch] = useLazyGetRecipesByUserQuery();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -52,13 +55,18 @@ function Recipe() {
   };
 
   useEffect(() => {
-    if(isPersonalizedRecipes){
-      if (isPersonalizedRecipes) {
-        console.log('isPersonalizedRecipes', recipes)
-        dispatch(setUserRecipes({ recipes }));
-      }
-    }
-  }, [isPersonalizedRecipes, recipes])
+    const shouldBootstrap = Boolean(token) && ownedRecipes.length === 0;
+    if (!shouldBootstrap) return;
+
+    triggerOwnedFetch({ pageNumber: 1, pageSize: 50 })
+      .unwrap()
+      .then((res: any) => {
+        const items = res?.items ?? [];
+        dispatch(setUserRecipes({ recipes: items }));
+      })
+      .catch(() => {
+      });
+  }, [token, ownedRecipes.length, triggerOwnedFetch, dispatch]);
 
   return (
     <>

@@ -21,9 +21,30 @@ const authApi = createApi({
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          if (data?.token && data?.username) {
-            dispatch(setCredentials({ token: data.token, username: data.username }));
-          }
+          if (!data?.token) return;
+
+          const deriveUsername = (d: any): string | null => {
+            const fromFields = d?.username || d?.userName || d?.email || d?.name || d?.surname;
+            if (fromFields) return fromFields as string;
+            try {
+              const [, payload] = (d.token as string).split('.');
+              if (payload) {
+                const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+                return (
+                  decoded?.unique_name ||
+                  decoded?.preferred_username ||
+                  decoded?.name ||
+                  decoded?.email ||
+                  decoded?.sub ||
+                  null
+                );
+              }
+            } catch {}
+            return null;
+          };
+
+          const username = deriveUsername(data) || 'User';
+          dispatch(setCredentials({ token: data.token, username }));
         } catch (error) {
           console.error('Register error:', error);
         }
@@ -39,9 +60,30 @@ const authApi = createApi({
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          if (data?.token && data?.username) {
-            dispatch(setCredentials({ token: data.token, username: data.username }));
-          }
+          if (!data?.token) return;
+
+          const deriveUsername = (d: any): string | null => {
+            const fromFields = d?.username || d?.userName || d?.email || d?.name || d?.surname;
+            if (fromFields) return fromFields as string;
+            try {
+              const [, payload] = (d.token as string).split('.');
+              if (payload) {
+                const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+                return (
+                  decoded?.unique_name ||
+                  decoded?.preferred_username ||
+                  decoded?.name ||
+                  decoded?.email ||
+                  decoded?.sub ||
+                  null
+                );
+              }
+            } catch {}
+            return null;
+          };
+
+          const username = deriveUsername(data) || 'User';
+          dispatch(setCredentials({ token: data.token, username }));
         } catch (error) {
           console.error('Login error:', error);
         }

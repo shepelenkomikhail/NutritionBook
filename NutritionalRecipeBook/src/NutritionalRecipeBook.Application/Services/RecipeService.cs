@@ -116,8 +116,14 @@ namespace NutritionalRecipeBook.Application.Services
                     _logger.LogWarning("UpdateRecipeAsync failed: Recipe with ID {Id} not found.", id);
                     return false;
                 }
-
-                existingRecipe = RecipeMapper.ToEntity(recipeDto.RecipeDTO);
+                
+                var updated = recipeDto.RecipeDTO;
+                existingRecipe.Name = updated.Name?.Trim() ?? existingRecipe.Name;
+                existingRecipe.Description = updated.Description?.Trim() ?? string.Empty;
+                existingRecipe.Instructions = updated.Instructions?.Trim() ?? string.Empty;
+                existingRecipe.CookingTimeInMin = updated.CookingTimeInMin;
+                existingRecipe.Servings = updated.Servings;
+                existingRecipe.ImageUrl = updated.ImageUrl;
 
                 if (recipeDto.Ingredients.Count > 0)
                 {

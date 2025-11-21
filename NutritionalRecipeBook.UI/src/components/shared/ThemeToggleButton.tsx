@@ -21,12 +21,11 @@ function ThemeToggleButton({ variant = 'floating', className }: Props){
     return (
       <Button
         icon={icon}
-        type="default"
+        type="primary"
         shape="circle"
         className={className}
         aria-label="Toggle theme"
         onClick={handleThemeToggle}
-        style={{ color: 'var(--fg)', borderColor: 'var(--border)', backgroundColor: 'var(--bg-muted)' }}
       />
     );
   }

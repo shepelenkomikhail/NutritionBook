@@ -39,7 +39,7 @@ function Login() {
         <Form
           form={form}
           layout="vertical"
-          onFinish={() => handleSubmit(form.getFieldsValue())}
+          onFinish={handleSubmit}
           className="w-11/12 !p-4 rounded-lg bg-[var(--card)] text-[var(--fg)] border border-[var(--border)]"
         >
           <Form.Item
@@ -71,8 +71,13 @@ function Login() {
           </Form.Item>
 
           <Form.Item className="flex justify-center">
-            <Button type="primary" htmlType="submit" block loading={isLoading} className="!w-[12rem] mt-4"
-                    onClick={() => handleSubmit(form.getFieldsValue())}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={isLoading}
+              className="!w-[12rem] mt-4"
+            >
               {isLoading ? 'Login...' : 'Login'}
             </Button>
           </Form.Item>

@@ -72,8 +72,12 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
             >
               {recipe.name}
               <Space>
-                { isOwnedRecipe && <EditRecipeButton recipe={recipe} onEdit={onEdit} /> }
-                <DeleteRecipeButton id={recipe.id || 'error'} />
+                { isOwnedRecipe &&
+                  <>
+                    <EditRecipeButton recipe={recipe} onEdit={onEdit} />
+                    <DeleteRecipeButton id={recipe.id || 'error'} />
+                  </>
+                }
               </Space>
             </span>
           }
