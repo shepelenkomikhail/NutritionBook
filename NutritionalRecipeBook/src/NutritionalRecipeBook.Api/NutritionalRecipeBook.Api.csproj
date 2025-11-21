@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Align security packages to same minor to avoid MissingMethodException in Base64UrlEncoder -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.4.0" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.4.0" />

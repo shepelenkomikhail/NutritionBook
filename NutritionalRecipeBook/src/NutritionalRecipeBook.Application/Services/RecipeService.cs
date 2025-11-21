@@ -7,6 +7,7 @@ using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 using NutritionalRecipeBook.Application.DTOs;
 using NutritionalRecipeBook.Application.DTOs.Mappers;
 using NutritionalRecipeBook.Domain.Entities;
+using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Application.Services.Extensions;
 
@@ -26,7 +27,7 @@ namespace NutritionalRecipeBook.Application.Services
             _ingredientService = ingredientService;
         }
 
-        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO? recipeDto)
+        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO? recipeDto, Guid userId)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -55,6 +56,16 @@ namespace NutritionalRecipeBook.Application.Services
                 var recipeEntity = RecipeMapper.ToEntity(recipeData);
                 await _unitOfWork.Repository<Recipe, Guid>().InsertAsync(recipeEntity);
 
+                var userRecipe = new UserRecipe
+                {
+                    UserId = userId,
+                    RecipeId = recipeEntity.Id,
+                    IsOwner = true,
+                    IsFavourite = false,
+                    Rating = 0
+                };
+                await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>().InsertAsync(userRecipe);
+
                 if (recipeDto.Ingredients.Count > 0)
                 {
                     await this.ProcessRecipeIngredientsAsync(
@@ -74,8 +85,8 @@ namespace NutritionalRecipeBook.Application.Services
                     return null;
                 }
 
-                _logger.LogInformation("Recipe '{Name}' created successfully with ID {Id}.",
-                    recipeEntity.Name, recipeEntity.Id);
+                _logger.LogInformation("Recipe '{Name}' created successfully with ID {Id}. Linked to user {UserId}.",
+                    recipeEntity.Name, recipeEntity.Id, userId);
                
                 return recipeEntity.Id;
             }

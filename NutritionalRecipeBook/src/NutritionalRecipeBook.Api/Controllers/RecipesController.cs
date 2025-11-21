@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Api.Models;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
@@ -21,10 +23,21 @@ namespace NutritionalRecipeBook.Api.Controllers
         }
 
         // POST: api/recipes
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] RecipeIngredientDTO newRecipeUpdateDto)
         {
-            Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeUpdateDto);
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier) ??
+                User.FindFirst("sub");
+            
+            if (userIdClaim == null || 
+                !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized();
+            }
+            
+            Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeUpdateDto, userId);
             if (newRecipeId == null)
             {
                 return BadRequest("Failed to create recipe.");
@@ -86,9 +99,20 @@ namespace NutritionalRecipeBook.Api.Controllers
         }
 
         // PUT: api/recipes/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] RecipeIngredientDTO updatedRecipeDto)
         {
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier) ??
+                User.FindFirst("sub");
+            
+            if (userIdClaim == null || 
+                !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized();
+            }
+            
             bool isUpdated = await _recipeService.UpdateRecipeAsync(id, updatedRecipeDto);
             if (!isUpdated)
             {
@@ -99,9 +123,20 @@ namespace NutritionalRecipeBook.Api.Controllers
         }
         
         // DELETE: api/recipes/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier) ??
+                User.FindFirst("sub");
+            
+            if (userIdClaim == null || 
+                !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized();
+            }
+            
             bool isDeleted = await _recipeService.DeleteRecipeAsync(id);
             if (!isDeleted)
             {

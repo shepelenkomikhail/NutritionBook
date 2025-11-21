@@ -16,6 +16,7 @@ const userRecipesSlice = createSlice({
     setUserRecipes: (state,
                      action: PayloadAction<{ recipes: RecipeModel[] }>) => {
       const { recipes }  = action.payload;
+      console.log('SET USER RECIPES', recipes);
       state.recipes = recipes ;
     },
   },

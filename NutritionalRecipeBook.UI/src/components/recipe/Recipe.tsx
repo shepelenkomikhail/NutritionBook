@@ -53,7 +53,10 @@ function Recipe() {
 
   useEffect(() => {
     if(isPersonalizedRecipes){
-      setUserRecipes(recipes);
+      if (isPersonalizedRecipes) {
+        console.log('isPersonalizedRecipes', recipes)
+        dispatch(setUserRecipes({ recipes }));
+      }
     }
   }, [isPersonalizedRecipes, recipes])
 
