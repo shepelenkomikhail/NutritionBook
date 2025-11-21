@@ -373,8 +373,8 @@ namespace NutritionalRecipeBook.Application.Services
                     .Select(r => RecipeMapper.ToDto(r))
                     .ToList();
                 
-                _logger.LogInformation("Retrieved {Count} recipes for page {PageNumber} with page size {PageSize}.",
-                    totalCount, pageNumber, pageSize);
+                _logger.LogInformation("Retrieved {Count} recipes for page {PageNumber} with page size {PageSize} for user ID {UserId}.",
+                    totalCount, pageNumber, pageSize, userId);
 
                 return new PagedResultDTO<RecipeDTO>(recipes, totalCount, pageNumber, pageSize);
             }

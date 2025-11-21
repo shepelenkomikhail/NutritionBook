@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NutritionalRecipeBook.Application.Services;
+using NutritionalRecipeBook.Application.Contracts;
 
 namespace NutritionalRecipeBook.Api.Controllers;
 
@@ -11,16 +11,16 @@ namespace NutritionalRecipeBook.Api.Controllers;
 public class UsersController: ControllerBase
 {
     private readonly ILogger<UsersController> _logger;
-    private readonly RecipeService _recipeService;
+    private readonly IRecipeService _recipeService;
     
-    public UsersController(ILogger<UsersController> logger, RecipeService recipeService)
+    public UsersController(ILogger<UsersController> logger, IRecipeService recipeService)
     {
         _logger = logger;
         _recipeService = recipeService;
     }
     
-    // GET: api/users/{id}/recipes
-    [HttpGet]
+    // GET: api/users/recipes
+    [HttpGet("recipes")]
     public IActionResult Get(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10
@@ -30,16 +30,18 @@ public class UsersController: ControllerBase
             User.FindFirst(ClaimTypes.NameIdentifier) ??
             User.FindFirst("sub");
 
+        _logger.LogInformation(
+            "User authenticated: {IsAuth}. Claims count: {ClaimsCount}. NameIdentifier: {NameId}",
+            User?.Identity?.IsAuthenticated ?? false,
+            User?.Claims?.Count() ?? 0,
+            userIdClaim?.Value
+        );
+
         if (userIdClaim == null || 
             !Guid.TryParse(userIdClaim.Value, out var userId))
         {
-            _logger.LogWarning("Missing user id claim or" +
-                               "Invalid user id claim value: {Value}", userIdClaim?.Value);
-            
             return Unauthorized();
         }
-
-        _logger.LogInformation("Getting recipes for authenticated user {UserId}.", userId);
 
         var pagedResult = _recipeService.GetRecipesForUserAsync(pageNumber, pageSize, userId);
             

@@ -55,6 +55,25 @@ const recipesApi = createApi({
         url: `/api/recipes/${id}`,
         method: 'GET',
       })
+    }),
+    getRecipesByUser: builder.query({
+      providesTags: ['Recipe'],
+      query: (params?: {
+        search?: string;
+        pageNumber?: number;
+        pageSize?: number;
+        minCookingTimeInMin?: number;
+        maxCookingTimeInMin?: number;
+        minServings?: number;
+        maxServings?: number;
+      })=>  ({
+        url: `/api/users/recipes`,
+        method: 'GET',
+        headers: localStorage.getItem('token')
+          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          : undefined,
+        params,
+      })
     })
   })
 });

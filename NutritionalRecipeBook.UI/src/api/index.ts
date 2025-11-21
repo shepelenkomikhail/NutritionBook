@@ -19,10 +19,12 @@ export const {
   useUpdateRecipeMutation,
   useDeleteRecipeMutation,
   useLazyGetRecipeByIdQuery,
-  useLazyGetRecipesQuery
+  useLazyGetRecipesQuery,
+  useLazyGetRecipesByUserQuery
 } = recipesApi;
 
 export const { useRegisterMutation, useLoginMutation } = authApi;
+
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 

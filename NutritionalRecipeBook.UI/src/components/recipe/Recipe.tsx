@@ -11,6 +11,7 @@ import { ThemeToggleButton } from '../shared';
 import { RootState } from '@api';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../api/slices/authSlice.ts';
+import { TogglePersonalizedButton } from './buttons';
 const { Content, Header } = Layout;
 
 function Recipe() {
@@ -18,6 +19,7 @@ function Recipe() {
   const [isLoading, setIsLoading] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
   const { username } = useSelector((state: RootState) => state.auth);
+  const [isPersonalizedRecipes, setIsPersonalizedRecipes] = useState<boolean>(false)
 
   const dispatch = useDispatch();
 
@@ -36,7 +38,7 @@ function Recipe() {
     recipes, totalCount, search, setSearch, pageNumber, setPageNumber, pageSize, isLoadingQuery,
     minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, setMinCookingTimeInMin,
     setMaxCookingTimeInMin, setMinServings, setMaxServings,
-  } = useRecipeQuery();
+  } = useRecipeQuery(isPersonalizedRecipes);
 
   const handleOpenEdit = (recipe: RecipeModel) => {
     setEditingRecipe(recipe);
@@ -81,6 +83,7 @@ function Recipe() {
       </Header>
 
       <Content className={`flex flex-col p-6 transition-all duration-100 bg-[var(--bg)] text-[var(--fg)] min-h-screen`}>
+        <TogglePersonalizedButton isPersonalized={isPersonalizedRecipes} setIsPersonalized={setIsPersonalizedRecipes} />
         <RecipeSearchBar
           search={search}
           onSearchChange={(v) => {
