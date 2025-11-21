@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Application.Services;
 
@@ -5,6 +7,7 @@ namespace NutritionalRecipeBook.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UsersController: ControllerBase
 {
     private readonly ILogger<UsersController> _logger;
@@ -19,20 +22,25 @@ public class UsersController: ControllerBase
     // GET: api/users/{id}/recipes
     [HttpGet]
     public IActionResult Get(
-        [FromQuery] Guid? userId,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10
         )
     {
-        if (userId == null)
+        var userIdClaim =
+            User.FindFirst(ClaimTypes.NameIdentifier) ??
+            User.FindFirst("sub");
+
+        if (userIdClaim == null || 
+            !Guid.TryParse(userIdClaim.Value, out var userId))
         {
-            _logger.LogError("User ID is null.");
+            _logger.LogWarning("Missing user id claim or" +
+                               "Invalid user id claim value: {Value}", userIdClaim?.Value);
             
-            return BadRequest("Invalid pagination parameters.");
+            return Unauthorized();
         }
-        
-        _logger.LogInformation("Getting recipes for user with ID: {UserId}.", userId);
-        
+
+        _logger.LogInformation("Getting recipes for authenticated user {UserId}.", userId);
+
         var pagedResult = _recipeService.GetRecipesForUserAsync(pageNumber, pageSize, userId);
             
         return Ok(pagedResult);
