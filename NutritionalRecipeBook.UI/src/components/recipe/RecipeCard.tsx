@@ -4,6 +4,8 @@ import { Card, Image, Space } from 'antd';
 import { PictureOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { RecipeDetails } from './index.ts';
+import { useSelector } from 'react-redux';
+import { RootState } from '@api';
 
 interface RecipeCardProps {
   recipe: RecipeModel;
@@ -16,11 +18,9 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
   const buildImageSrc = (url?: string) => {
     if (!url || url.trim() === '') return undefined;
     const trimmed = url.trim();
-    // If absolute or data/blob URL, return as-is
     if (/^(https?:)?\/\//i.test(trimmed) || /^(data:|blob:)/i.test(trimmed)) {
       return trimmed;
     }
-    // Otherwise treat as relative to API base if configured, else use as-is
     const base = import.meta.env.VITE_API_URL as string | undefined;
     if (base) {
       const sep = trimmed.startsWith('/') ? '' : '/';
@@ -35,6 +35,9 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
 
   const handleClose = () => setIsModalOpen(false);
 
+  const ownedRecipes = useSelector((state: RootState) => state.userRecipes.recipes || []);
+  const isOwnedRecipe = ownedRecipes.some((r: RecipeModel) => r.id === recipe.id);
+  
   return (
     <>
       <button onClick={handleOpen} className="w-full">
@@ -67,7 +70,7 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
             >
               {recipe.name}
               <Space>
-                <EditRecipeButton recipe={recipe} onEdit={onEdit} />
+                { isOwnedRecipe && <EditRecipeButton recipe={recipe} onEdit={onEdit} /> }
                 <DeleteRecipeButton id={recipe.id || 'error'} />
               </Space>
             </span>

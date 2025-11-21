@@ -1,6 +1,6 @@
 import 'simplebar-react/dist/simplebar.min.css';
 import SimpleBar from 'simplebar-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PlusOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Button, FloatButton, Layout, Modal, Spin } from 'antd';
 import Title from 'antd/es/typography/Title';
@@ -12,6 +12,7 @@ import { RootState } from '@api';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../api/slices/authSlice.ts';
 import { TogglePersonalizedButton } from './buttons';
+import { setUserRecipes } from '../../api/slices/userRecipeSlice.ts';
 const { Content, Header } = Layout;
 
 function Recipe() {
@@ -49,6 +50,12 @@ function Recipe() {
     setIsModalOpen(false);
     setEditingRecipe(null);
   };
+
+  useEffect(() => {
+    if(isPersonalizedRecipes){
+      setUserRecipes(recipes);
+    }
+  }, [isPersonalizedRecipes, recipes])
 
   return (
     <>
