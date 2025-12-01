@@ -7,3 +7,4 @@ export * from './RegisterFormModel';
 export * from './RegisterResponseModel';
 export * from './LoginFormModel';
 export * from './ShowIngredientModel';
+export * from './CommentModel';

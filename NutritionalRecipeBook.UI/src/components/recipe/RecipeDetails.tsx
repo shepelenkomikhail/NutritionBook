@@ -1,8 +1,11 @@
 import { useEffect } from 'react';
 import { useLazyGetRecipeByIdQuery } from '@api';
-import { Descriptions, Divider, Image, List, Modal, Spin, Typography } from 'antd';
+import { Button, Descriptions, Divider, Form, Image, Input, List, Modal, Rate, Spin, Typography } from 'antd';
 import { PictureOutlined } from '@ant-design/icons';
-import { ShowIngredientModel } from '@models';
+import { type CommentModel, ShowIngredientModel } from '@models';
+import { formContainerLightStyle, lightLabelStyle } from '../../themes/modelStyles.ts';
+import TextArea from 'antd/es/input/TextArea';
+import { useCommentMutation } from '@hooks';
 const { Title } = Typography;
 
 interface RecipeModalProps {
@@ -13,6 +16,8 @@ interface RecipeModalProps {
 
 function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   const [getData, { data: recipeData, isLoading }] = useLazyGetRecipeByIdQuery();
+  const [form] = Form.useForm<CommentModel>();
+  const { submit, isLoading: isSubmitting } = useCommentMutation();
 
   const buildImageSrc = (url?: string) => {
     if (!url || url.trim() === '') return undefined;
@@ -27,6 +32,15 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
     }
     return trimmed;
   };
+
+  const handleSubmit = async (values: { rating: number; content: string }) => {
+    if (!recipeId) return;
+    const ok = await submit({ recipeId, rating: values.rating, content: values.content?.trim() });
+    if (ok) {
+      form.resetFields(['rating', 'content']);
+      getData(recipeId);
+    }
+  }
 
   useEffect(() => {
     if (open && recipeId) {
@@ -119,6 +133,46 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
               {recipeData.recipeDTO.servings}
             </Descriptions.Item>
           </Descriptions>
+
+          <Divider className="my-4" />
+          <Title level={4} className="!text-[var(--fg)]">
+            Leve a Comment
+          </Title>
+
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={() => handleSubmit(form.getFieldsValue() as any)}
+            className="w-11/12 !p-4 rounded-lg bg-[var(--card)] text-[var(--fg)] border border-[var(--border)]"
+            style={formContainerLightStyle}
+          >
+            <Form.Item
+              name="rating"
+              label={<span style={lightLabelStyle}>Rating</span>}
+              rules={[{ required: true, message: 'Please, rate this recipe!' }]}
+            >
+              <Rate id="rating" allowClear={false} />
+            </Form.Item>
+
+            <Form.Item
+              name="content"
+              label={<span style={lightLabelStyle}>Comment</span>}
+              rules={[{ required: true, message: 'Please, write a comment!' }]}
+            >
+              <TextArea
+                placeholder="Your comment goes here..."
+              />
+            </Form.Item>
+
+            <Button
+              type="primary"
+              htmlType="submit"
+              className={"mt-4"}
+              loading={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </Button>
+          </Form>
         </div>
       ) : (
         <p className="text-center py-6 text-[var(--fg-muted)]">
