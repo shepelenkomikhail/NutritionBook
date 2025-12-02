@@ -64,7 +64,7 @@ namespace NutritionalRecipeBook.Application.Services
                     IsFavourite = false,
                     Rating = 0
                 };
-                await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>().InsertAsync(userRecipe);
+                await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(userRecipe);
 
                 if (recipeDto.Ingredients.Count > 0)
                 {
@@ -119,7 +119,7 @@ namespace NutritionalRecipeBook.Application.Services
                     return false;
                 }
                 
-                var userRecipe = await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>()
+                var userRecipe = await _unitOfWork.Repository<UserRecipe, Guid>()
                     .GetSingleOrDefaultAsync(ur => ur.UserId == userId && ur.RecipeId == id);
                 
                 if (userRecipe is null || !userRecipe.IsOwner)
@@ -256,8 +256,7 @@ namespace NutritionalRecipeBook.Application.Services
             {
                 await this.CheckExistencyAsync(id, _logger, _unitOfWork);
 
-                // Rights check: only owner can delete
-                var userRecipe = await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>()
+                var userRecipe = await _unitOfWork.Repository<UserRecipe, Guid>()
                     .GetSingleOrDefaultAsync(ur => ur.UserId == userId && ur.RecipeId == id);
                 if (userRecipe is null || !userRecipe.IsOwner)
                 {

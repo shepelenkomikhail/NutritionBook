@@ -49,6 +49,18 @@ public class CommentsController : ControllerBase
         
         return Ok(comments);
     }
+
+    // GET api/comments/mine
+    [RequireUserId]
+    [HttpGet("mine")]
+    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetMyCommentsForRecipeAsync(Guid? recipeId)
+    {
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+        var comments = await _commentsService.GetUserCommentsForRecipeAsync(recipeId, userId);
+
+        return Ok(comments);
+    }
     
     // DELETE api/comments
     [RequireUserId]

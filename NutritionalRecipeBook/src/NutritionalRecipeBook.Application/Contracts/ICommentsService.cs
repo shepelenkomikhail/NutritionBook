@@ -11,4 +11,6 @@ public interface ICommentsService
     Task<CommentDTO?> GetCommentByIdAsync(Guid? commentId);
     
     Task<IEnumerable<CommentDTO>> GetAllCommentsForRecipeAsync(Guid? recipeId);
+
+    Task<IEnumerable<CommentDTO>> GetUserCommentsForRecipeAsync(Guid? recipeId, Guid userId);
 }

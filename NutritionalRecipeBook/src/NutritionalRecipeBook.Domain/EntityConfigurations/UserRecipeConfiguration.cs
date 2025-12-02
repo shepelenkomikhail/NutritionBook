@@ -9,7 +9,7 @@ public class UserRecipeConfiguration : IEntityTypeConfiguration<UserRecipe>
     public void Configure(EntityTypeBuilder<UserRecipe> builder)
     {
         builder.ToTable("UserRecipes");
-        builder.HasKey(ur => new { ur.UserId, ur.RecipeId });
+        builder.HasKey(ur => ur.Id);
         
         builder.HasOne(ur => ur.User)
             .WithMany(u => u.UserRecipes)
@@ -21,6 +21,8 @@ public class UserRecipeConfiguration : IEntityTypeConfiguration<UserRecipe>
             .HasForeignKey(ur => ur.RecipeId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.Ignore(ur => ur.Id);
+        builder.Property(ur => ur.Id)
+            .ValueGeneratedOnAdd()
+            .HasDefaultValueSql("NEWID()"); 
     }
 }
