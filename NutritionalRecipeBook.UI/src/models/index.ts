@@ -8,3 +8,7 @@ export * from './RegisterResponseModel';
 export * from './LoginFormModel';
 export * from './ShowIngredientModel';
 export * from './CommentModel';
+export * from './PagedResult';
+export * from './RecipeDTO';
+export * from './RecipeDetailsResponse';
+export * from './UploadImageResponse';

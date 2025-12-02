@@ -6,6 +6,7 @@ export function useCommentMutation() {
 
   const submit = async (params: { recipeId: string; rating: number; content: string }) => {
     try {
+      console.log('Submitting comment with params:', params);
       await createComment(params).unwrap();
       toast('Comment submitted successfully!');
 

@@ -2,7 +2,7 @@ import { theme as antdTheme } from 'antd';
 import type { ThemeConfig } from 'antd';
 import { darkTokens, lightTokens } from './tokens';
 
-function toAntd(tokens: typeof lightTokens, algorithm: any): ThemeConfig {
+function toAntd(tokens: typeof lightTokens, algorithm: ThemeConfig['algorithm']): ThemeConfig {
   return {
     algorithm,
     token: {

@@ -32,7 +32,13 @@ export const {
 } = recipesApi;
 
 export const { useRegisterMutation, useLoginMutation } = authApi;
-export const { useCreateCommentMutation } = commentsApi;
+export const { 
+  useCreateCommentMutation, 
+  useLazyGetCommentsQuery, 
+  useDeleteCommentMutation,
+  useGetMyCommentsQuery,
+  useLazyGetMyCommentsQuery,
+} = commentsApi;
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

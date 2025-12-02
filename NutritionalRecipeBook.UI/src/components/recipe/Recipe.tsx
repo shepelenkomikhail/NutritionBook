@@ -60,7 +60,7 @@ function Recipe() {
 
     triggerOwnedFetch({ pageNumber: 1, pageSize: 50 })
       .unwrap()
-      .then((res: any) => {
+      .then((res) => {
         const items = res?.items ?? [];
         dispatch(setUserRecipes({ recipes: items }));
       })

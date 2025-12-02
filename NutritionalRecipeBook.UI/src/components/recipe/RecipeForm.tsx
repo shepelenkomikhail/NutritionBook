@@ -7,6 +7,7 @@ import {
   lightLabelStyle,
 } from '../../themes/modelStyles.ts';
 import { Button, Checkbox, Form, GetProp, Input, InputNumber, message, Select, Space, Upload, UploadProps } from 'antd';
+import SecureImage from '../shared/SecureImage';
 
 
 interface RecipeFormProps {
@@ -74,7 +75,8 @@ function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeF
       return;
     }
     if (info.file.status === 'done') {
-      const serverUrl = (info.file.response as any)?.url as string | undefined;
+      const resp = info.file.response as import('@models').UploadImageResponse | undefined;
+      const serverUrl = resp?.url;
       if (serverUrl) {
         setLoading(false);
         setImageUrl(serverUrl);
@@ -112,14 +114,19 @@ function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeF
           listType="picture-card"
           className="avatar-uploader !w-full"
           showUploadList={false}
-          action="http://localhost:5039/api/recipes/image"
+          action={`${BASE_URL}/api/recipes/image`}
+          headers={localStorage.getItem('token') ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : undefined}
+          withCredentials
           beforeUpload={beforeUpload}
           onChange={handleChange}
           style={{ width: '100%' }}
         >
           {imageUrl ? (
-            <img draggable={false} src={BASE_URL + imageUrl} alt="avatar"
-                 style={{ width: '100%', height: '140px', borderRadius: '10px', marginTop: '16px' }} />
+            <SecureImage
+              src={imageUrl}
+              alt="avatar"
+              style={{ width: '400px', height: '120px', borderRadius: '10px', marginTop: '16px' }}
+            />
           ) : (
             uploadButton
           )}

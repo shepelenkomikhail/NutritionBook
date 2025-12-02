@@ -1,9 +1,13 @@
-import { RecipePayload } from '@models';
+import { RecipePayload, PagedResult, RecipeModel, RecipeDetailsResponse } from '@models';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-
 const BASE_URL = import.meta.env.VITE_API_URL;
+
+const getHeader = () =>
+  localStorage.getItem('token')
+    ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    : undefined;
 
 const recipesApi = createApi({
   reducerPath: 'recipes',
@@ -12,83 +16,89 @@ const recipesApi = createApi({
   endpoints: (builder) => ({
     createRecipe: builder.mutation({
       invalidatesTags: ['Recipe'],
-      query: (payload: RecipePayload) => ({
-        url: '/api/recipes',
-        method: 'POST',
-        headers: localStorage.getItem('token')
-          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          : undefined,
-        body: payload,
-      }),
+      query: (payload: RecipePayload) => {
+        const headers = getHeader();
+        return {
+          url: '/api/recipes',
+          method: 'POST',
+          ...(headers ? { headers } : {}),
+          body: payload,
+        };
+      },
     }),
     updateRecipe: builder.mutation<void, { id: string; data: RecipePayload }>({
       invalidatesTags: ['Recipe'],
-      query: ({ id, data }) => ({
-        url: `/api/recipes/${id}`,
-        method: 'PUT',
-        headers: localStorage.getItem('token')
-          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          : undefined,
-        body: data,
-      }),
+      query: ({ id, data }) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/${id}`,
+          method: 'PUT',
+          ...(headers ? { headers } : {}),
+          body: data,
+        };
+      },
     }),
     deleteRecipe: builder.mutation({
       invalidatesTags: ['Recipe'],
-      query: (id: string) => ({
-        url: `/api/recipes/${id}`,
-        method: 'DELETE',
-        headers: localStorage.getItem('token')
-          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          : undefined,
-      }),
+      query: (id: string) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/${id}`,
+          method: 'DELETE',
+          ...(headers ? { headers } : {}),
+        };
+      },
     }),
-    getRecipes: builder.query({
+    getRecipes: builder.query<PagedResult<RecipeModel>, {
+      search?: string;
+      pageNumber?: number;
+      pageSize?: number;
+      minCookingTimeInMin?: number;
+      maxCookingTimeInMin?: number;
+      minServings?: number;
+      maxServings?: number;
+    } | void>({
       providesTags: ['Recipe'],
-      query: (params?: {
-        search?: string;
-        pageNumber?: number;
-        pageSize?: number;
-        minCookingTimeInMin?: number;
-        maxCookingTimeInMin?: number;
-        minServings?: number;
-        maxServings?: number;
-      }) => ({
-        url: '/api/recipes',
-        method: 'GET',
-        headers: localStorage.getItem('token')
-          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          : undefined,
-        params,
-      }),
+      query: (params) => {
+        const headers = getHeader();
+        return {
+          url: '/api/recipes',
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+          ...(params ? { params } : {}),
+        };
+      },
     }),
-    getRecipeById: builder.query({
+    getRecipeById: builder.query<RecipeDetailsResponse, string>({
       providesTags: ['Recipe'],
-      query: (id: string) => ({
-        url: `/api/recipes/${id}`,
-        method: 'GET',
-        headers: localStorage.getItem('token')
-          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          : undefined,
-      })
+      query: (id: string) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/${id}`,
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+        };
+      }
     }),
-    getRecipesByUser: builder.query({
+    getRecipesByUser: builder.query<PagedResult<RecipeModel>, {
+      search?: string;
+      pageNumber?: number;
+      pageSize?: number;
+      minCookingTimeInMin?: number;
+      maxCookingTimeInMin?: number;
+      minServings?: number;
+      maxServings?: number;
+    } | void>({
       providesTags: ['Recipe'],
-      query: (params?: {
-        search?: string;
-        pageNumber?: number;
-        pageSize?: number;
-        minCookingTimeInMin?: number;
-        maxCookingTimeInMin?: number;
-        minServings?: number;
-        maxServings?: number;
-      })=>  ({
-        url: `/api/users/recipes`,
-        method: 'GET',
-        headers: localStorage.getItem('token')
-          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          : undefined,
-        params,
-      })
+      query: (params)=>  {
+        const headers = getHeader();
+        return {
+          url: `/api/users/recipes`,
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+          ...(params ? { params } : {}),
+        };
+      }
     })
   })
 });
