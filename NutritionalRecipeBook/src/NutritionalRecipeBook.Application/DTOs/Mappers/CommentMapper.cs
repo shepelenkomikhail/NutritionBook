@@ -4,14 +4,15 @@ namespace NutritionalRecipeBook.Application.DTOs.Mappers;
 
 public static class CommentMapper
 {
-    public static CommentDTO ToDto(Comment entity)
+    public static CommentDTO ToDto(Comment entity, int? rating = null)
     {
         return new CommentDTO(
             entity.Id,
             entity.Content,
             entity.CreatedAt,
             entity.RecipeId,
-            entity.UserId
+            entity.UserId,
+            rating
         );
     }
 

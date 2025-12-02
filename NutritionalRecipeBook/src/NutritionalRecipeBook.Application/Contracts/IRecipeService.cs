@@ -8,11 +8,11 @@ public interface IRecipeService
 {
     Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO recipeUpdateDto, Guid userId);
     
-    Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO recipeUpdateDto);
+    Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO recipeUpdateDto, Guid userId);
     
     Task<Guid?> GetRecipeIdByNameAsync(string name);
     
-    Task<bool> DeleteRecipeAsync(Guid id);
+    Task<bool> DeleteRecipeAsync(Guid id, Guid userId);
     
     Task<RecipeIngredientDTO?> GetRecipeByIdAsync(Guid id);
     

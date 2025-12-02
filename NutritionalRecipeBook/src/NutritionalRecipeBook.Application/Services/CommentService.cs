@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs;
 using NutritionalRecipeBook.Application.DTOs.Mappers;
+using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 
@@ -34,8 +35,24 @@ public class CommentService : ICommentsService
             return false;
         }
 
+        if (commentDto.RecipeId == Guid.Empty)
+        {
+            _logger.LogWarning("Recipe ID is required to create a comment.");
+            return false;
+        }
+
         try
         {
+            var recipeExists = await _unitOfWork.Repository<Recipe, Guid>()
+                .GetByIdAsync(commentDto.RecipeId) != null;
+            
+            if (!recipeExists)
+            {
+                _logger.LogWarning("Cannot create comment: Recipe with ID {RecipeId} not found.", commentDto.RecipeId);
+            
+                return false;
+            }
+
             var existingComment = await _unitOfWork.Repository<Comment, Guid>()
                 .GetWhereAsync(c =>
                 c.Content == commentDto.Content &&
@@ -52,6 +69,26 @@ public class CommentService : ICommentsService
 
             var commentEntity = CommentMapper.ToEntity(commentDto);
             await _unitOfWork.Repository<Comment, Guid>().InsertAsync(commentEntity);
+
+            var existingUserRecipe = await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>()
+                .GetSingleOrDefaultAsync(ur => ur.UserId == commentDto.UserId && ur.RecipeId == commentDto.RecipeId);
+            
+            if (existingUserRecipe is not null)
+            {   
+                existingUserRecipe.Rating = commentDto.Rating;
+                
+                await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>().UpdateAsync(existingUserRecipe);
+            }
+            else
+            {
+                await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>().InsertAsync(
+                    new UserRecipe()
+                    {
+                        UserId = commentDto.UserId,
+                        RecipeId = commentDto.RecipeId,
+                        Rating = commentDto.Rating
+                    });
+            }
             
             var isSaved = await _unitOfWork.SaveAsync();
 
@@ -73,7 +110,7 @@ public class CommentService : ICommentsService
         }
     }
     
-    public async Task<bool> DeleteCommentAsync(Guid? commentId)
+    public async Task<bool> DeleteCommentAsync(Guid? commentId, Guid userId)
     {
         if (commentId == null)
         {
@@ -82,6 +119,16 @@ public class CommentService : ICommentsService
             return false;
         }
 
+        var comment =
+            await _unitOfWork.Repository<Comment, Guid>().GetSingleOrDefaultAsync(c => c.Id == commentId.Value);
+
+        if (comment?.UserId != userId)
+        {
+            _logger.LogWarning("User {UserId} is not authorized to delete comment with ID {CommentId}.", userId, commentId);
+            
+            return false;
+        }
+        
         try
         {
             await _unitOfWork.Repository<Comment, Guid>().DeleteAsync(commentId.Value);
@@ -130,6 +177,17 @@ public class CommentService : ICommentsService
         var comments = await _unitOfWork.Repository<Comment, Guid>()
             .GetWhereAsync(c => c.RecipeId == recipeId);
         
-        return comments.Select(CommentMapper.ToDto);
+        var ratings = await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>()
+            .GetWhereAsync(ur => ur.RecipeId == recipeId);
+
+        var ratingByUser = ratings
+            .GroupBy(r => r.UserId)
+            .ToDictionary(g => g.Key, g => g.First().Rating);
+
+        return comments.Select(c =>
+        {
+            ratingByUser.TryGetValue(c.UserId, out var rating);
+            return CommentMapper.ToDto(c, rating);
+        });
     }
 }

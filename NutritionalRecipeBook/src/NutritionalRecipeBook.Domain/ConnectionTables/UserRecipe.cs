@@ -10,7 +10,7 @@ public class UserRecipe: BaseEntity<(Guid RecipeId, Guid IngredientId)>
     public Guid RecipeId { get; set; }
     public virtual Recipe Recipe { get; set; } = null!;
     
-    public int Rating { get; set; }
+    public int? Rating { get; set; }
     public bool IsOwner { get; set; }
     public bool IsFavourite { get; set; }
 }

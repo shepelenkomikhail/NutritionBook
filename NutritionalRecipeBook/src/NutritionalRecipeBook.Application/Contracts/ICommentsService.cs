@@ -4,9 +4,9 @@ namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface ICommentsService
 {
-    Task<bool> CreateCommentAsync(CommentDTO? commentDto);
+    Task<bool> CreateCommentAsync(CommentDTO? newComment);
     
-    Task<bool> DeleteCommentAsync(Guid? commentId);
+    Task<bool> DeleteCommentAsync(Guid? commentId, Guid userId);
     
     Task<CommentDTO?> GetCommentByIdAsync(Guid? commentId);
     

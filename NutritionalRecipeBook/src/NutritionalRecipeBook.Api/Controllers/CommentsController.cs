@@ -1,10 +1,14 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NutritionalRecipeBook.Api.Filters;
+using NutritionalRecipeBook.Api.Models;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs;
 
 namespace NutritionalRecipeBook.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class CommentsController : ControllerBase
@@ -19,10 +23,14 @@ public class CommentsController : ControllerBase
     }
     
     // POST: api/comments
-    //[Authorize]
+    [RequireUserId]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CommentDTO newCommentDto)
     {
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+        newCommentDto = newCommentDto with { UserId = userId };
+        
         var createdComment = await _commentsService.CreateCommentAsync(newCommentDto);
 
         if (!createdComment)
@@ -43,11 +51,13 @@ public class CommentsController : ControllerBase
     }
     
     // DELETE api/comments
-    //[Authorize]
+    [RequireUserId]
     [HttpDelete]
     public async Task<IActionResult> DeleteCommentAsync(Guid commentId)
     {
-        var isDeleted = await _commentsService.DeleteCommentAsync(commentId);
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+        
+        var isDeleted = await _commentsService.DeleteCommentAsync(commentId, userId);
         
         if (!isDeleted)
         {

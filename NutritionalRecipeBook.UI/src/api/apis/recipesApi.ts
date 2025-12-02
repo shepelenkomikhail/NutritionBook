@@ -55,6 +55,9 @@ const recipesApi = createApi({
       }) => ({
         url: '/api/recipes',
         method: 'GET',
+        headers: localStorage.getItem('token')
+          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          : undefined,
         params,
       }),
     }),
@@ -63,6 +66,9 @@ const recipesApi = createApi({
       query: (id: string) => ({
         url: `/api/recipes/${id}`,
         method: 'GET',
+        headers: localStorage.getItem('token')
+          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          : undefined,
       })
     }),
     getRecipesByUser: builder.query({

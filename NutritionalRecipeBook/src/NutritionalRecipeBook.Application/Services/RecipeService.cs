@@ -99,7 +99,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO? recipeDto)
+        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO? recipeDto, Guid userId)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -116,6 +116,16 @@ namespace NutritionalRecipeBook.Application.Services
                 {
                     _logger.LogWarning("UpdateRecipeAsync failed: Recipe with ID {Id} not found.", id);
                     
+                    return false;
+                }
+                
+                var userRecipe = await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>()
+                    .GetSingleOrDefaultAsync(ur => ur.UserId == userId && ur.RecipeId == id);
+                
+                if (userRecipe is null || !userRecipe.IsOwner)
+                {
+                    _logger.LogWarning("User {UserId} is not authorized to update recipe with ID {RecipeId}.", userId, id);
+                
                     return false;
                 }
                 
@@ -240,11 +250,20 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public async Task<bool> DeleteRecipeAsync(Guid id)
+        public async Task<bool> DeleteRecipeAsync(Guid id, Guid userId)
         {
             try
             {
                 await this.CheckExistencyAsync(id, _logger, _unitOfWork);
+
+                // Rights check: only owner can delete
+                var userRecipe = await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>()
+                    .GetSingleOrDefaultAsync(ur => ur.UserId == userId && ur.RecipeId == id);
+                if (userRecipe is null || !userRecipe.IsOwner)
+                {
+                    _logger.LogWarning("User {UserId} is not authorized to delete recipe with ID {RecipeId}.", userId, id);
+                    return false;
+                }
                 await _unitOfWork.Repository<Recipe, Guid>().DeleteAsync(id);
 
                 bool isSaved = await _unitOfWork.SaveAsync();
