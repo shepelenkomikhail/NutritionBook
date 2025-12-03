@@ -177,6 +177,7 @@ public static class SeedData
             var recipe = recipes[i % recipes.Count];
             list.Add(new UserRecipe
             {
+                Id = Guid.Parse($"70000000-0000-0000-0000-0000000000{i:D2}"),
                 UserId = user.Id,
                 RecipeId = recipe.Id,
                 Rating = (i % 5) + 1,

@@ -23,26 +23,6 @@ const authApi = createApi({
           const { data } = await queryFulfilled;
           if (!data?.token) return;
 
-          const deriveUsername = (d: any): string | null => {
-            const fromFields = d?.username || d?.userName || d?.email || d?.name || d?.surname;
-            if (fromFields) return fromFields as string;
-            try {
-              const [, payload] = (d.token as string).split('.');
-              if (payload) {
-                const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-                return (
-                  decoded?.unique_name ||
-                  decoded?.preferred_username ||
-                  decoded?.name ||
-                  decoded?.email ||
-                  decoded?.sub ||
-                  null
-                );
-              }
-            } catch {}
-            return null;
-          };
-
           const username = deriveUsername(data) || 'User';
           dispatch(setCredentials({ token: data.token, username }));
         } catch (error) {
@@ -62,26 +42,6 @@ const authApi = createApi({
           const { data } = await queryFulfilled;
           if (!data?.token) return;
 
-          const deriveUsername = (d: any): string | null => {
-            const fromFields = d?.username || d?.userName || d?.email || d?.name || d?.surname;
-            if (fromFields) return fromFields as string;
-            try {
-              const [, payload] = (d.token as string).split('.');
-              if (payload) {
-                const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-                return (
-                  decoded?.unique_name ||
-                  decoded?.preferred_username ||
-                  decoded?.name ||
-                  decoded?.email ||
-                  decoded?.sub ||
-                  null
-                );
-              }
-            } catch {}
-            return null;
-          };
-
           const username = deriveUsername(data) || 'User';
           dispatch(setCredentials({ token: data.token, username }));
         } catch (error) {
@@ -94,3 +54,75 @@ const authApi = createApi({
 
 export const { useRegisterMutation, useLoginMutation } = authApi;
 export default authApi;
+
+function deriveUsername(
+  data: RegisterResponseModel | { token: string } | undefined
+): string | null {
+  if (!data) return null;
+
+  const direct = extractDirectUsername(data);
+  if (direct) return direct;
+
+  const alt = extractAlternativeUsername(data);
+  if (alt) return alt;
+
+  return extractUsernameFromToken(data);
+}
+
+function extractDirectUsername(data: unknown): string | null {
+  const model = data as Partial<RegisterResponseModel>;
+
+  return typeof model.username === "string" && model.username
+    ? model.username
+    : null;
+}
+
+function extractAlternativeUsername(data: unknown): string | null {
+  const obj = data as Record<string, unknown>;
+  const altKeys = ["userName", "email", "name", "surname"] as const;
+
+  for (const key of altKeys) {
+    const val = obj[key];
+    if (typeof val === "string" && val) return val;
+  }
+
+  return null;
+}
+
+function extractUsernameFromToken(data: unknown): string | null {
+  try {
+    const token = (data as { token?: string }).token;
+    if (!token) return null;
+
+    const payloadJson = decodeJwtPayload(token);
+    if (!payloadJson) return null;
+
+    return (
+      payloadJson["unique_name"] ||
+      payloadJson["preferred_username"] ||
+      payloadJson["name"] ||
+      payloadJson["email"] ||
+      payloadJson["sub"] ||
+      null
+    ) as string | null;
+  } catch {
+    return null;
+  }
+}
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  const parts = token.split(".");
+  if (parts.length < 2) return null;
+
+  const base64 = parts[1]
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+
+  try {
+    const json = atob(base64);
+
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}

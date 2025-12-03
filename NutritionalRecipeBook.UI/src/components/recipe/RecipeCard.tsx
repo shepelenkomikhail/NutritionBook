@@ -1,7 +1,8 @@
 import { RecipeModel } from '@models';
 import { DeleteRecipeButton, EditRecipeButton } from './buttons/index.ts';
-import { Card, Image, Space } from 'antd';
+import { Card, Space } from 'antd';
 import { PictureOutlined } from '@ant-design/icons';
+import SecureImage from '../shared/SecureImage';
 import { useState } from 'react';
 import { RecipeDetails } from './index.ts';
 import { useSelector } from 'react-redux';
@@ -17,16 +18,7 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
 
   const buildImageSrc = (url?: string) => {
     if (!url || url.trim() === '') return undefined;
-    const trimmed = url.trim();
-    if (/^(https?:)?\/\//i.test(trimmed) || /^(data:|blob:)/i.test(trimmed)) {
-      return trimmed;
-    }
-    const base = import.meta.env.VITE_API_URL as string | undefined;
-    if (base) {
-      const sep = trimmed.startsWith('/') ? '' : '/';
-      return `${base}${sep}${trimmed}`;
-    }
-    return trimmed;
+    return url.trim();
   };
 
   const handleOpen = () => {
@@ -49,7 +41,7 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
           cover={(() => {
             const src = buildImageSrc(recipe.imageUrl);
             return src ? (
-              <Image
+              <SecureImage
                 alt={recipe.name}
                 src={src}
                 preview={false}

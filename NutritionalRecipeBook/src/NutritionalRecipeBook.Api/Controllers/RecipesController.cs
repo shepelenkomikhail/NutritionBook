@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NutritionalRecipeBook.Api.Filters;
 using NutritionalRecipeBook.Api.Models;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
@@ -8,6 +9,7 @@ using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 namespace NutritionalRecipeBook.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class RecipesController : ControllerBase
     {
@@ -23,19 +25,11 @@ namespace NutritionalRecipeBook.Api.Controllers
         }
 
         // POST: api/recipes
-        [Authorize]
+        [RequireUserId]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] RecipeIngredientDTO newRecipeUpdateDto)
         {
-            var userIdClaim =
-                User.FindFirst(ClaimTypes.NameIdentifier) ??
-                User.FindFirst("sub");
-            
-            if (userIdClaim == null || 
-                !Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                return Unauthorized();
-            }
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
             Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeUpdateDto, userId);
             if (newRecipeId == null)
@@ -99,21 +93,13 @@ namespace NutritionalRecipeBook.Api.Controllers
         }
 
         // PUT: api/recipes/{id}
-        [Authorize]
+        [RequireUserId]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] RecipeIngredientDTO updatedRecipeDto)
         {
-            var userIdClaim =
-                User.FindFirst(ClaimTypes.NameIdentifier) ??
-                User.FindFirst("sub");
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
-            if (userIdClaim == null || 
-                !Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                return Unauthorized();
-            }
-            
-            bool isUpdated = await _recipeService.UpdateRecipeAsync(id, updatedRecipeDto);
+            bool isUpdated = await _recipeService.UpdateRecipeAsync(id, updatedRecipeDto, userId);
             if (!isUpdated)
             {
                 return BadRequest("Failed to update recipe.");
@@ -123,21 +109,13 @@ namespace NutritionalRecipeBook.Api.Controllers
         }
         
         // DELETE: api/recipes/{id}
-        [Authorize]
         [HttpDelete("{id}")]
+        [RequireUserId]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var userIdClaim =
-                User.FindFirst(ClaimTypes.NameIdentifier) ??
-                User.FindFirst("sub");
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
-            if (userIdClaim == null || 
-                !Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                return Unauthorized();
-            }
-            
-            bool isDeleted = await _recipeService.DeleteRecipeAsync(id);
+            bool isDeleted = await _recipeService.DeleteRecipeAsync(id, userId);
             if (!isDeleted)
             {
                 return BadRequest("Failed to update recipe.");
@@ -166,11 +144,6 @@ namespace NutritionalRecipeBook.Api.Controllers
             [FromQuery] int pageSize = 10,
             [FromQuery] RecipeFilter? filter = null)
         {
-            if (pageNumber <= 0 || pageSize <= 0)
-            {
-                return BadRequest("Invalid pagination parameters.");
-            }
-
             var filterDto = new RecipeFilterDTO(
                 filter?.Search,
                 filter?.MinCookingTimeInMin, 
@@ -181,6 +154,19 @@ namespace NutritionalRecipeBook.Api.Controllers
             var pagedResult = _recipeService.GetRecipesAsync(pageNumber, pageSize, filterDto);
             
             return Ok(pagedResult);
+        }
+
+        // GET: api/recipes/mine
+        [HttpGet("mine")]
+        [RequireUserId]
+        public IActionResult GetMyRecipes(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+            var paged = _recipeService.GetRecipesForUserAsync(pageNumber, pageSize, userId);
+     
+            return Ok(paged);
         }
     }
 }

@@ -1,12 +1,12 @@
-import hotToast from 'react-hot-toast';
+import hotToast, { type ToastOptions } from 'react-hot-toast';
 
-export function toast(message: string, opts?: any) {
+export function toast(message: string, opts?: ToastOptions) {
   const styles = getComputedStyle(document.body);
   const colorPrimary = styles.getPropertyValue('--brand').trim() || '#722ED1';
   const colorInfo = styles.getPropertyValue('--fg').trim() || '#ffffff';
   const colorBg = styles.getPropertyValue('--card').trim() || '#181818';
 
-  const baseOpts = {
+  const baseOpts: ToastOptions = {
     icon: '👀',
     position: 'top-right' as const,
     style: {

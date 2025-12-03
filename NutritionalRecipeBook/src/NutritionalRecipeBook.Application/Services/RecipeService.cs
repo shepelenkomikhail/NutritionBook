@@ -64,7 +64,7 @@ namespace NutritionalRecipeBook.Application.Services
                     IsFavourite = false,
                     Rating = 0
                 };
-                await _unitOfWork.Repository<UserRecipe, (Guid, Guid)>().InsertAsync(userRecipe);
+                await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(userRecipe);
 
                 if (recipeDto.Ingredients.Count > 0)
                 {
@@ -99,11 +99,12 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO? recipeDto)
+        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO? recipeDto, Guid userId)
         {
             if (recipeDto?.RecipeDTO == null)
             {
                 _logger.LogWarning("UpdateRecipeAsync failed: RecipeDTO is null.");
+               
                 return false;
             }
 
@@ -114,6 +115,17 @@ namespace NutritionalRecipeBook.Application.Services
                 if (existingRecipe == null)
                 {
                     _logger.LogWarning("UpdateRecipeAsync failed: Recipe with ID {Id} not found.", id);
+                    
+                    return false;
+                }
+                
+                var userRecipe = await _unitOfWork.Repository<UserRecipe, Guid>()
+                    .GetSingleOrDefaultAsync(ur => ur.UserId == userId && ur.RecipeId == id);
+                
+                if (userRecipe is null || !userRecipe.IsOwner)
+                {
+                    _logger.LogWarning("User {UserId} is not authorized to update recipe with ID {RecipeId}.", userId, id);
+                
                     return false;
                 }
                 
@@ -142,15 +154,18 @@ namespace NutritionalRecipeBook.Application.Services
                 if (!isSaved)
                 {
                     _logger.LogWarning("UpdateRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
+                    
                     return false;
                 }
 
                 _logger.LogInformation("Recipe with ID {Id} and ingredients updated successfully.", id);
+                
                 return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred while updating recipe ID {Id}.", id);
+                
                 return false;
             }
         }
@@ -235,11 +250,19 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public async Task<bool> DeleteRecipeAsync(Guid id)
+        public async Task<bool> DeleteRecipeAsync(Guid id, Guid userId)
         {
             try
             {
                 await this.CheckExistencyAsync(id, _logger, _unitOfWork);
+
+                var userRecipe = await _unitOfWork.Repository<UserRecipe, Guid>()
+                    .GetSingleOrDefaultAsync(ur => ur.UserId == userId && ur.RecipeId == id);
+                if (userRecipe is null || !userRecipe.IsOwner)
+                {
+                    _logger.LogWarning("User {UserId} is not authorized to delete recipe with ID {RecipeId}.", userId, id);
+                    return false;
+                }
                 await _unitOfWork.Repository<Recipe, Guid>().DeleteAsync(id);
 
                 bool isSaved = await _unitOfWork.SaveAsync();

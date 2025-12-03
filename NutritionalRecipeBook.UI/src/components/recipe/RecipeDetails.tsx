@@ -1,8 +1,14 @@
-import { useEffect } from 'react';
-import { useLazyGetRecipeByIdQuery } from '@api';
-import { Descriptions, Divider, Image, List, Modal, Spin, Typography } from 'antd';
-import { PictureOutlined } from '@ant-design/icons';
-import { ShowIngredientModel } from '@models';
+import { useEffect, useMemo, useState } from 'react';
+import { useLazyGetRecipeByIdQuery, useLazyGetCommentsQuery, useDeleteCommentMutation, useLazyGetMyCommentsQuery } from '@api';
+import { Divider, Modal, Spin, Typography, List } from 'antd';
+import { type CommentModel, ShowIngredientModel, type PagedResult } from '@models';
+import { useCommentMutation } from '@hooks';
+import { toast } from '@utils/toast.tsx';
+import RecipeRatingSummary from './details/RecipeRatingSummary';
+import RecipeImage from './details/RecipeImage';
+import RecipeMeta from './details/RecipeMeta';
+import CommentsList from './details/CommentsList';
+import CommentForm from './details/CommentForm';
 const { Title } = Typography;
 
 interface RecipeModalProps {
@@ -13,26 +19,79 @@ interface RecipeModalProps {
 
 function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   const [getData, { data: recipeData, isLoading }] = useLazyGetRecipeByIdQuery();
+  const { submit, isLoading: isSubmitting } = useCommentMutation();
+  const [triggerComments, { data: commentsData, isLoading: isCommentsLoading }] = useLazyGetCommentsQuery();
+  const [triggerMyComments, { data: myCommentsData }] = useLazyGetMyCommentsQuery();
+  const [page, setPage] = useState<number>(1);
+  const pageSize = 3;
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteComment] = useDeleteCommentMutation();
+  
+  const handleSubmit = async (values: { rating: number; content: string }) => {
+    if (!recipeId) return;
+    const ok = await submit({ recipeId, rating: values.rating, content: values.content?.trim() });
+    if (ok) {
+      getData(recipeId);
+      triggerComments({ recipeId });
+      triggerMyComments({ recipeId });
+    }
+  }
 
-  const buildImageSrc = (url?: string) => {
-    if (!url || url.trim() === '') return undefined;
-    const trimmed = url.trim();
-    if (/^(https?:)?\/\//i.test(trimmed) || /^(data:|blob:)/i.test(trimmed)) {
-      return trimmed;
+  const handleDeleteComment = async (item: CommentModel, currentPageCount: number) => {
+    if (!item.id) return;
+    const allow = myCommentIds.has(item.id);
+    if (!allow) {
+      toast('You can only delete your own comments.');
+      return;
     }
-    const base = import.meta.env.VITE_API_URL as string | undefined;
-    if (base) {
-      const sep = trimmed.startsWith('/') ? '' : '/';
-      return `${base}${sep}${trimmed}`;
+    try {
+      setDeletingId(item.id);
+      if (currentPageCount === 1 && page > 1) {
+        setPage(page - 1);
+      }
+      await deleteComment({ commentId: item.id }).unwrap();
+      toast('Comment deleted successfully!');
+      triggerComments({ recipeId });
+      triggerMyComments({ recipeId });
+    } catch (err) {
+      console.error('Failed to delete comment:', err);
+      toast('Failed to delete comment');
+    } finally {
+      setDeletingId(null);
     }
-    return trimmed;
   };
 
   useEffect(() => {
     if (open && recipeId) {
       getData(recipeId);
+
+      triggerComments({ recipeId });
+      triggerMyComments({ recipeId });
+      setPage(1);
     }
-  }, [open, recipeId, getData]);
+  }, [open, recipeId, getData, triggerComments, triggerMyComments]);
+
+  const comments: CommentModel[] = useMemo(() => {
+    const list = (commentsData ?? []) as CommentModel[];
+
+    return Array.isArray(list) ? list : [];
+  }, [commentsData]);
+
+  const averageRating = useMemo(() => {
+    if (!comments.length) return 0;
+    const sum = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+
+    return Number((sum / comments.length).toFixed(1));
+  }, [comments]);
+
+  const myCommentIds = useMemo(() => {
+    const raw = (myCommentsData ?? []) as CommentModel[] | PagedResult<CommentModel>;
+    const items = Array.isArray(raw) ? raw : (raw?.items ?? []);
+    const ids = (items as CommentModel[])
+      .map(c => c.id)
+      .filter((id): id is string => typeof id === 'string' && !!id);
+    return new Set(ids);
+  }, [myCommentsData]);
 
   return (
     <Modal
@@ -54,28 +113,17 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
         <Spin className="w-full flex justify-center py-10" tip="Loading recipe details..." />
       ) : recipeData ? (
         <div className="p-4 rounded-lg bg-[var(--card)] text-[var(--fg)]">
-          <div className="w-full mb-4">
-            {(() => {
-              const src = buildImageSrc((recipeData as any).recipeDTO?.imageUrl);
-              return src ? (
-                <Image
-                  alt={recipeData.recipeDTO?.name || 'Recipe image'}
-                  src={src}
-                  preview={false}
-                  className="object-cover"
-                  style={{ height: '180px', width: '100%', padding: '12px', borderRadius: '20px' }}
+          <RecipeRatingSummary averageRating={averageRating} totalCount={comments.length} />
 
-                />
-              ) : (
-                <div
-                  className="h-56 w-full flex items-center justify-center bg-[var(--card)] text-[var(--fg-muted)] rounded-md"
-                  aria-label="No image available"
-                  title="No image available"
-                >
-                  <PictureOutlined style={{ fontSize: 56 }} />
-                </div>
-              );
-            })()}
+          <Divider className="my-4" />
+
+          <div className="w-full mb-4">
+            <RecipeImage
+              name={recipeData.recipeDTO?.name}
+              imageUrl={recipeData.recipeDTO?.imageUrl}
+              className="object-cover"
+              style={{ height: '180px', width: '100%', padding: '12px', borderRadius: '20px' }}
+            />
           </div>
 
           <Title level={4} className="!text-[var(--fg)]">
@@ -111,14 +159,39 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
 
           <Divider className="my-4" />
 
-          <Descriptions bordered column={1} size="small">
-            <Descriptions.Item label="Cooking Time">
-              {recipeData.recipeDTO.cookingTimeInMin} min
-            </Descriptions.Item>
-            <Descriptions.Item label="Servings">
-              {recipeData.recipeDTO.servings}
-            </Descriptions.Item>
-          </Descriptions>
+          <RecipeMeta
+            cookingTimeInMin={recipeData.recipeDTO.cookingTimeInMin}
+            servings={recipeData.recipeDTO.servings}
+          />
+
+          <Divider className="my-4" />
+          <Title level={4} className="!text-[var(--fg)]">
+            Comments
+          </Title>
+
+          <Spin spinning={isCommentsLoading} tip="Loading comments...">
+            {comments.length === 0 ? (
+              <p className="text-[var(--fg-muted)]">No comments yet. Be the first to leave one!</p>
+            ) : (
+              <CommentsList
+                comments={comments}
+                page={page}
+                setPage={setPage}
+                pageSize={pageSize}
+                myCommentIds={myCommentIds}
+                deletingId={deletingId}
+                onDelete={handleDeleteComment}
+              />
+            )}
+          </Spin>
+
+          <Divider className="my-4" />
+
+          <Title level={4} className="!text-[var(--fg)]">
+            Leave a Comment
+          </Title>
+
+          <CommentForm onSubmit={handleSubmit} loading={isSubmitting} />
         </div>
       ) : (
         <p className="text-center py-6 text-[var(--fg-muted)]">

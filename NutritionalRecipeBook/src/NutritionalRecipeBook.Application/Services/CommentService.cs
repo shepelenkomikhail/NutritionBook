@@ -1,0 +1,211 @@
+using Microsoft.Extensions.Logging;
+using NutritionalRecipeBook.Application.Contracts;
+using NutritionalRecipeBook.Application.DTOs;
+using NutritionalRecipeBook.Application.DTOs.Mappers;
+using NutritionalRecipeBook.Domain.ConnectionTables;
+using NutritionalRecipeBook.Domain.Entities;
+using NutritionalRecipeBook.Infrastructure.Contracts;
+
+namespace NutritionalRecipeBook.Application.Services;
+
+public class CommentService : ICommentsService
+{
+    private readonly ILogger<CommentService> _logger;
+    private readonly IUnitOfWork _unitOfWork;
+    
+    public CommentService(ILogger<CommentService> logger, IUnitOfWork unitOfWork)
+    {
+        _logger = logger;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<bool> CreateCommentAsync(CommentDTO? commentDto)
+    {
+        if (commentDto == null)
+        {
+            _logger.LogWarning("CommentDTO is null.");
+            
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(commentDto.Content))
+        {
+            _logger.LogWarning("Comment content is required.");
+            
+            return false;
+        }
+
+        try
+        {
+            var recipeExists = await _unitOfWork.Repository<Recipe, Guid>()
+                .GetByIdAsync(commentDto.RecipeId) != null;
+            if (!recipeExists)
+            {
+                _logger.LogWarning("Cannot create comment: Recipe with ID {RecipeId} not found.", commentDto.RecipeId);
+                
+                return false;
+            }
+
+            var duplicate = await _unitOfWork.Repository<Comment, Guid>()
+                .GetSingleOrDefaultAsync(c => c.UserId == commentDto.UserId
+                                           && c.RecipeId == commentDto.RecipeId
+                                           && c.Content == commentDto.Content);
+            if (duplicate != null)
+            {
+                _logger.LogWarning("Duplicate comment content for user {UserId} on recipe {RecipeId}.", 
+                    commentDto.UserId, commentDto.RecipeId);
+                
+                return false;
+            }
+
+            var commentEntity = CommentMapper.ToEntity(commentDto);
+            commentEntity.CreatedAt = DateTime.UtcNow;
+            
+            await _unitOfWork.Repository<Comment, Guid>().InsertAsync(commentEntity);
+            
+            await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(new UserRecipe
+            {
+                UserId = commentDto.UserId,
+                RecipeId = commentDto.RecipeId,
+                Rating = commentDto.Rating,
+            });
+
+            return SaveChangesAsync().Result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error occurred while creating comment.");
+            
+            return false;
+        }
+    }
+    
+    public async Task<bool> DeleteCommentAsync(Guid? commentId, Guid userId)
+    {
+        if (commentId == null)
+        {
+            _logger.LogWarning("Comment ID is null.");
+            
+            return false;
+        }
+
+        var comment = await _unitOfWork.Repository<Comment, Guid>()
+            .GetSingleOrDefaultAsync(c => c.Id == commentId.Value);
+
+        if (comment?.UserId != userId)
+        {
+            _logger.LogWarning("User {UserId} is not authorized to delete comment with ID {CommentId}.",
+                userId, commentId);
+            
+            return false;
+        }
+        
+        try
+        {
+            await _unitOfWork.Repository<Comment, Guid>().DeleteAsync(commentId.Value);
+
+            return SaveChangesAsync().Result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error occurred while deleting comment.");
+            
+            return false;
+        }
+    }
+
+    public async Task<CommentDTO?> GetCommentByIdAsync(Guid? commentId)
+    {
+        if (commentId == null)
+        {
+            _logger.LogWarning("Comment ID is null.");
+            
+            return null;
+        }
+
+        var existingComment = await _unitOfWork.Repository<Comment, Guid>()
+            .GetByIdAsync(commentId.Value);
+        if (existingComment == null)
+        {
+            _logger.LogWarning("Comment with ID '{Id}' not found.", commentId);
+            
+            return null;
+        }
+        
+        return CommentMapper.ToDto(existingComment);
+    }
+
+    public async Task<IEnumerable<CommentDTO>> GetAllCommentsForRecipeAsync(Guid? recipeId)
+    {
+        if (recipeId == null)
+        {
+            _logger.LogWarning("Recipe ID is null.");
+            
+            return Enumerable.Empty<CommentDTO>();
+        }
+
+        var comments = (await _unitOfWork.Repository<Comment, Guid>()
+                .GetWhereAsync(c => c.RecipeId == recipeId))
+            .OrderBy(c => c.Id)
+            .ToList();
+
+        var ratings = (await _unitOfWork.Repository<UserRecipe, Guid>()
+                .GetWhereAsync(ur => ur.RecipeId == recipeId))
+            .OrderBy(r => r.Id)
+            .ToList();
+
+        var result = new List<CommentDTO>();
+
+        for (int i = 0; i < comments.Count; i++)
+        {
+            var comment = comments[i];
+
+            var rating = ratings.Count > i ? ratings[i].Rating : null;
+
+            result.Add(CommentMapper.ToDto(comment, rating));
+        }
+
+        return result;
+    }
+
+    public async Task<IEnumerable<CommentDTO>> GetUserCommentsForRecipeAsync(Guid? recipeId, Guid userId)
+    {
+        if (recipeId == null)
+        {
+            _logger.LogWarning("Recipe ID is null.");
+           
+            return Enumerable.Empty<CommentDTO>();
+        }
+
+        var comments = (await _unitOfWork.Repository<Comment, Guid>()
+                .GetWhereAsync(c => c.RecipeId == recipeId && c.UserId == userId))
+            .OrderBy(c => c.CreatedAt)
+            .ToList();
+
+        if (comments.Count == 0)
+        {
+            return Enumerable.Empty<CommentDTO>();
+        }
+
+        var userRecipe = await _unitOfWork.Repository<UserRecipe, Guid>()
+            .GetSingleOrDefaultAsync(ur => ur.RecipeId == recipeId && ur.UserId == userId);
+
+        int? rating = userRecipe?.Rating;
+
+        return comments.Select(c => CommentMapper.ToDto(c, rating));
+    }
+    
+    private async Task<bool> SaveChangesAsync()
+    {
+        try
+        {
+            return await _unitOfWork.SaveAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error occurred while saving changes to the database.");
+           
+            return false;
+        }
+    }
+}
