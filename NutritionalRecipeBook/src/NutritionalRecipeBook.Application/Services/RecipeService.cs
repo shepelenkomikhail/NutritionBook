@@ -413,7 +413,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public async Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid? userId)
+        public async Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid userId)
         {
             if (recipeId == null)
             {
@@ -431,7 +431,7 @@ namespace NutritionalRecipeBook.Application.Services
                 await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(new UserRecipe
                 {
                     RecipeId = recipeId.Value,
-                    UserId = userId!.Value,
+                    UserId = userId,
                     IsFavourite = true
                 });
                 
@@ -454,6 +454,23 @@ namespace NutritionalRecipeBook.Application.Services
             }
 
             return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
+        }
+
+        public async Task<IEnumerable<RecipeDTO>> GetFavoriteRecipesAsync(Guid? recipeId, Guid userId)
+        {
+            if (recipeId == null)
+            {
+                _logger.LogWarning("Recipe ID is null.");
+
+                return Enumerable.Empty<RecipeDTO>();;
+            }
+            
+            var favoriteRecipes = (await _unitOfWork.Repository<UserRecipe, Guid>()
+                    .GetWhereAsync(ur => ur.UserId == userId && ur.RecipeId == recipeId && ur.IsFavourite))
+                .DistinctBy(ur => ur.RecipeId)
+                .Select(ur => RecipeMapper.ToDto(ur.Recipe));
+            
+            return favoriteRecipes;
         }
     }
 }
