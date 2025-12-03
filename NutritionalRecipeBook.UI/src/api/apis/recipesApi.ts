@@ -26,7 +26,7 @@ const recipesApi = createApi({
         };
       },
     }),
-    updateRecipe: builder.mutation<void, { id: string; data: RecipePayload }>({
+    updateRecipe: builder.mutation<void, { id: string | undefined; data: RecipePayload }>({
       invalidatesTags: ['Recipe'],
       query: ({ id, data }) => {
         const headers = getHeader();
@@ -99,7 +99,30 @@ const recipesApi = createApi({
           ...(params ? { params } : {}),
         };
       }
-    })
+    }),
+    getFavoriteRecipes: builder.query<RecipeModel[], void>({
+      providesTags: ['Recipe'],
+      query: () => {
+        const headers = getHeader();
+        return {
+          url: '/api/recipes/favorite',
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+        };
+      },
+    }),
+    markFavoriteRecipe: builder.mutation({
+      invalidatesTags: ['Recipe'],
+      query: (params) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/favorite/${params.id}`,
+          method: 'POST',
+          ...(headers ? { headers } : {}),
+          ...(params ? { params } : {})
+        };
+      },
+    }),
   })
 });
 

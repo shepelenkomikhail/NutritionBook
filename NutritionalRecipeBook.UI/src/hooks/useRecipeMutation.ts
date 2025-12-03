@@ -1,12 +1,14 @@
-import { useCreateRecipeMutation, useUpdateRecipeMutation } from '@api';
+import { useCreateRecipeMutation, useMarkFavoriteRecipeMutation, useUpdateRecipeMutation } from '@api';
 import type { IngredientModel, RecipeModel, RecipePayload } from '@models';
 import { toast } from '@utils/toast.tsx';
 
 export function useRecipeMutation() {
   const [createRecipe, createState] = useCreateRecipeMutation();
   const [updateRecipe, updateState] = useUpdateRecipeMutation();
+  const [markFavoriteRecipe, markFavoriteState] = useMarkFavoriteRecipeMutation();
 
-  const execute = async (values: RecipeModel, id?: string, mode?: 'create' | 'update') => {
+  const execute =
+    async (values: RecipeModel, id?: string, mode?: 'create' | 'update' | 'markFavorite') => {
     const mappedIngredients = Array.isArray(values.ingredients)
         ? values.ingredients.map((ing: IngredientModel) => ({
         ingredientDTO: {
@@ -35,14 +37,24 @@ export function useRecipeMutation() {
     console.log('id - ', id);
 
     try {
-      if (mode == "create") {
-        console.log('Creating recipe with payload:', payload);
-        await createRecipe(payload).unwrap();
-        toast('Recipe created successfully!');
-      } else if (mode == "update" && id) {
-        console.log('Update recipe with id ', id);
-        await updateRecipe({ id: id, data: payload }).unwrap();
-        toast('Recipe updated successfully!');
+      switch (mode) {
+        case "create":
+          console.log('Creating recipe with payload:', payload);
+          await createRecipe(payload).unwrap();
+          toast('Recipe created successfully!');
+          break;
+        case "update":
+          console.log('Update recipe with id ', id);
+          await updateRecipe({ id: id, data: payload }).unwrap();
+          toast('Recipe updated successfully!');
+          break;
+        case "markFavorite":
+          console.log('Mark recipe as favorite with id ', id);
+          await markFavoriteRecipe({ id: id }).unwrap();
+          toast('Recipe favorited successfully!');
+          break;
+        default:
+            break;
       }
     } catch (error) {
       console.error(`Failed to ${mode} recipe:`, error);
@@ -50,8 +62,8 @@ export function useRecipeMutation() {
     }
   };
 
-  const isLoading = createState.isLoading || updateState.isLoading;
-  const isError = createState.isError || updateState.isError;
+  const isLoading = createState.isLoading || updateState.isLoading || markFavoriteState.isLoading;
+  const isError = createState.isError || updateState.isError || markFavoriteState.isError;
 
   return { execute, isLoading, isError };
 }

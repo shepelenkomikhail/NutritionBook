@@ -28,10 +28,13 @@ export const {
   useDeleteRecipeMutation,
   useLazyGetRecipeByIdQuery,
   useLazyGetRecipesQuery,
-  useLazyGetRecipesByUserQuery
+  useLazyGetRecipesByUserQuery,
+  useGetFavoriteRecipesQuery,
+  useMarkFavoriteRecipeMutation,
 } = recipesApi;
 
 export const { useRegisterMutation, useLoginMutation } = authApi;
+
 export const { 
   useCreateCommentMutation, 
   useLazyGetCommentsQuery, 
