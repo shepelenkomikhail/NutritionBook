@@ -46,10 +46,10 @@ public class AuthController: ControllerBase
         
         return Ok(userCredentials);
     }
-    
-    // PATCH: /api/users/{userId}/email-confirmation
-    [HttpPatch("users/{userId}/email-confirmation")]
-    public async Task<IActionResult> ConfirmEmail(Guid userId, string token)
+
+    // GET: /api/auth/users/{userId}/email-confirmation?token=...
+    [HttpGet("users/{userId}/email-confirmation")]
+    public async Task<IActionResult> ConfirmEmailGet(Guid userId, [FromQuery] string token)
     {
         var result = await _userService.ConfirmEmailAsync(userId, token);
 

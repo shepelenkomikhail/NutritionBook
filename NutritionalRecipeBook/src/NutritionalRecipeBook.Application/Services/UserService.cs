@@ -68,8 +68,8 @@ public class UserService : IUserService
                 
                 var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
                 var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailToken));
-                var confirmationLink = $"{_configuration["App:ClientUrl"]}" +
-                                       $"/confirm-email?userId={newUser.Id}&token={encodedToken}";
+                var confirmationLink = $"{_configuration["App:ApiUrl"]}" +
+                                       $"/api/auth/users/{newUser.Id}/email-confirmation?token={encodedToken}";
                 
                 try
                 {
@@ -122,6 +122,14 @@ public class UserService : IUserService
             return new ReturnLoggedUserDTO(loginUserDto.UserName, null);
         }
 
+        if (!user.EmailConfirmed)
+        {
+            _logger.LogWarning("Login failed: Email not confirmed for user {UserName}.", 
+                loginUserDto.UserName);
+            
+            return new ReturnLoggedUserDTO(loginUserDto.UserName, null);
+        }
+
         var passwordValid = await _userManager.CheckPasswordAsync(user, 
             loginUserDto.Password);
         if (!passwordValid)
@@ -152,7 +160,19 @@ public class UserService : IUserService
             return false;
         }
 
-        var result = await _userManager.ConfirmEmailAsync(user, token);
+        // The token was Base64Url-encoded in the email. Decode back before confirming.
+        string decodedToken;
+        try
+        {
+            decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to decode email confirmation token for user {UserName}.", user.UserName);
+            return false;
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
         if (result.Succeeded)
         {
             _logger.LogInformation("Email for user {UserName} confirmed successfully.", user.UserName);
