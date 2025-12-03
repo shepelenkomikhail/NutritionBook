@@ -332,34 +332,14 @@ namespace NutritionalRecipeBook.Application.Services
         {
             try
             {
-                var repo = _unitOfWork.Repository<Recipe, Guid>();
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
                 _logger.LogInformation("Building query for recipes with search '{Search}', " +
                                        "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
                                        "minServ {MinServ}, maxServ {MaxServ}.",
                     filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
                     filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);
-
-                if (!string.IsNullOrWhiteSpace(filterDto.Search))
-                {
-                    var search = filterDto.Search.ToLower();
-
-                    query = query.Where(r =>
-                        r.Name.ToLower().Contains(search) ||
-                        r.Description.ToLower().Contains(search) ||
-                        r.Instructions.ToLower().Contains(search) ||
-                        r.RecipeIngredients.Any(ri => ri.Ingredient.Name.ToLower().Contains(search))
-                    );
-                }
-
-                query = repo.GetWhereIf(query, filterDto.MinCookingTimeInMin.HasValue, r => 
-                    r.CookingTimeInMin >= filterDto.MinCookingTimeInMin!.Value);
-                query = repo.GetWhereIf(query, filterDto.MaxCookingTimeInMin.HasValue, r =>
-                    r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin!.Value);
-                query = repo.GetWhereIf(query, filterDto.MinServings.HasValue, r =>
-                    r.Servings >= filterDto.MinServings!.Value);
-                query = repo.GetWhereIf(query, filterDto.MaxServings.HasValue, r =>
-                    r.Servings <= filterDto.MaxServings!.Value);
+                
+                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
                 
                 int totalCount = query.Count();
 
@@ -383,13 +363,14 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public PagedResultDTO<RecipeDTO> GetRecipesForUserAsync(int pageNumber, int pageSize, Guid? userId)
+        public PagedResultDTO<RecipeDTO> GetRecipesForUserAsync(int pageNumber, int pageSize, Guid? userId, RecipeFilterDTO? filterDto = null)
         {
             try
             {
-                var repo = _unitOfWork.Repository<Recipe, Guid>();
-                var query = repo.GetQueryable()
+                var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
                     .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId));
+                
+                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
                 
                 var totalCount = query.Count();
                 
@@ -456,14 +437,34 @@ namespace NutritionalRecipeBook.Application.Services
             return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
         }
 
-        public async Task<IEnumerable<RecipeDTO>> GetFavoriteRecipesAsync(Guid userId)
+        public PagedResultDTO<RecipeDTO> GetFavoriteRecipesAsync(Guid userId, int pageNumber, int pageSize, RecipeFilterDTO? filterDto = null)
         {
-            var favoriteRecipes = (await _unitOfWork.Repository<UserRecipe, Guid>()
-                    .GetWhereAsync(ur => ur.UserId == userId && ur.IsFavourite))
-                .DistinctBy(ur => ur.RecipeId)
-                .Select(ur => RecipeMapper.ToDto(ur.Recipe));
-            
-            return favoriteRecipes;
+            try
+            {
+                var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
+                    .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId && ur.IsFavourite));
+                
+                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
+
+                var totalCount = query.Count();
+
+                var recipes = query
+                    .OrderBy(r => r.Name)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(r => RecipeMapper.ToDto(r))
+                    .ToList();
+
+                _logger.LogInformation("Retrieved {Count} favorite recipes for user {UserId} on page {PageNumber} size {PageSize}.",
+                    totalCount, userId, pageNumber, pageSize);
+
+                return new PagedResultDTO<RecipeDTO>(recipes, totalCount, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting favorite recipes for user {UserId}.", userId);
+                return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
+            }
         }
     }
 }

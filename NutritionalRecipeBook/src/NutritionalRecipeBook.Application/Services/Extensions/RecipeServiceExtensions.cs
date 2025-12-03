@@ -219,4 +219,51 @@ public static class RecipeServiceExtensions
             throw new KeyNotFoundException($"Recipe with ID '{id}' does not exist.");
         }
     }
+
+    public static IQueryable<Recipe> ApplyFilter(
+        this IQueryable<Recipe> query,
+        RecipeFilterDTO? filterDto,
+        IRepository<Recipe, Guid>? repo = null)
+    {
+        if (filterDto == null)
+        {
+            return query;
+        }
+
+        if (!string.IsNullOrWhiteSpace(filterDto.Search))
+        {
+            var search = filterDto.Search.ToLower();
+            query = query.Where(r =>
+                r.Name.ToLower().Contains(search) ||
+                r.Description.ToLower().Contains(search) ||
+                r.Instructions.ToLower().Contains(search) ||
+                r.RecipeIngredients.Any(ri => ri.Ingredient.Name.ToLower().Contains(search))
+            );
+        }
+
+        if (repo != null)
+        {
+            query = repo.GetWhereIf(query, filterDto.MinCookingTimeInMin.HasValue,
+                r => r.CookingTimeInMin >= filterDto.MinCookingTimeInMin!.Value);
+            query = repo.GetWhereIf(query, filterDto.MaxCookingTimeInMin.HasValue,
+                r => r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin!.Value);
+            query = repo.GetWhereIf(query, filterDto.MinServings.HasValue,
+                r => r.Servings >= filterDto.MinServings!.Value);
+            query = repo.GetWhereIf(query, filterDto.MaxServings.HasValue,
+                r => r.Servings <= filterDto.MaxServings!.Value);
+        }
+        else
+        {
+            if (filterDto.MinCookingTimeInMin.HasValue)
+                query = query.Where(r => r.CookingTimeInMin >= filterDto.MinCookingTimeInMin.Value);
+            if (filterDto.MaxCookingTimeInMin.HasValue)
+                query = query.Where(r => r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin.Value);
+            if (filterDto.MinServings.HasValue)
+                query = query.Where(r => r.Servings >= filterDto.MinServings.Value);
+            if (filterDto.MaxServings.HasValue)
+                query = query.Where(r => r.Servings <= filterDto.MaxServings.Value);
+        }
+
+        return query;
+    }
 }

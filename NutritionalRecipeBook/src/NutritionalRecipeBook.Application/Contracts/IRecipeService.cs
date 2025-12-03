@@ -27,12 +27,18 @@ public interface IRecipeService
     PagedResultDTO<RecipeDTO> GetRecipesForUserAsync(
         int pageNumber,
         int pageSize,
-        Guid? userId
+        Guid? userId,
+        RecipeFilterDTO? filterDto = null
     );
     
     Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath);
 
     Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid userId);
     
-    Task<IEnumerable<RecipeDTO>> GetFavoriteRecipesAsync(Guid userId);
+    PagedResultDTO<RecipeDTO> GetFavoriteRecipesAsync(
+        Guid userId,
+        int pageNumber,
+        int pageSize,
+        RecipeFilterDTO? filterDto = null
+    );
 }
