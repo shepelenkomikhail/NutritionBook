@@ -132,6 +132,17 @@ const recipesApi = createApi({
         };
       },
     }),
+    unmarkFavoriteRecipe: builder.mutation({
+      invalidatesTags: ['Recipe'],
+      query: (params) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/favorite/${params.id}`,
+          method: 'DELETE',
+          ...(headers ? { headers } : {}),
+        };
+      },
+    }),
   })
 });
 

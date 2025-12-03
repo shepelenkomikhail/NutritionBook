@@ -33,10 +33,12 @@ function HeartFavoriteButton({ recipeId, className, size = 'middle', variant = '
     if (!recipeId) return;
 
     try {
-      await execute({ id: recipeId, mode: 'markFavorite' });
-      // Ensure favorites are refreshed after toggle in case tag invalidation isn't enough
-      getFavorites(undefined);
-    } catch (err) {
+      if (isFavorite) {
+        await execute({ id: recipeId, mode: 'unmarkFavorite' });
+      } else {
+        await execute({ id: recipeId, mode: 'markFavorite' });
+      }
+    } catch(err){
       console.error(err);
     }
   };

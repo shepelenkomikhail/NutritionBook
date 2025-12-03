@@ -31,6 +31,7 @@ export const {
   useLazyGetRecipesByUserQuery,
   useLazyGetFavoriteRecipesQuery,
   useMarkFavoriteRecipeMutation,
+  useUnmarkFavoriteRecipeMutation,
 } = recipesApi;
 
 export const { useRegisterMutation, useLoginMutation } = authApi;

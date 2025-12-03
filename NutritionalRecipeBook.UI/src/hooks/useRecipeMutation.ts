@@ -1,4 +1,7 @@
-import { useCreateRecipeMutation, useMarkFavoriteRecipeMutation, useUpdateRecipeMutation, } from '@api';
+import {
+  useCreateRecipeMutation, useMarkFavoriteRecipeMutation,
+  useUnmarkFavoriteRecipeMutation, useUpdateRecipeMutation
+} from '@api';
 import type { IngredientModel, RecipeModel, RecipePayload } from '@models';
 import { toast } from '@utils/toast.tsx';
 
@@ -18,12 +21,18 @@ type FavoriteArgs = {
   mode: 'markFavorite';
 };
 
-type ExecuteArgs = CreateArgs | UpdateArgs | FavoriteArgs;
+type NotFavoriteArgs = {
+  id: string;
+  mode: 'unmarkFavorite';
+};
+
+type ExecuteArgs = CreateArgs | UpdateArgs | FavoriteArgs | NotFavoriteArgs;
 
 export function useRecipeMutation() {
   const [createRecipe, createState] = useCreateRecipeMutation();
   const [updateRecipe, updateState] = useUpdateRecipeMutation();
   const [markFavoriteRecipe, markFavoriteState] = useMarkFavoriteRecipeMutation();
+  const [unmarkFavoriteRecipe, unmarkFavoriteState] = useUnmarkFavoriteRecipeMutation();
 
   const mapPayload = (values: RecipeModel): RecipePayload => {
     const mappedIngredients =
@@ -74,6 +83,12 @@ export function useRecipeMutation() {
           toast('Recipe favorited successfully!');
           break;
         }
+
+        case 'unmarkFavorite': {
+          await unmarkFavoriteRecipe({ id: args.id }).unwrap();
+          toast('Recipe unfavorited successfully!');
+          break;
+        }
       }
     } catch (error) {
       console.error(`Failed to ${args.mode} recipe:`, error);
@@ -84,12 +99,14 @@ export function useRecipeMutation() {
   const isLoading =
     createState.isLoading ||
     updateState.isLoading ||
-    markFavoriteState.isLoading;
+    markFavoriteState.isLoading ||
+    unmarkFavoriteState.isLoading;
 
   const isError =
     createState.isError ||
     updateState.isError ||
-    markFavoriteState.isError;
+    markFavoriteState.isError ||
+    unmarkFavoriteState.isError;
 
   return { execute, isLoading, isError };
 }
