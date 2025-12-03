@@ -10,7 +10,11 @@ type ThemeProviderProps = PropsWithChildren<{
 export default function ThemeProvider({ mode, children }: ThemeProviderProps) {
   const [current, setCurrent] = useState<ThemeMode>(() => {
     if (mode) return mode;
+    const persisted = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
+
+    if (persisted === 'light' || persisted === 'dark') return persisted;
     const attr = document.body.getAttribute('data-theme');
+
     if (attr === 'light' || attr === 'dark') return attr;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
@@ -30,6 +34,11 @@ export default function ThemeProvider({ mode, children }: ThemeProviderProps) {
 
   useEffect(() => {
     const target = document.body;
+    target.setAttribute('data-theme', current);
+    try {
+      localStorage.setItem('theme', current);
+    } catch {
+    }
     const vars = tokensToCssVars(current === 'dark' ? darkTokens : lightTokens);
     Object.entries(vars).forEach(([k, v]) => target.style.setProperty(k, v));
   }, [current]);
@@ -41,6 +50,8 @@ export default function ThemeProvider({ mode, children }: ThemeProviderProps) {
 
 export function useTheme() {
   const [mode, setMode] = useState<ThemeMode>(() => {
+    const persisted = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
+    if (persisted === 'light' || persisted === 'dark') return persisted;
     const attr = document.body.getAttribute('data-theme');
     if (attr === 'light' || attr === 'dark') return attr;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -59,6 +70,12 @@ export function useTheme() {
     return () => observer.disconnect();
   }, []);
 
-  const set = (m: ThemeMode) => document.body.setAttribute('data-theme', m);
+  const set = (m: ThemeMode) => {
+    document.body.setAttribute('data-theme', m);
+    try {
+      localStorage.setItem('theme', m);
+    } catch {
+    }
+  };
   return { mode, set };
 }
