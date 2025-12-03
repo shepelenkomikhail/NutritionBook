@@ -213,8 +213,26 @@ namespace NutritionalRecipeBook.Api.Controllers
             );
 
             var result = _recipeService.GetFavoriteRecipesAsync(userId, pageNumber, pageSize, filterDto);
-
+            
+            
             return Ok(result);
+        }
+        
+        // DELETE api/recipes/favorite/{recipeId}
+        [HttpDelete("favorite/{recipeId}")]
+        [RequireUserId]
+        public async Task<IActionResult> DeleteFavoriteRecipe(Guid recipeId)
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+            var result = await _recipeService.UnmarkFavoriteRecipeAsync(recipeId, userId);
+
+            if (!result)
+            {
+                return BadRequest("Recipe wasn't removed from favorites.");
+            }
+            
+            return Ok("Recipe removed from favorites successfully.");
         }
     }
 }

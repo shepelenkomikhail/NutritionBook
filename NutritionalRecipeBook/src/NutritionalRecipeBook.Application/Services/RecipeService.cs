@@ -463,7 +463,43 @@ namespace NutritionalRecipeBook.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while getting favorite recipes for user {UserId}.", userId);
+               
                 return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
+            }
+        }
+
+        public async Task<bool> UnmarkFavoriteRecipeAsync(Guid recipeId, Guid userId)
+        {
+            try
+            {
+                var connections = (await _unitOfWork.Repository<UserRecipe, Guid>()
+                        .GetWhereAsync(ur => ur.UserId == userId && ur.RecipeId == recipeId && ur.IsFavourite))
+                    .ToList();
+
+                if (connections.Count == 0)
+                {
+                    _logger.LogWarning("No favorite connection found for recipe {RecipeId} and user {UserId}.", recipeId, userId);
+                    
+                    return false;
+                }
+
+                foreach (var ur in connections)
+                {
+                    if (!ur.IsFavourite) continue;
+                    ur.IsFavourite = false;
+                    
+                    await _unitOfWork.Repository<UserRecipe, Guid>().UpdateAsync(ur);
+                }
+
+                _logger.LogInformation("Unmarked favorite for {Count} connection(s) of recipe {RecipeId} for user {UserId}.", connections.Count, recipeId, userId);
+
+                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UnmarkFavoriteRecipeAsync");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unmarking favorite recipe {RecipeId} for user {UserId}.", recipeId, userId);
+                
+                return false;
             }
         }
     }

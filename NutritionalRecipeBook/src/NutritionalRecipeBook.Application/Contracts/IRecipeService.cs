@@ -35,6 +35,8 @@ public interface IRecipeService
 
     Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid userId);
     
+    Task<bool> UnmarkFavoriteRecipeAsync(Guid recipeId, Guid userId);
+    
     PagedResultDTO<RecipeDTO> GetFavoriteRecipesAsync(
         Guid userId,
         int pageNumber,
