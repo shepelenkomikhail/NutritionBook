@@ -70,19 +70,12 @@ public class CommentService : ICommentsService
                 Rating = commentDto.Rating,
             });
 
-            var isSaved = await _unitOfWork.SaveAsync();
-            if (!isSaved)
-            {
-                _logger.LogError("Failed to save the new comment and/or rating update.");
-                
-                return false;
-            }
-
-            return true;
+            return SaveChangesAsync().Result;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error occurred while creating comment.");
+            
             return false;
         }
     }
@@ -110,10 +103,8 @@ public class CommentService : ICommentsService
         try
         {
             await _unitOfWork.Repository<Comment, Guid>().DeleteAsync(commentId.Value);
-            
-            var isSaved = await _unitOfWork.SaveAsync();
-            
-            return isSaved;
+
+            return SaveChangesAsync().Result;
         }
         catch (Exception e)
         {
@@ -202,5 +193,19 @@ public class CommentService : ICommentsService
         int? rating = userRecipe?.Rating;
 
         return comments.Select(c => CommentMapper.ToDto(c, rating));
+    }
+    
+    private async Task<bool> SaveChangesAsync()
+    {
+        try
+        {
+            return await _unitOfWork.SaveAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error occurred while saving changes to the database.");
+           
+            return false;
+        }
     }
 }
