@@ -105,10 +105,12 @@ function Recipe() {
         <TogglePersonalizedButton
           isPersonalized={isPersonalizedRecipes}
           setIsPersonalized={setIsPersonalizedRecipes}
+          setIsFavorite={setIsFavoriteRecipes}
         />
         <ToggleFavoriteRecipesButton
           isFavorite={isFavoriteRecipes}
           setIsFavorite={setIsFavoriteRecipes}
+          setIsPersonalized={setIsPersonalizedRecipes}
         />
         <RecipeSearchBar
           search={search}
@@ -157,13 +159,15 @@ function Recipe() {
           destroyOnClose
           footer={null}
           className="max-h-[70vh]"
-          bodyStyle={{
-            color: 'var(--fg)',
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)'
+          styles={{
+            body: {
+              color: 'var(--fg)',
+              backgroundColor: 'var(--card)',
+              borderColor: 'var(--border)'
+            }
           }}
         >
-          <Spin spinning={isLoadingQuery} tip="Processing...">
+          <Spin spinning={isLoadingQuery}>
             <SimpleBar style={{ maxHeight: '60vh' }} autoHide={false}>
               <RecipeForm
                 id={editingRecipe?.id || null}

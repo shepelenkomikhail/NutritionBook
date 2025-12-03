@@ -100,14 +100,23 @@ const recipesApi = createApi({
         };
       }
     }),
-    getFavoriteRecipes: builder.query<RecipeModel[], void>({
+    getFavoriteRecipes: builder.query<PagedResult<RecipeModel>, {
+      search?: string;
+      pageNumber?: number;
+      pageSize?: number;
+      minCookingTimeInMin?: number;
+      maxCookingTimeInMin?: number;
+      minServings?: number;
+      maxServings?: number;
+    } | void>({
       providesTags: ['Recipe'],
-      query: () => {
+      query: (params) => {
         const headers = getHeader();
         return {
           url: '/api/recipes/favorite',
           method: 'GET',
           ...(headers ? { headers } : {}),
+          ...(params ? { params } : {}),
         };
       },
     }),

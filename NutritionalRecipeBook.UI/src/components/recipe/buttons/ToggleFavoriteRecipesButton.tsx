@@ -3,13 +3,19 @@ import { Button } from 'antd';
 interface Props {
   isFavorite: boolean;
   setIsFavorite: (value: boolean) => void;
+  setIsPersonalized: (value: boolean) => void;
 }
 
-function ToggleFavoriteRecipesButton({ isFavorite, setIsFavorite }: Props) {
+function ToggleFavoriteRecipesButton({ isFavorite, setIsFavorite, setIsPersonalized }: Props) {
+  const handleClick = () => {
+    setIsFavorite(!isFavorite);
+    setIsPersonalized(false);
+  }
+
   return (
     <Button
-      onClick={() => setIsFavorite(!isFavorite)}
-      className={"!absolute right-20"}
+      onClick={handleClick}
+      className={"!absolute"}
       style={{ left: "10rem" }}
     >
       {!isFavorite ? 'Favorite Recipes' : 'All Recipes'}

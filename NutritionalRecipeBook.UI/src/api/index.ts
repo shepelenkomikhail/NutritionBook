@@ -29,7 +29,7 @@ export const {
   useLazyGetRecipeByIdQuery,
   useLazyGetRecipesQuery,
   useLazyGetRecipesByUserQuery,
-  useGetFavoriteRecipesQuery,
+  useLazyGetFavoriteRecipesQuery,
   useMarkFavoriteRecipeMutation,
 } = recipesApi;
 

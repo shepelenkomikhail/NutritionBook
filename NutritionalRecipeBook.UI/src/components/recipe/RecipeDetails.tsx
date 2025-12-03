@@ -9,6 +9,7 @@ import RecipeImage from './details/RecipeImage';
 import RecipeMeta from './details/RecipeMeta';
 import CommentsList from './details/CommentsList';
 import CommentForm from './details/CommentForm';
+import { HeartFavoriteButton } from './buttons';
 const { Title } = Typography;
 
 interface RecipeModalProps {
@@ -110,14 +111,18 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
       }}
     >
       {isLoading ? (
-        <Spin className="w-full flex justify-center py-10" tip="Loading recipe details..." />
+        <Spin className="w-full flex justify-center py-10" />
       ) : recipeData ? (
         <div className="p-4 rounded-lg bg-[var(--card)] text-[var(--fg)]">
+          <div className="absolute right-12 top-20 z-10">
+            <HeartFavoriteButton recipeId={recipeId} />
+          </div>
+
           <RecipeRatingSummary averageRating={averageRating} totalCount={comments.length} />
 
           <Divider className="my-4" />
 
-          <div className="w-full mb-4">
+          <div className="w-full mb-4 relative">
             <RecipeImage
               name={recipeData.recipeDTO?.name}
               imageUrl={recipeData.recipeDTO?.imageUrl}
@@ -169,7 +174,7 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
             Comments
           </Title>
 
-          <Spin spinning={isCommentsLoading} tip="Loading comments...">
+          <Spin spinning={isCommentsLoading} >
             {comments.length === 0 ? (
               <p className="text-[var(--fg-muted)]">No comments yet. Be the first to leave one!</p>
             ) : (

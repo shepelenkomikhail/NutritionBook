@@ -15,7 +15,7 @@ interface Props {
 function RecipeList({ recipes, totalCount, pageNumber, pageSize,
                              onPageChange, isLoading, onEdit }: Props) {
 
-  if (isLoading) return <Spin className="m-auto" tip="Loading recipes..." />;
+  if (isLoading) return <Spin className="m-auto" />;
   if (!recipes.length) return <Empty description="No recipes found" />;
 
   return (

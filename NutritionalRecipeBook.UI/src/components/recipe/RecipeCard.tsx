@@ -1,5 +1,5 @@
 import { RecipeModel } from '@models';
-import { DeleteRecipeButton, EditRecipeButton } from './buttons/index.ts';
+import { DeleteRecipeButton, EditRecipeButton, HeartFavoriteButton } from './buttons/index.ts';
 import { Card, Space } from 'antd';
 import { PictureOutlined } from '@ant-design/icons';
 import SecureImage from '../shared/SecureImage';
@@ -30,8 +30,6 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
   const ownedRecipes = useSelector((state: RootState) => state.userRecipes.recipes || []);
   const isOwnedRecipe = ownedRecipes.some((r: RecipeModel) => r.id === recipe.id);
 
-  console.log('Owned Recipes:', ownedRecipes);
-  
   return (
     <>
       <button onClick={handleOpen} className="w-full">
@@ -74,6 +72,9 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
             </span>
           }
         >
+          <div className="absolute left-4 z-10" onClick={(e) => e.stopPropagation()}>
+            <HeartFavoriteButton recipeId={recipe.id} />
+          </div>
           <p className={`text-sm mb-2 text-[var(--fg-muted)]`}>
             {recipe.description}
           </p>
