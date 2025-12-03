@@ -31,4 +31,6 @@ public interface IRecipeService
     );
     
     Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath);
+
+    Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid? userId);
 }

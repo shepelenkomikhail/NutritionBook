@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs;
 using NutritionalRecipeBook.Domain.Entities;
+using NutritionalRecipeBook.Application.Services.Helpers;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 
 namespace NutritionalRecipeBook.Application.Services;
@@ -51,16 +52,8 @@ public class IngredientService : IIngredientService
             };
 
             await _unitOfWork.Repository<Ingredient, Guid>().InsertAsync(ingredientEntity);
-            
-            bool isSaved = await _unitOfWork.SaveAsync();
-            if (!isSaved)
-            {
-                _logger.LogError("Failed to save the new ingredient.");
 
-                return false;
-            }
-            
-            return true;
+            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateIngredientAsync");
         }
         catch (Exception ex)
         {

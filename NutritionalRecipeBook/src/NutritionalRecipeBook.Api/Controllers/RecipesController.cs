@@ -168,5 +168,22 @@ namespace NutritionalRecipeBook.Api.Controllers
      
             return Ok(paged);
         }
+        
+        // POST api/recipes/favorite
+        [HttpGet]
+        [RequireUserId]
+        public IActionResult MarkFavoriteRecipe(Guid recipeId)
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+            
+            var result = _recipeService.MarkFavoriteRecipeAsync(recipeId, userId).Result;
+
+            if (!result)
+            {
+                return BadRequest("Failed to mark recipe as favorite.");
+            }
+            
+            return Ok("Recipe marked as favorite successfully.");
+        }
     }
 }

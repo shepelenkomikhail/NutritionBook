@@ -10,6 +10,7 @@ using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Application.Services.Extensions;
+using NutritionalRecipeBook.Application.Services.Helpers;
 
 namespace NutritionalRecipeBook.Application.Services
 {
@@ -77,7 +78,7 @@ namespace NutritionalRecipeBook.Application.Services
                         );
                 }
 
-                bool isSaved = await _unitOfWork.SaveAsync();
+                bool isSaved = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateRecipeAsync");
                 if (!isSaved)
                 {
                     _logger.LogWarning("CreateRecipeAsync failed: SaveAsync returned false.");
@@ -149,18 +150,10 @@ namespace NutritionalRecipeBook.Application.Services
                 }
 
                 await _unitOfWork.Repository<Recipe, Guid>().UpdateAsync(existingRecipe);
-                bool isSaved = await _unitOfWork.SaveAsync();
-
-                if (!isSaved)
-                {
-                    _logger.LogWarning("UpdateRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
-                    
-                    return false;
-                }
-
+                
                 _logger.LogInformation("Recipe with ID {Id} and ingredients updated successfully.", id);
                 
-                return true;
+                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UpdateRecipeAsync");
             }
             catch (Exception ex)
             {
@@ -216,6 +209,7 @@ namespace NutritionalRecipeBook.Application.Services
                 }
 
                 var apiUrl = $"/api/recipes/image/{newFileName}";
+                
                 return apiUrl;
             }
             catch (Exception ex)
@@ -236,6 +230,7 @@ namespace NutritionalRecipeBook.Application.Services
                 if (recipe == null)
                 {
                     _logger.LogWarning("Recipe with name '{RecipeName}' not found.", name);
+                   
                     return null;
                 }
 
@@ -265,17 +260,9 @@ namespace NutritionalRecipeBook.Application.Services
                 }
                 await _unitOfWork.Repository<Recipe, Guid>().DeleteAsync(id);
 
-                bool isSaved = await _unitOfWork.SaveAsync();
-                if (!isSaved)
-                {
-                    _logger.LogWarning("DeleteRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
-                    
-                    return false;
-                }
-
                 _logger.LogInformation("Recipe with ID {Id} deleted successfully.", id);
                 
-                return true;
+                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteRecipeAsync");
             }
             catch (Exception ex)
             {
@@ -424,6 +411,42 @@ namespace NutritionalRecipeBook.Application.Services
                 
                 return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
             }
+        }
+
+        public async Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid? userId)
+        {
+            if (recipeId == null)
+            {
+                _logger.LogWarning("Recipe ID is null.");
+                
+                return false;
+            }
+            
+            var existingUserRecipeConnection = await _unitOfWork.Repository<UserRecipe, Guid>()
+                .GetSingleOrDefaultAsync(ur => ur.UserId == userId && ur.RecipeId == recipeId);
+
+            if (existingUserRecipeConnection == null)
+            {
+                await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(new UserRecipe()
+                {
+                    RecipeId = recipeId.Value,
+                    UserId = userId!.Value,
+                    IsFavourite = true
+                });
+                
+                _logger.LogInformation("Recipe with id {RecipeId} is marked as favorite for user {UserId}.", 
+                    recipeId, userId);
+            }
+            else
+            {
+                existingUserRecipeConnection.IsFavourite = true;
+                await _unitOfWork.Repository<UserRecipe, Guid>().UpdateAsync(existingUserRecipeConnection);
+                
+                _logger.LogInformation("Recipe with id {RecipeId} favorite status updated for user {UserId}.", 
+                    recipeId, userId);
+            }
+            
+            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync_Update");
         }
     }
 }
