@@ -202,7 +202,6 @@ namespace NutritionalRecipeBook.Api.Controllers
 
             var result = await _recipeService.GetFavoriteRecipesAsync(userId, pageNumber, pageSize, filterDto);
             
-            
             return Ok(result);
         }
         

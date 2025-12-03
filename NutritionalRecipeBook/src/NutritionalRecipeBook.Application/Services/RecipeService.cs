@@ -540,7 +540,7 @@ namespace NutritionalRecipeBook.Application.Services
                     _ => "application/octet-stream"
                 };
 
-                await using var stream = new FileStream(
+                var stream = new FileStream(
                     fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
                 
                 return (stream, contentType);
