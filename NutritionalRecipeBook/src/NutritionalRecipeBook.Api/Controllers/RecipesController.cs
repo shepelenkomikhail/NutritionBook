@@ -169,14 +169,14 @@ namespace NutritionalRecipeBook.Api.Controllers
             return Ok(paged);
         }
         
-        // POST api/recipes/favorite
+        // POST api/recipes/favorite/{recipeId}
         [HttpPost("favorite/{recipeId}")]
         [RequireUserId]
-        public IActionResult MarkFavoriteRecipe(Guid recipeId)
+        public async Task<IActionResult> MarkFavoriteRecipe(Guid recipeId)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
-            var result = _recipeService.MarkFavoriteRecipeAsync(recipeId, userId).Result;
+            var result = await _recipeService.MarkFavoriteRecipeAsync(recipeId, userId);
 
             if (!result)
             {

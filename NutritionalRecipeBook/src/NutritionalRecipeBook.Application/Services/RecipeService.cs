@@ -422,31 +422,38 @@ namespace NutritionalRecipeBook.Application.Services
                 return false;
             }
             
-            var existingUserRecipeConnection = await _unitOfWork.Repository<UserRecipe, Guid>()
-                .GetSingleOrDefaultAsync(ur => ur.UserId == userId && ur.RecipeId == recipeId);
+            var connections = (await _unitOfWork.Repository<UserRecipe, Guid>()
+                    .GetWhereAsync(ur => ur.UserId == userId && ur.RecipeId == recipeId))
+                .ToList();
 
-            if (existingUserRecipeConnection == null)
+            if (connections.Count == 0)
             {
-                await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(new UserRecipe()
+                await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(new UserRecipe
                 {
                     RecipeId = recipeId.Value,
                     UserId = userId!.Value,
                     IsFavourite = true
                 });
                 
-                _logger.LogInformation("Recipe with id {RecipeId} is marked as favorite for user {UserId}.", 
+                _logger.LogInformation("Recipe with id {RecipeId} is marked as favorite for user {UserId} (new connection).",
                     recipeId, userId);
             }
             else
             {
-                existingUserRecipeConnection.IsFavourite = true;
-                await _unitOfWork.Repository<UserRecipe, Guid>().UpdateAsync(existingUserRecipeConnection);
+                foreach (var ur in connections)
+                {
+                    if (ur.IsFavourite) continue;
+                    
+                    ur.IsFavourite = true;
+                    await _unitOfWork.Repository<UserRecipe, Guid>().UpdateAsync(ur);
+                }
                 
-                _logger.LogInformation("Recipe with id {RecipeId} favorite status updated for user {UserId}.", 
-                    recipeId, userId);
+                _logger.LogInformation(
+                    "Updated {Count} user-recipe connections to favorite for recipe {RecipeId} and user {UserId}.",
+                    connections.Count, recipeId, userId);
             }
-            
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync_Update");
+
+            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
         }
     }
 }
