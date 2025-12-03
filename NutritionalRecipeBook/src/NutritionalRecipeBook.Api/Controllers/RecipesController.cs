@@ -185,5 +185,17 @@ namespace NutritionalRecipeBook.Api.Controllers
             
             return Ok("Recipe marked as favorite successfully.");
         }
+        
+        // GET api/recipes/favorite/
+        [HttpGet("favorite")]
+        [RequireUserId]
+        public async Task<IActionResult> GetFavoriteRecipes(Guid recipeId)
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+            
+            var result = await _recipeService.GetFavoriteRecipesAsync(userId);
+            
+            return Ok(result);
+        }
     }
 }

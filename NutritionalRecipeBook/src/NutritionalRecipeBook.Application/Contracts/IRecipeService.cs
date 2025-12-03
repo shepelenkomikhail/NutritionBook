@@ -34,5 +34,5 @@ public interface IRecipeService
 
     Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid userId);
     
-    Task<IEnumerable<RecipeDTO>> GetFavoriteRecipesAsync(Guid? recipeId, Guid userId);
+    Task<IEnumerable<RecipeDTO>> GetFavoriteRecipesAsync(Guid userId);
 }

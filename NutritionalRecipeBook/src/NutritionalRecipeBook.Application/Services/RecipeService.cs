@@ -456,17 +456,10 @@ namespace NutritionalRecipeBook.Application.Services
             return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
         }
 
-        public async Task<IEnumerable<RecipeDTO>> GetFavoriteRecipesAsync(Guid? recipeId, Guid userId)
+        public async Task<IEnumerable<RecipeDTO>> GetFavoriteRecipesAsync(Guid userId)
         {
-            if (recipeId == null)
-            {
-                _logger.LogWarning("Recipe ID is null.");
-
-                return Enumerable.Empty<RecipeDTO>();;
-            }
-            
             var favoriteRecipes = (await _unitOfWork.Repository<UserRecipe, Guid>()
-                    .GetWhereAsync(ur => ur.UserId == userId && ur.RecipeId == recipeId && ur.IsFavourite))
+                    .GetWhereAsync(ur => ur.UserId == userId && ur.IsFavourite))
                 .DistinctBy(ur => ur.RecipeId)
                 .Select(ur => RecipeMapper.ToDto(ur.Recipe));
             
