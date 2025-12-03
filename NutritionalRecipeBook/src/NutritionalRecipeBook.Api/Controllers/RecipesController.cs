@@ -48,6 +48,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         {
             var webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             _logger.LogInformation("Uploading image to {FileName}", file.FileName);
+            
             var url = await _recipeService.UploadImageAsync(file.OpenReadStream(), file.FileName, webRootPath);
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -61,7 +62,7 @@ namespace NutritionalRecipeBook.Api.Controllers
 
         // GET: api/recipes/image/{fileName}
         [HttpGet("image/{fileName}")]
-        public IActionResult GetImage(string fileName)
+        public async Task<IActionResult> GetImage(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
             {
@@ -69,27 +70,14 @@ namespace NutritionalRecipeBook.Api.Controllers
             }
 
             var webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            var imagesPath = Path.Combine(webRootPath, "images");
-            var fullPath = Path.Combine(imagesPath, fileName);
 
-            if (!System.IO.File.Exists(fullPath))
+            var result = await _recipeService.GetImageAsync(fileName, webRootPath);
+            if (result == null)
             {
                 return NotFound();
             }
 
-            var extension = Path.GetExtension(fullPath).ToLowerInvariant();
-            var contentType = extension switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".gif" => "image/gif",
-                ".webp" => "image/webp",
-                ".bmp" => "image/bmp",
-                _ => "application/octet-stream"
-            };
-
-            var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            return File(stream, contentType);
+            return File(result.Value.Stream, result.Value.ContentType);
         }
 
         // PUT: api/recipes/{id}
@@ -139,7 +127,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         
         // GET: api/recipes
         [HttpGet]
-        public IActionResult Get(
+        public async Task<IActionResult> Get(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] RecipeFilter? filter = null)
@@ -151,7 +139,7 @@ namespace NutritionalRecipeBook.Api.Controllers
                 filter?.MinServings,
                 filter?.MaxServings
             );
-            var pagedResult = _recipeService.GetRecipesAsync(pageNumber, pageSize, filterDto);
+            var pagedResult = await _recipeService.GetRecipesAsync(pageNumber, pageSize, filterDto);
             
             return Ok(pagedResult);
         }
@@ -159,7 +147,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         // GET: api/recipes/mine
         [HttpGet("mine")]
         [RequireUserId]
-        public IActionResult GetMyRecipes(
+        public async Task<IActionResult> GetMyRecipes(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] RecipeFilter? filter = null)
@@ -172,7 +160,7 @@ namespace NutritionalRecipeBook.Api.Controllers
                 filter?.MinServings,
                 filter?.MaxServings
             );
-            var paged = _recipeService.GetRecipesForUserAsync(pageNumber, pageSize, userId, filterDto);
+            var paged = await _recipeService.GetRecipesForUserAsync(pageNumber, pageSize, userId, filterDto);
      
             return Ok(paged);
         }
@@ -197,7 +185,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         // GET api/recipes/favorite/
         [HttpGet("favorite")]
         [RequireUserId]
-        public IActionResult GetFavoriteRecipes(
+        public async Task<IActionResult> GetFavoriteRecipes(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] RecipeFilter? filter = null)
@@ -212,7 +200,7 @@ namespace NutritionalRecipeBook.Api.Controllers
                 filter?.MaxServings
             );
 
-            var result = _recipeService.GetFavoriteRecipesAsync(userId, pageNumber, pageSize, filterDto);
+            var result = await _recipeService.GetFavoriteRecipesAsync(userId, pageNumber, pageSize, filterDto);
             
             
             return Ok(result);

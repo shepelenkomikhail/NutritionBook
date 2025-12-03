@@ -11,6 +11,7 @@ using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Application.Services.Extensions;
 using NutritionalRecipeBook.Application.Services.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace NutritionalRecipeBook.Application.Services
 {
@@ -328,7 +329,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public PagedResultDTO<RecipeDTO> GetRecipesAsync(int pageNumber, int pageSize, RecipeFilterDTO filterDto = null)
+        public async Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(int pageNumber, int pageSize, RecipeFilterDTO filterDto = null)
         {
             try
             {
@@ -340,13 +341,15 @@ namespace NutritionalRecipeBook.Application.Services
                     filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);
                 
                 query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
-                
-                int totalCount = query.Count();
 
-                var recipes = query
+                int totalCount = await query.CountAsync();
+
+                var recipeEntities = await query
                     .OrderBy(r => r.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
+                    .ToListAsync();
+                var recipes = recipeEntities
                     .Select(r => RecipeMapper.ToDto(r))
                     .ToList();
                 
@@ -363,7 +366,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public PagedResultDTO<RecipeDTO> GetRecipesForUserAsync(int pageNumber, int pageSize, Guid? userId, RecipeFilterDTO? filterDto = null)
+        public async Task<PagedResultDTO<RecipeDTO>> GetRecipesForUserAsync(int pageNumber, int pageSize, Guid? userId, RecipeFilterDTO? filterDto = null)
         {
             try
             {
@@ -371,13 +374,15 @@ namespace NutritionalRecipeBook.Application.Services
                     .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId));
                 
                 query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
-                
-                var totalCount = query.Count();
-                
-                var recipes = query
+
+                var totalCount = await query.CountAsync();
+
+                var recipeEntities = await query
                     .OrderBy(r => r.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
+                    .ToListAsync();
+                var recipes = recipeEntities
                     .Select(r => RecipeMapper.ToDto(r))
                     .ToList();
                 
@@ -437,7 +442,7 @@ namespace NutritionalRecipeBook.Application.Services
             return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
         }
 
-        public PagedResultDTO<RecipeDTO> GetFavoriteRecipesAsync(Guid userId, int pageNumber, int pageSize, RecipeFilterDTO? filterDto = null)
+        public async Task<PagedResultDTO<RecipeDTO>> GetFavoriteRecipesAsync(Guid userId, int pageNumber, int pageSize, RecipeFilterDTO? filterDto = null)
         {
             try
             {
@@ -446,12 +451,14 @@ namespace NutritionalRecipeBook.Application.Services
                 
                 query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
 
-                var totalCount = query.Count();
+                var totalCount = await query.CountAsync();
 
-                var recipes = query
+                var recipeEntities = await query
                     .OrderBy(r => r.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
+                    .ToListAsync();
+                var recipes = recipeEntities
                     .Select(r => RecipeMapper.ToDto(r))
                     .ToList();
 
@@ -500,6 +507,51 @@ namespace NutritionalRecipeBook.Application.Services
                 _logger.LogError(ex, "Error unmarking favorite recipe {RecipeId} for user {UserId}.", recipeId, userId);
                 
                 return false;
+            }
+        }
+
+        public async Task<(Stream Stream, string ContentType)?> GetImageAsync(string fileName, string webRootPath)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    _logger.LogWarning("GetImageAsync called with empty file name.");
+                    return null;
+                }
+
+                var imagesPath = Path.Combine(webRootPath, "images");
+                var fullPath = Path.Combine(imagesPath, fileName);
+
+                if (!System.IO.File.Exists(fullPath))
+                {
+                    _logger.LogInformation("Image not found at path: {FullPath}", fullPath);
+                    return null;
+                }
+
+                var extension = Path.GetExtension(fullPath).ToLowerInvariant();
+                var contentType = extension switch
+                {
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".png" => "image/png",
+                    ".gif" => "image/gif",
+                    ".webp" => "image/webp",
+                    ".bmp" => "image/bmp",
+                    _ => "application/octet-stream"
+                };
+
+                await using var stream = new FileStream(
+                    fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+                
+                return (stream, contentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, 
+                    "Error while getting image {FileName} from web root {WebRootPath}.", 
+                    fileName, webRootPath);
+                
+                return null;
             }
         }
     }
