@@ -170,7 +170,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         }
         
         // POST api/recipes/favorite
-        [HttpGet]
+        [HttpPost("favorite/{recipeId}")]
         [RequireUserId]
         public IActionResult MarkFavoriteRecipe(Guid recipeId)
         {
