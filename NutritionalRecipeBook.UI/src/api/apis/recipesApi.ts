@@ -93,7 +93,7 @@ const recipesApi = createApi({
       query: (params)=>  {
         const headers = getHeader();
         return {
-          url: `/api/users/recipes`,
+          url: `/api/recipes/mine`,
           method: 'GET',
           ...(headers ? { headers } : {}),
           ...(params ? { params } : {}),

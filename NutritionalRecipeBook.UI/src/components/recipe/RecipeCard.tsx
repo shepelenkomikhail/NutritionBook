@@ -32,7 +32,7 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
 
   return (
     <>
-      <button onClick={handleOpen} className="w-full">
+      <div onClick={handleOpen} className="w-full">
         <Card
           hoverable
           className={`!rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 relative ds-card`}
@@ -48,11 +48,11 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
               />
             ) : (
               <div
-                className="h-44 w-full flex items-center justify-center bg-[var(--card)] text-[var(--fg-muted)]"
+                className="h-[180px] mt-2 w-full flex items-center justify-center bg-[var(--card)] text-[var(--fg-muted)] rounded-xl"
                 aria-label="No image available"
                 title="No image available"
               >
-                <PictureOutlined style={{ fontSize: 48 }} />
+                <PictureOutlined style={{ fontSize: 124, marginLeft: '35%', marginTop: '10%' }} />
               </div>
             );
           })()}
@@ -75,14 +75,16 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
           <div className="absolute left-4 z-10" onClick={(e) => e.stopPropagation()}>
             <HeartFavoriteButton recipeId={recipe.id} />
           </div>
-          <p className={`text-sm mb-2 text-[var(--fg-muted)]`}>
-            {recipe.description}
-          </p>
-          <p className={`text-xs text-[var(--fg-muted)]`}>
-            ⏱️ {recipe.cookingTimeInMin} min | 🍽️ Serves {recipe.servings}
-          </p>
+          <div className={"w-full flex flex-col justify-center items-center gap-2 "}>
+            <p className={`text-sm mb-2 text-[var(--fg-muted)]`}>
+              {recipe.description}
+            </p>
+            <p className={`text-xs text-[var(--fg-muted)]`}>
+              ⏱️ {recipe.cookingTimeInMin} min | 🍽️ Serves {recipe.servings}
+            </p>
+          </div>
         </Card>
-      </button>
+      </div>
 
       <RecipeDetails
         open={isModalOpen}
