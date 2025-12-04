@@ -79,28 +79,26 @@ public static class RecipeServiceExtensions
             var ingredientEntity = await unitOfWork.Repository<Ingredient, Guid>()
                 .GetSingleOrDefaultAsync(i => 
                     i.Name.ToLower() == ingredientAmount.IngredientDTO.Name.Trim().ToLower());
-
-            if (ingredientEntity == null)
-            {
-                logger.LogWarning("Ingredient '{Name}' could not be found after creation attempt.", 
-                    ingredientAmount.IngredientDTO.Name);
-               
-                continue;
-            }
             
             var unitOfMeasure = await unitOfWork.Repository<UnitOfMeasure, Guid>()
                 .GetSingleOrDefaultAsync(u => 
                     u.Name.Equals(ingredientAmount.Unit.Trim(), StringComparison.CurrentCultureIgnoreCase));
+
+            if (ingredientEntity == null || unitOfMeasure == null)
+            {
+                logger.LogWarning("Ingredient '{IngredientName}' or unit of measure '{UOM Name}'  " +
+                                  "could not be found after creation attempt.", 
+                    ingredientAmount.IngredientDTO.Name, ingredientAmount.Unit.Trim());
+               
+                continue;
+            }
 
             var recipeIngredient = new RecipeIngredient
             {
                 RecipeId = recipeEntity.Id,
                 IngredientId = ingredientEntity.Id,
                 Amount = ingredientAmount.Amount,
-                UnitOfMeasure = unitOfMeasure ?? new UnitOfMeasure
-                {
-                    Name = ingredientAmount.Unit?.Trim() ?? string.Empty
-                }
+                UnitOfMeasure = unitOfMeasure
             };
 
             await unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(recipeIngredient);
@@ -150,11 +148,16 @@ public static class RecipeServiceExtensions
             var ingredientEntityId = await ingredientService
                 .GetIngredientIdByNameAsync(ingredientAmount.IngredientDTO.Name.Trim().ToLower());
 
-            if (ingredientEntityId == null)
+            var unitOfMeasure = await unitOfWork.Repository<UnitOfMeasure, Guid>()
+                .GetSingleOrDefaultAsync(u => 
+                    u.Name.Equals(ingredientAmount.Unit.Trim(), StringComparison.CurrentCultureIgnoreCase));
+            
+            if (ingredientEntityId == null || unitOfMeasure == null)
             {
                 logger.LogWarning(
-                    "UpdateRecipeAsync: Ingredient '{Name}' could not be found after creation attempt.",
-                    ingredientAmount.IngredientDTO.Name);
+                    "UpdateRecipeAsync: Ingredient '{Name}' or unit of measure {UOM Name} " +
+                    "could not be found after creation attempt.",
+                    ingredientAmount.IngredientDTO.Name, ingredientAmount.Unit.Trim());
                 
                 continue;
             }
@@ -165,19 +168,12 @@ public static class RecipeServiceExtensions
 
             if (existingEntry == null)
             {
-                var unitOfMeasure = await unitOfWork.Repository<UnitOfMeasure, Guid>()
-                    .GetSingleOrDefaultAsync(u => 
-                        u.Name.Equals(ingredientAmount.Unit.Trim(), StringComparison.CurrentCultureIgnoreCase));
-                
                 var newLink = new RecipeIngredient
                 {
                     RecipeId = recipeEntity.Id,
                     IngredientId = ingredientEntityId.Value,
                     Amount = ingredientAmount.Amount,
-                    UnitOfMeasure = unitOfMeasure ?? new UnitOfMeasure
-                    {
-                        Name = ingredientAmount.Unit?.Trim() ?? string.Empty
-                    }
+                    UnitOfMeasure = unitOfMeasure
                 };
 
                 await unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(newLink);
