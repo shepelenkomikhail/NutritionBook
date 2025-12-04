@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NutritionalRecipeBook.NutritionWebApi.Context;
 using NutritionalRecipeBook.NutritionWebApi.Models;
 
 namespace NutritionalRecipeBook.NutritionWebApi
@@ -52,11 +53,5 @@ namespace NutritionalRecipeBook.NutritionWebApi
 
             app.Run();
         }
-    }
-    
-    [JsonSerializable(typeof(Nutrient[]))]
-    internal partial class AppJsonSerializerContext : JsonSerializerContext
-    {
-
     }
 }
