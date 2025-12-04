@@ -87,13 +87,20 @@ public static class RecipeServiceExtensions
                
                 continue;
             }
+            
+            var unitOfMeasure = await unitOfWork.Repository<UnitOfMeasure, Guid>()
+                .GetSingleOrDefaultAsync(u => 
+                    u.Name.Equals(ingredientAmount.Unit.Trim(), StringComparison.CurrentCultureIgnoreCase));
 
             var recipeIngredient = new RecipeIngredient
             {
                 RecipeId = recipeEntity.Id,
                 IngredientId = ingredientEntity.Id,
                 Amount = ingredientAmount.Amount,
-                Unit = ingredientAmount.Unit?.Trim() ?? string.Empty
+                UnitOfMeasure = unitOfMeasure ?? new UnitOfMeasure
+                {
+                    Name = ingredientAmount.Unit?.Trim() ?? string.Empty
+                }
             };
 
             await unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(recipeIngredient);
@@ -158,12 +165,19 @@ public static class RecipeServiceExtensions
 
             if (existingEntry == null)
             {
+                var unitOfMeasure = await unitOfWork.Repository<UnitOfMeasure, Guid>()
+                    .GetSingleOrDefaultAsync(u => 
+                        u.Name.Equals(ingredientAmount.Unit.Trim(), StringComparison.CurrentCultureIgnoreCase));
+                
                 var newLink = new RecipeIngredient
                 {
                     RecipeId = recipeEntity.Id,
                     IngredientId = ingredientEntityId.Value,
                     Amount = ingredientAmount.Amount,
-                    Unit = ingredientAmount.Unit?.Trim() ?? string.Empty
+                    UnitOfMeasure = unitOfMeasure ?? new UnitOfMeasure
+                    {
+                        Name = ingredientAmount.Unit?.Trim() ?? string.Empty
+                    }
                 };
 
                 await unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().InsertAsync(newLink);
@@ -171,7 +185,7 @@ public static class RecipeServiceExtensions
             else
             {
                 existingEntry.Amount = ingredientAmount.Amount;
-                existingEntry.Unit = ingredientAmount.Unit?.Trim() ?? string.Empty;
+                existingEntry.UnitOfMeasure.Name = ingredientAmount.Unit?.Trim() ?? string.Empty;
                 
                 await unitOfWork.Repository<RecipeIngredient, (Guid, Guid)>().UpdateAsync(existingEntry);
             }

@@ -296,7 +296,7 @@ namespace NutritionalRecipeBook.Application.Services
                             ri.Ingredient.IsLiquid
                         ),
                         ri.Amount,
-                        ri.Unit
+                        ri.UnitOfMeasure.Name
                     ))
                     .ToList();
 

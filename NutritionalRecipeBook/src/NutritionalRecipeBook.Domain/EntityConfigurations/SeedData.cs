@@ -108,22 +108,41 @@ public static class SeedData
         return comments;
     }
 
+    // --- UNIT OF MEASURES ---
+    public static List<UnitOfMeasure> GetUnitOfMeasures()
+    {
+        return new List<UnitOfMeasure>
+        {
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000001"), Name = "g" },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000002"), Name = "kg" },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000003"), Name = "ml" },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000004"), Name = "L" },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000005"), Name = "tsp" },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000006"), Name = "tbsp" },
+        };
+    }
+
     // --- RECIPE INGREDIENTS ---
-    public static List<RecipeIngredient> GetRecipeIngredients(List<Recipe> recipes, List<Ingredient> ingredients)
+    public static List<RecipeIngredient> GetRecipeIngredients(List<Recipe> recipes, 
+        List<Ingredient> ingredients, List<UnitOfMeasure> units)
     {
         var list = new List<RecipeIngredient>();
+        var gramUom = units.First(u => u.Name == "g");
+        var mlUom = units.First(u => u.Name == "ml");
+
         for (int i = 0; i < recipes.Count; i++)
         {
             var recipe = recipes[i];
             for (int j = 0; j < 3; j++)
             {
                 var ingredient = ingredients[(i + j) % ingredients.Count];
+                var selectedUom = ingredient.IsLiquid ? mlUom : gramUom;
                 list.Add(new RecipeIngredient
                 {
                     RecipeId = recipe.Id,
                     IngredientId = ingredient.Id,
-                    Amount = 50 + j * 25,
-                    Unit = ingredient.IsLiquid ? "ml" : "g"
+                    Amount = (decimal)(50 + j * 25),
+                    UnitOfMeasureId = selectedUom.Id
                 });
             }
         }

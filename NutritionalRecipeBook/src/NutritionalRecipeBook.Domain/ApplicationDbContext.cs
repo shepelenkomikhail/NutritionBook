@@ -53,7 +53,8 @@ public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<Guid>, G
         var recipes = SeedData.GetRecipes();
         var comments = SeedData.GetComments(users, recipes);
         var shoppingLists = SeedData.GetShoppingLists(users);
-        var recipeIngredients = SeedData.GetRecipeIngredients(recipes, ingredients);
+        var units = SeedData.GetUnitOfMeasures();
+        var recipeIngredients = SeedData.GetRecipeIngredients(recipes, ingredients, units);
         var nutrientIngredients = SeedData.GetNutrientIngredients(nutrients, ingredients);
         var shoppingListIngredients = SeedData.GetShoppingListIngredients(shoppingLists, ingredients);
         var userRecipes = SeedData.GetUserRecipes(users, recipes);

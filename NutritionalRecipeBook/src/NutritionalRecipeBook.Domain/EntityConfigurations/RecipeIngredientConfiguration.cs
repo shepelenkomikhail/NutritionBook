@@ -19,9 +19,10 @@ public class RecipeIngredientConfiguration : IEntityTypeConfiguration<RecipeIngr
             .WithMany(i => i.RecipeIngredients)
             .HasForeignKey(ri => ri.IngredientId);
 
-        builder.Property(ri => ri.Unit)
-            .IsRequired()
-            .HasMaxLength(20);
+        builder.HasOne(ri => ri.UnitOfMeasure)
+            .WithMany(u => u.RecipeIngredients)
+            .HasForeignKey(ri => ri.UnitOfMeasureId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(ri => ri.Amount)
             .HasPrecision(10, 2);
