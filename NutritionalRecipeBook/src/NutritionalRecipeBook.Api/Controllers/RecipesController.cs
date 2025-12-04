@@ -114,7 +114,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         
         // GET: api/recipes/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
+        public async Task<IActionResult> GetRecipe(Guid id)
         {
             var recipe = await _recipeService.GetRecipeByIdAsync(id);
             if (recipe == null)
@@ -127,7 +127,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         
         // GET: api/recipes
         [HttpGet]
-        public async Task<IActionResult> Get(
+        public async Task<IActionResult> GetRecipes(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] RecipeFilter? filter = null)

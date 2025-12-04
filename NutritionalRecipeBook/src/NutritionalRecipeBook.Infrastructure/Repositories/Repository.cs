@@ -24,11 +24,6 @@ public class Repository<T, TId> : IRepository<T, TId> where T : class, IBaseEnti
     {
         return _context.Set<T>();
     }
-    
-    public IQueryable<T> GetWhereIf(IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicate)
-    {
-        return condition ? source.AsNoTracking().Where(predicate) : source;
-    }
 
     public async Task<T?> GetByIdAsync(Guid id)
     {

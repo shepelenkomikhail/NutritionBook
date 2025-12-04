@@ -340,7 +340,7 @@ namespace NutritionalRecipeBook.Application.Services
                     filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
                     filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);
                 
-                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
+                query = query.ApplyFilter(filterDto);
 
                 int totalCount = await query.CountAsync();
 
@@ -373,7 +373,7 @@ namespace NutritionalRecipeBook.Application.Services
                 var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
                     .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId));
                 
-                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
+                query = query.ApplyFilter(filterDto);
 
                 var totalCount = await query.CountAsync();
 
@@ -449,7 +449,7 @@ namespace NutritionalRecipeBook.Application.Services
                 var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
                     .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId && ur.IsFavourite));
                 
-                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
+                query = query.ApplyFilter(filterDto);
 
                 var totalCount = await query.CountAsync();
 
