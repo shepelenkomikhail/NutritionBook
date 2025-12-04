@@ -5,6 +5,7 @@ using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Infrastructure.Contracts;
+using NutritionalRecipeBook.Infrastructure.Extensions;
 
 namespace NutritionalRecipeBook.Application.Services.Extensions;
 
@@ -222,8 +223,7 @@ public static class RecipeServiceExtensions
 
     public static IQueryable<Recipe> ApplyFilter(
         this IQueryable<Recipe> query,
-        RecipeFilterDTO? filterDto,
-        IRepository<Recipe, Guid>? repo = null)
+        RecipeFilterDTO? filterDto)
     {
         if (filterDto == null)
         {
@@ -241,29 +241,14 @@ public static class RecipeServiceExtensions
             );
         }
 
-        if (repo != null)
-        {
-            query = repo.GetWhereIf(query, filterDto.MinCookingTimeInMin.HasValue,
-                r => r.CookingTimeInMin >= filterDto.MinCookingTimeInMin!.Value);
-            query = repo.GetWhereIf(query, filterDto.MaxCookingTimeInMin.HasValue,
-                r => r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin!.Value);
-            query = repo.GetWhereIf(query, filterDto.MinServings.HasValue,
-                r => r.Servings >= filterDto.MinServings!.Value);
-            query = repo.GetWhereIf(query, filterDto.MaxServings.HasValue,
+        return query
+            .WhereIfNoTracking(filterDto.MinCookingTimeInMin.HasValue,
+                r => r.CookingTimeInMin >= filterDto.MinCookingTimeInMin!.Value)
+            .WhereIfNoTracking(filterDto.MaxCookingTimeInMin.HasValue,
+                r => r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin!.Value)
+            .WhereIfNoTracking(filterDto.MinServings.HasValue,
+                r => r.Servings >= filterDto.MinServings!.Value)
+            .WhereIfNoTracking(filterDto.MaxServings.HasValue,
                 r => r.Servings <= filterDto.MaxServings!.Value);
-        }
-        else
-        {
-            if (filterDto.MinCookingTimeInMin.HasValue)
-                query = query.Where(r => r.CookingTimeInMin >= filterDto.MinCookingTimeInMin.Value);
-            if (filterDto.MaxCookingTimeInMin.HasValue)
-                query = query.Where(r => r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin.Value);
-            if (filterDto.MinServings.HasValue)
-                query = query.Where(r => r.Servings >= filterDto.MinServings.Value);
-            if (filterDto.MaxServings.HasValue)
-                query = query.Where(r => r.Servings <= filterDto.MaxServings.Value);
-        }
-
-        return query;
     }
 }

@@ -27,8 +27,6 @@ export function CommentsList({
     return comments.slice(start, start + pageSize);
   }, [comments, page, pageSize]);
 
-  console.log(comments);
-
   return (
     <>
       <List

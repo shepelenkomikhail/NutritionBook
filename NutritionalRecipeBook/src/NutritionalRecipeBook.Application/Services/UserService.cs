@@ -74,7 +74,7 @@ public class UserService : IUserService
                 try
                 {
                     await _emailSender.SendEmailAsync(
-                        newUser.Email!,
+                        newUser.Email,
                         "Confirm your email",
                         $"<p>Please confirm your account by clicking <a href='{confirmationLink}'>here</a>.</p>"
                     );

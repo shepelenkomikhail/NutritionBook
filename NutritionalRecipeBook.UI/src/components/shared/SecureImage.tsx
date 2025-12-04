@@ -99,7 +99,7 @@ function SecureImage({ src, alt, className, style, preview = false, draggable }:
         aria-label={error ? 'Image failed to load' : 'No image available'}
         title={error ? 'Image failed to load' : 'No image available'}
       >
-        <PictureOutlined style={{ fontSize: 48 }} />
+        <PictureOutlined style={{ fontSize: 124 }} />
       </div>
     );
   }

@@ -34,7 +34,7 @@ export function RecipeImage({
       title="No image available"
       style={style}
     >
-      <PictureOutlined style={{ fontSize: 56 }} />
+      <PictureOutlined style={{ fontSize: 124 }} />
     </div>
   );
 }

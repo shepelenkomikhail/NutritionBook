@@ -93,7 +93,7 @@ const recipesApi = createApi({
       query: (params)=>  {
         const headers = getHeader();
         return {
-          url: `/api/users/recipes`,
+          url: `/api/recipes/mine`,
           method: 'GET',
           ...(headers ? { headers } : {}),
           ...(params ? { params } : {}),
@@ -129,6 +129,17 @@ const recipesApi = createApi({
           method: 'POST',
           ...(headers ? { headers } : {}),
           ...(params ? { params } : {})
+        };
+      },
+    }),
+    unmarkFavoriteRecipe: builder.mutation({
+      invalidatesTags: ['Recipe'],
+      query: (params) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/favorite/${params.id}`,
+          method: 'DELETE',
+          ...(headers ? { headers } : {}),
         };
       },
     }),
