@@ -55,10 +55,10 @@ namespace NutritionalRecipeBook.NutritionWebApi
 
     public record Nutrient(
         [property: JsonPropertyName("name")] string? Name, 
-        [property: JsonPropertyName("calories")] double Calories, 
-        [property: JsonPropertyName("proteins_g")] double ProteinsG, 
-        [property: JsonPropertyName("carbs_g")] double CarbsG, 
-        [property: JsonPropertyName("fats_g")] double FatsG);
+        [property: JsonPropertyName("calories")] int Calories, 
+        [property: JsonPropertyName("proteins")] double Proteins, 
+        [property: JsonPropertyName("carbs")] double Carbs, 
+        [property: JsonPropertyName("fats")] double Fats);
 
     [JsonSerializable(typeof(Nutrient[]))]
     internal partial class AppJsonSerializerContext : JsonSerializerContext

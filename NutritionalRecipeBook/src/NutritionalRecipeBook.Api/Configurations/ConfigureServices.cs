@@ -3,6 +3,7 @@ using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.Services;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Infrastructure.Repositories;
+using System;
 
 namespace NutritionalRecipeBook.Api.Configurations
 {
@@ -18,8 +19,14 @@ namespace NutritionalRecipeBook.Api.Configurations
             services.AddScoped<IIngredientService, IngredientService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICommentsService, CommentService>();
+            services.AddScoped<INutrientService, NutrientService>();
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IJWTService, JWTService>();
+
+            services.AddHttpClient<INutrientService, NutrientService>(client =>
+            {
+                client.BaseAddress = new Uri(config["NutrientsApi:BaseUrl"]!);
+            });
             
             return services;
         }
