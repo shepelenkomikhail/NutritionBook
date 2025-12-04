@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NutritionalRecipeBook.NutritionWebApi.Models;
 
 namespace NutritionalRecipeBook.NutritionWebApi
 {
@@ -52,14 +53,7 @@ namespace NutritionalRecipeBook.NutritionWebApi
             app.Run();
         }
     }
-
-    public record Nutrient(
-        [property: JsonPropertyName("name")] string? Name, 
-        [property: JsonPropertyName("calories")] int Calories, 
-        [property: JsonPropertyName("proteins")] double Proteins, 
-        [property: JsonPropertyName("carbs")] double Carbs, 
-        [property: JsonPropertyName("fats")] double Fats);
-
+    
     [JsonSerializable(typeof(Nutrient[]))]
     internal partial class AppJsonSerializerContext : JsonSerializerContext
     {
