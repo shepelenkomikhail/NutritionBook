@@ -69,12 +69,4 @@ const commentsApi = createApi({
   }),
 });
 
-export const { 
-  useCreateCommentMutation, 
-  useGetCommentsQuery, 
-  useLazyGetCommentsQuery, 
-  useDeleteCommentMutation,
-  useGetMyCommentsQuery,
-  useLazyGetMyCommentsQuery,
-} = commentsApi;
 export default commentsApi;

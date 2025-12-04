@@ -1,50 +1,69 @@
-import { useState, useEffect } from 'react';
-import { useLazyGetRecipesQuery, useLazyGetRecipesByUserQuery } from '@api';
+import { useState, useEffect, useCallback } from 'react';
+import { useLazyGetRecipesQuery, useLazyGetRecipesByUserQuery, useLazyGetFavoriteRecipesQuery, } from '@api';
 
-export const useRecipeQuery = (isPersonalizedRequest: boolean) => {
+export const useRecipeQuery = (
+  isPersonalizedRequest: boolean,
+  isFavoriteRequest: boolean
+) => {
   const [search, setSearch] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(10);
+  const pageSize = 10;
 
   const [minCookingTimeInMin, setMinCookingTimeInMin] = useState<number | undefined>(undefined);
   const [maxCookingTimeInMin, setMaxCookingTimeInMin] = useState<number | undefined>(undefined);
   const [minServings, setMinServings] = useState<number | undefined>(undefined);
   const [maxServings, setMaxServings] = useState<number | undefined>(undefined);
 
-  const [triggerUser, userResult] = useLazyGetRecipesByUserQuery();
   const [triggerPublic, publicResult] = useLazyGetRecipesQuery();
+  const [triggerUser, userResult] = useLazyGetRecipesByUserQuery();
+  const [triggerFavorite, favoriteResult] = useLazyGetFavoriteRecipesQuery();
 
-  const trigger = isPersonalizedRequest ? triggerUser : triggerPublic;
-  const result = isPersonalizedRequest ? userResult : publicResult;
+  const trigger = isFavoriteRequest
+    ? triggerFavorite
+    : isPersonalizedRequest
+      ? triggerUser
+      : triggerPublic;
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      trigger({
-        search,
-        pageNumber,
-        pageSize,
-        minCookingTimeInMin,
-        maxCookingTimeInMin,
-        minServings,
-        maxServings,
-      });
-    }, 200);
+  const result = isFavoriteRequest
+    ? favoriteResult
+    : isPersonalizedRequest
+      ? userResult
+      : publicResult;
 
-    return () => clearTimeout(handler);
+  const buildParams = useCallback(() => {
+    return {
+      search,
+      pageNumber,
+      pageSize,
+      minCookingTimeInMin,
+      maxCookingTimeInMin,
+      minServings,
+      maxServings,
+    };
   }, [
     search,
     pageNumber,
+    pageSize,
     minCookingTimeInMin,
     maxCookingTimeInMin,
     minServings,
     maxServings,
-    trigger,
   ]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trigger(buildParams());
+    }, 200);
+
+    return () => clearTimeout(handler);
+  }, [trigger, buildParams]);
+
+  const isLoadingQuery = result.isLoading || result.isFetching;
 
   return {
     recipes: result.data?.items ?? [],
     totalCount: result.data?.totalCount ?? 0,
-    isLoadingQuery: result.isLoading || result.isFetching,
+    isLoadingQuery,
 
     search,
     setSearch,
@@ -58,9 +77,21 @@ export const useRecipeQuery = (isPersonalizedRequest: boolean) => {
     minServings,
     maxServings,
 
-    setMinCookingTimeInMin: (v: number | undefined) => { setMinCookingTimeInMin(v); setPageNumber(1); },
-    setMaxCookingTimeInMin: (v: number | undefined) => { setMaxCookingTimeInMin(v); setPageNumber(1); },
-    setMinServings: (v: number | undefined) => { setMinServings(v); setPageNumber(1); },
-    setMaxServings: (v: number | undefined) => { setMaxServings(v); setPageNumber(1); },
+    setMinCookingTimeInMin: (v: number | undefined) => {
+      setMinCookingTimeInMin(v);
+      setPageNumber(1);
+    },
+    setMaxCookingTimeInMin: (v: number | undefined) => {
+      setMaxCookingTimeInMin(v);
+      setPageNumber(1);
+    },
+    setMinServings: (v: number | undefined) => {
+      setMinServings(v);
+      setPageNumber(1);
+    },
+    setMaxServings: (v: number | undefined) => {
+      setMaxServings(v);
+      setPageNumber(1);
+    },
   };
 };

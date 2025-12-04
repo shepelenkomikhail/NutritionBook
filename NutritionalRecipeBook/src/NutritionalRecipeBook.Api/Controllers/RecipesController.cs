@@ -161,12 +161,60 @@ namespace NutritionalRecipeBook.Api.Controllers
         [RequireUserId]
         public IActionResult GetMyRecipes(
             [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10,
+            [FromQuery] RecipeFilter? filter = null)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
-            var paged = _recipeService.GetRecipesForUserAsync(pageNumber, pageSize, userId);
+            var filterDto = new RecipeFilterDTO(
+                filter?.Search,
+                filter?.MinCookingTimeInMin,
+                filter?.MaxCookingTimeInMin,
+                filter?.MinServings,
+                filter?.MaxServings
+            );
+            var paged = _recipeService.GetRecipesForUserAsync(pageNumber, pageSize, userId, filterDto);
      
             return Ok(paged);
+        }
+        
+        // POST api/recipes/favorite/{recipeId}
+        [HttpPost("favorite/{recipeId}")]
+        [RequireUserId]
+        public async Task<IActionResult> MarkFavoriteRecipe(Guid recipeId)
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+            
+            var result = await _recipeService.MarkFavoriteRecipeAsync(recipeId, userId);
+
+            if (!result)
+            {
+                return BadRequest("Failed to mark recipe as favorite.");
+            }
+            
+            return Ok("Recipe marked as favorite successfully.");
+        }
+        
+        // GET api/recipes/favorite/
+        [HttpGet("favorite")]
+        [RequireUserId]
+        public IActionResult GetFavoriteRecipes(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] RecipeFilter? filter = null)
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+            var filterDto = new RecipeFilterDTO(
+                filter?.Search,
+                filter?.MinCookingTimeInMin,
+                filter?.MaxCookingTimeInMin,
+                filter?.MinServings,
+                filter?.MaxServings
+            );
+
+            var result = _recipeService.GetFavoriteRecipesAsync(userId, pageNumber, pageSize, filterDto);
+
+            return Ok(result);
         }
     }
 }

@@ -1,25 +1,45 @@
-import { useCreateRecipeMutation, useUpdateRecipeMutation } from '@api';
+import { useCreateRecipeMutation, useMarkFavoriteRecipeMutation, useUpdateRecipeMutation, } from '@api';
 import type { IngredientModel, RecipeModel, RecipePayload } from '@models';
 import { toast } from '@utils/toast.tsx';
+
+type CreateArgs = {
+  values: RecipeModel;
+  mode: 'create';
+};
+
+type UpdateArgs = {
+  values: RecipeModel;
+  id: string;
+  mode: 'update';
+};
+
+type FavoriteArgs = {
+  id: string;
+  mode: 'markFavorite';
+};
+
+type ExecuteArgs = CreateArgs | UpdateArgs | FavoriteArgs;
 
 export function useRecipeMutation() {
   const [createRecipe, createState] = useCreateRecipeMutation();
   const [updateRecipe, updateState] = useUpdateRecipeMutation();
+  const [markFavoriteRecipe, markFavoriteState] = useMarkFavoriteRecipeMutation();
 
-  const execute = async (values: RecipeModel, id?: string, mode?: 'create' | 'update') => {
-    const mappedIngredients = Array.isArray(values.ingredients)
+  const mapPayload = (values: RecipeModel): RecipePayload => {
+    const mappedIngredients =
+      Array.isArray(values.ingredients)
         ? values.ingredients.map((ing: IngredientModel) => ({
-        ingredientDTO: {
-          id: id || null,
-          name: ing.name.trim(),
-          isLiquid: ing.isLiquid ?? false,
-        },
-        amount: ing.amount,
-        unit: ing.unit.trim(),
-      }))
-      : [];
+          ingredientDTO: {
+            id: ing.id ?? null,
+            name: ing.name.trim(),
+            isLiquid: ing.isLiquid ?? false,
+          },
+          amount: ing.amount,
+          unit: ing.unit.trim(),
+        }))
+        : [];
 
-    const payload: RecipePayload = {
+    return {
       recipeDTO: {
         name: values.name.trim(),
         description: values.description?.trim(),
@@ -30,28 +50,46 @@ export function useRecipeMutation() {
       },
       ingredients: mappedIngredients,
     };
+  };
 
-    console.log('EXECUTE')
-    console.log('id - ', id);
-
+  const execute = async (args: ExecuteArgs) => {
     try {
-      if (mode == "create") {
-        console.log('Creating recipe with payload:', payload);
-        await createRecipe(payload).unwrap();
-        toast('Recipe created successfully!');
-      } else if (mode == "update" && id) {
-        console.log('Update recipe with id ', id);
-        await updateRecipe({ id: id, data: payload }).unwrap();
-        toast('Recipe updated successfully!');
+      switch (args.mode) {
+        case 'create': {
+          const payload = mapPayload(args.values);
+          await createRecipe(payload).unwrap();
+          toast('Recipe created successfully!');
+          break;
+        }
+
+        case 'update': {
+          const payload = mapPayload(args.values);
+          await updateRecipe({ id: args.id, data: payload }).unwrap();
+          toast('Recipe updated successfully!');
+          break;
+        }
+
+        case 'markFavorite': {
+          await markFavoriteRecipe({ id: args.id }).unwrap();
+          toast('Recipe favorited successfully!');
+          break;
+        }
       }
     } catch (error) {
-      console.error(`Failed to ${mode} recipe:`, error);
-      toast(`Failed to ${mode} recipe`);
+      console.error(`Failed to ${args.mode} recipe:`, error);
+      toast(`Failed to ${args.mode} recipe`);
     }
   };
 
-  const isLoading = createState.isLoading || updateState.isLoading;
-  const isError = createState.isError || updateState.isError;
+  const isLoading =
+    createState.isLoading ||
+    updateState.isLoading ||
+    markFavoriteState.isLoading;
+
+  const isError =
+    createState.isError ||
+    updateState.isError ||
+    markFavoriteState.isError;
 
   return { execute, isLoading, isError };
 }

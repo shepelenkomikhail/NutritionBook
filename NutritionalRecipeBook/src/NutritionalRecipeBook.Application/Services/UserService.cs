@@ -160,7 +160,6 @@ public class UserService : IUserService
             return false;
         }
 
-        // The token was Base64Url-encoded in the email. Decode back before confirming.
         string decodedToken;
         try
         {

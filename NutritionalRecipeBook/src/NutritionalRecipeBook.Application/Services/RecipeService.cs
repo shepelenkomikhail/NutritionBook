@@ -10,6 +10,7 @@ using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Application.Services.Extensions;
+using NutritionalRecipeBook.Application.Services.Helpers;
 
 namespace NutritionalRecipeBook.Application.Services
 {
@@ -77,7 +78,7 @@ namespace NutritionalRecipeBook.Application.Services
                         );
                 }
 
-                bool isSaved = await _unitOfWork.SaveAsync();
+                bool isSaved = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateRecipeAsync");
                 if (!isSaved)
                 {
                     _logger.LogWarning("CreateRecipeAsync failed: SaveAsync returned false.");
@@ -149,18 +150,10 @@ namespace NutritionalRecipeBook.Application.Services
                 }
 
                 await _unitOfWork.Repository<Recipe, Guid>().UpdateAsync(existingRecipe);
-                bool isSaved = await _unitOfWork.SaveAsync();
-
-                if (!isSaved)
-                {
-                    _logger.LogWarning("UpdateRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
-                    
-                    return false;
-                }
-
+                
                 _logger.LogInformation("Recipe with ID {Id} and ingredients updated successfully.", id);
                 
-                return true;
+                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UpdateRecipeAsync");
             }
             catch (Exception ex)
             {
@@ -216,6 +209,7 @@ namespace NutritionalRecipeBook.Application.Services
                 }
 
                 var apiUrl = $"/api/recipes/image/{newFileName}";
+                
                 return apiUrl;
             }
             catch (Exception ex)
@@ -236,6 +230,7 @@ namespace NutritionalRecipeBook.Application.Services
                 if (recipe == null)
                 {
                     _logger.LogWarning("Recipe with name '{RecipeName}' not found.", name);
+                   
                     return null;
                 }
 
@@ -265,17 +260,9 @@ namespace NutritionalRecipeBook.Application.Services
                 }
                 await _unitOfWork.Repository<Recipe, Guid>().DeleteAsync(id);
 
-                bool isSaved = await _unitOfWork.SaveAsync();
-                if (!isSaved)
-                {
-                    _logger.LogWarning("DeleteRecipeAsync failed: SaveAsync returned false for recipe ID {Id}.", id);
-                    
-                    return false;
-                }
-
                 _logger.LogInformation("Recipe with ID {Id} deleted successfully.", id);
                 
-                return true;
+                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteRecipeAsync");
             }
             catch (Exception ex)
             {
@@ -345,34 +332,14 @@ namespace NutritionalRecipeBook.Application.Services
         {
             try
             {
-                var repo = _unitOfWork.Repository<Recipe, Guid>();
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
                 _logger.LogInformation("Building query for recipes with search '{Search}', " +
                                        "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
                                        "minServ {MinServ}, maxServ {MaxServ}.",
                     filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
                     filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);
-
-                if (!string.IsNullOrWhiteSpace(filterDto.Search))
-                {
-                    var search = filterDto.Search.ToLower();
-
-                    query = query.Where(r =>
-                        r.Name.ToLower().Contains(search) ||
-                        r.Description.ToLower().Contains(search) ||
-                        r.Instructions.ToLower().Contains(search) ||
-                        r.RecipeIngredients.Any(ri => ri.Ingredient.Name.ToLower().Contains(search))
-                    );
-                }
-
-                query = repo.GetWhereIf(query, filterDto.MinCookingTimeInMin.HasValue, r => 
-                    r.CookingTimeInMin >= filterDto.MinCookingTimeInMin!.Value);
-                query = repo.GetWhereIf(query, filterDto.MaxCookingTimeInMin.HasValue, r =>
-                    r.CookingTimeInMin <= filterDto.MaxCookingTimeInMin!.Value);
-                query = repo.GetWhereIf(query, filterDto.MinServings.HasValue, r =>
-                    r.Servings >= filterDto.MinServings!.Value);
-                query = repo.GetWhereIf(query, filterDto.MaxServings.HasValue, r =>
-                    r.Servings <= filterDto.MaxServings!.Value);
+                
+                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
                 
                 int totalCount = query.Count();
 
@@ -396,13 +363,14 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public PagedResultDTO<RecipeDTO> GetRecipesForUserAsync(int pageNumber, int pageSize, Guid? userId)
+        public PagedResultDTO<RecipeDTO> GetRecipesForUserAsync(int pageNumber, int pageSize, Guid? userId, RecipeFilterDTO? filterDto = null)
         {
             try
             {
-                var repo = _unitOfWork.Repository<Recipe, Guid>();
-                var query = repo.GetQueryable()
+                var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
                     .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId));
+                
+                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
                 
                 var totalCount = query.Count();
                 
@@ -422,6 +390,79 @@ namespace NutritionalRecipeBook.Application.Services
             {
                 _logger.LogError(ex, "Error retrieving filtered/paged recipes.");
                 
+                return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
+            }
+        }
+
+        public async Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid userId)
+        {
+            if (recipeId == null)
+            {
+                _logger.LogWarning("Recipe ID is null.");
+                
+                return false;
+            }
+            
+            var connections = (await _unitOfWork.Repository<UserRecipe, Guid>()
+                    .GetWhereAsync(ur => ur.UserId == userId && ur.RecipeId == recipeId))
+                .ToList();
+
+            if (connections.Count == 0)
+            {
+                await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(new UserRecipe
+                {
+                    RecipeId = recipeId.Value,
+                    UserId = userId,
+                    IsFavourite = true
+                });
+                
+                _logger.LogInformation("Recipe with id {RecipeId} is marked as favorite for user {UserId} (new connection).",
+                    recipeId, userId);
+            }
+            else
+            {
+                foreach (var ur in connections)
+                {
+                    if (ur.IsFavourite) continue;
+                    
+                    ur.IsFavourite = true;
+                    await _unitOfWork.Repository<UserRecipe, Guid>().UpdateAsync(ur);
+                }
+                
+                _logger.LogInformation(
+                    "Updated {Count} user-recipe connections to favorite for recipe {RecipeId} and user {UserId}.",
+                    connections.Count, recipeId, userId);
+            }
+
+            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
+        }
+
+        public PagedResultDTO<RecipeDTO> GetFavoriteRecipesAsync(Guid userId, int pageNumber, int pageSize, RecipeFilterDTO? filterDto = null)
+        {
+            try
+            {
+                var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
+                    .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId && ur.IsFavourite));
+                
+                query = query.ApplyFilter(filterDto, _unitOfWork.Repository<Recipe, Guid>());
+
+                var totalCount = query.Count();
+
+                var recipes = query
+                    .OrderBy(r => r.Name)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(r => RecipeMapper.ToDto(r))
+                    .ToList();
+
+                _logger.LogInformation("Retrieved {Count} favorite recipes for user {UserId} on page {PageNumber} size {PageSize}.",
+                    totalCount, userId, pageNumber, pageSize);
+
+                return new PagedResultDTO<RecipeDTO>(recipes, totalCount, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting favorite recipes for user {UserId}.", userId);
                 return new PagedResultDTO<RecipeDTO>(new List<RecipeDTO>(), 0, pageNumber, pageSize);
             }
         }

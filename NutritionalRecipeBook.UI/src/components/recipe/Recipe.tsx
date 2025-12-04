@@ -12,17 +12,18 @@ import { ThemeToggleButton } from '../shared';
 import { RootState } from '@api';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../api/slices/authSlice.ts';
-import { TogglePersonalizedButton } from './buttons';
+import { TogglePersonalizedButton, ToggleFavoriteRecipesButton } from './buttons';
 import { setUserRecipes } from '../../api/slices/userRecipeSlice.ts';
 const { Content, Header } = Layout;
 
 function Recipe() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
   const { username, token } = useSelector((state: RootState) => state.auth);
   const ownedRecipes = useSelector((state: RootState) => state.userRecipes.recipes || []);
-  const [isPersonalizedRecipes, setIsPersonalizedRecipes] = useState<boolean>(false)
+  const [isPersonalizedRecipes, setIsPersonalizedRecipes] = useState<boolean>(false);
+  const [isFavoriteRecipes, setIsFavoriteRecipes] = useState<boolean>(false);
 
   const dispatch = useDispatch();
   const [triggerOwnedFetch] = useLazyGetRecipesByUserQuery();
@@ -42,7 +43,7 @@ function Recipe() {
     recipes, totalCount, search, setSearch, pageNumber, setPageNumber, pageSize, isLoadingQuery,
     minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, setMinCookingTimeInMin,
     setMaxCookingTimeInMin, setMinServings, setMaxServings,
-  } = useRecipeQuery(isPersonalizedRecipes);
+  } = useRecipeQuery(isPersonalizedRecipes, isFavoriteRecipes);
 
   const handleOpenEdit = (recipe: RecipeModel) => {
     setEditingRecipe(recipe);
@@ -101,7 +102,16 @@ function Recipe() {
       </Header>
 
       <Content className={`flex flex-col p-6 transition-all duration-100 bg-[var(--bg)] text-[var(--fg)] min-h-screen`}>
-        <TogglePersonalizedButton isPersonalized={isPersonalizedRecipes} setIsPersonalized={setIsPersonalizedRecipes} />
+        <TogglePersonalizedButton
+          isPersonalized={isPersonalizedRecipes}
+          setIsPersonalized={setIsPersonalizedRecipes}
+          setIsFavorite={setIsFavoriteRecipes}
+        />
+        <ToggleFavoriteRecipesButton
+          isFavorite={isFavoriteRecipes}
+          setIsFavorite={setIsFavoriteRecipes}
+          setIsPersonalized={setIsPersonalizedRecipes}
+        />
         <RecipeSearchBar
           search={search}
           onSearchChange={(v) => {
@@ -131,7 +141,7 @@ function Recipe() {
           pageNumber={pageNumber}
           pageSize={pageSize}
           onPageChange={setPageNumber}
-          isLoading={isLoading}
+          isLoading={isLoadingQuery}
           onEdit={handleOpenEdit}
         />
 
@@ -149,13 +159,15 @@ function Recipe() {
           destroyOnClose
           footer={null}
           className="max-h-[70vh]"
-          bodyStyle={{
-            color: 'var(--fg)',
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)'
+          styles={{
+            body: {
+              color: 'var(--fg)',
+              backgroundColor: 'var(--card)',
+              borderColor: 'var(--border)'
+            }
           }}
         >
-          <Spin spinning={isLoadingQuery} tip="Processing...">
+          <Spin spinning={isLoadingQuery}>
             <SimpleBar style={{ maxHeight: '60vh' }} autoHide={false}>
               <RecipeForm
                 id={editingRecipe?.id || null}

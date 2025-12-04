@@ -62,7 +62,7 @@ function RecipeForm({ mode, initialValues, onSubmit, setIsLoading, id }: RecipeF
   }, [initialValues, form]);
 
   const handleSubmit = async (values: RecipeModel) => {
-    await execute(values, id ?? undefined, mode);
+    await execute({ values, id: id ?? '', mode });
     onSubmit();
   }
 

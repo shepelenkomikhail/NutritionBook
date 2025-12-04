@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs;
 using NutritionalRecipeBook.Application.DTOs.Mappers;
+using NutritionalRecipeBook.Application.Services.Helpers;
 using NutritionalRecipeBook.Domain.ConnectionTables;
 using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Infrastructure.Contracts;
@@ -70,7 +71,7 @@ public class CommentService : ICommentsService
                 Rating = commentDto.Rating,
             });
 
-            return SaveChangesAsync().Result;
+            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateCommentAsync");
         }
         catch (Exception e)
         {
@@ -104,7 +105,7 @@ public class CommentService : ICommentsService
         {
             await _unitOfWork.Repository<Comment, Guid>().DeleteAsync(commentId.Value);
 
-            return SaveChangesAsync().Result;
+            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteCommentAsync");
         }
         catch (Exception e)
         {
@@ -193,19 +194,5 @@ public class CommentService : ICommentsService
         int? rating = userRecipe?.Rating;
 
         return comments.Select(c => CommentMapper.ToDto(c, rating));
-    }
-    
-    private async Task<bool> SaveChangesAsync()
-    {
-        try
-        {
-            return await _unitOfWork.SaveAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error occurred while saving changes to the database.");
-           
-            return false;
-        }
     }
 }

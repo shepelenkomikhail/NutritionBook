@@ -3,12 +3,18 @@ import { Button } from 'antd';
 interface Props {
   isPersonalized: boolean;
   setIsPersonalized: (value: boolean) => void;
+  setIsFavorite: (value: boolean) => void;
 }
 
-function TogglePersonalizedButton({ isPersonalized, setIsPersonalized }: Props) {
+function TogglePersonalizedButton({ isPersonalized, setIsPersonalized, setIsFavorite }: Props) {
+  const handleClick = () => {
+    setIsPersonalized(!isPersonalized);
+    setIsFavorite(false);
+  }
+
   return (
     <Button
-      onClick={() => setIsPersonalized(!isPersonalized)}
+      onClick={handleClick}
       className={"!absolute"}
     >
       {!isPersonalized ? 'My Recipes' : 'All Recipes'}

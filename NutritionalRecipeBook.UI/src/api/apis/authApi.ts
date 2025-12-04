@@ -52,7 +52,6 @@ const authApi = createApi({
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation } = authApi;
 export default authApi;
 
 function deriveUsername(
