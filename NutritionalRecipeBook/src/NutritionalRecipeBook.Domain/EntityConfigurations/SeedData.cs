@@ -113,12 +113,14 @@ public static class SeedData
     {
         return new List<UnitOfMeasure>
         {
-            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000001"), Name = "g" },
-            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000002"), Name = "kg" },
-            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000003"), Name = "ml" },
-            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000004"), Name = "L" },
-            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000005"), Name = "tsp" },
-            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000006"), Name = "tbsp" },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000001"), Name = "g", IsLiquidMeasure = false},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000002"), Name = "kg", IsLiquidMeasure = false},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000003"), Name = "ml", IsLiquidMeasure = true},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000004"), Name = "l", IsLiquidMeasure = true },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000005"), Name = "tsp", IsLiquidMeasure = false },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000006"), Name = "tbsp", IsLiquidMeasure = false},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000007"), Name = "tsp", IsLiquidMeasure = true},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000008"), Name = "tbsp", IsLiquidMeasure = true}
         };
     }
 
