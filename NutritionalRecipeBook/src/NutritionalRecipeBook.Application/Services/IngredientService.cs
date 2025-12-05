@@ -156,7 +156,7 @@ public class IngredientService : IIngredientService
         var unitOfMeasures = _unitOfWork.Repository<UnitOfMeasure, Guid>().GetAll();
         
         var uomDictionary = unitOfMeasures
-            .ToDictionary(
+            .ToLookup(
                 uom => uom.Name,
                 uom => new UnitOfMeasureDTO(uom.Id, uom.Name, uom.IsLiquidMeasure)
             );
@@ -166,15 +166,19 @@ public class IngredientService : IIngredientService
         foreach (var nutrient in nutrientInfos)
         {
             var nutrientUnit = nutrient.Uom;
-            
-            if (!uomDictionary.TryGetValue(nutrientUnit, out var uomDto))
+
+            if (!uomDictionary.Contains(nutrientUnit))
             {
                 _logger.LogWarning("Unit of measure '{Unit}' missing for nutrient '{Name}'",
                     nutrientUnit, nutrient.Name);
-            
+
                 continue;
             }
-            
+
+            var uomDtos = uomDictionary[nutrientUnit];
+
+            var uomDto = uomDtos.First();
+
             result.Add(new IngredientNutrientInfoDTO(nutrient, uomDto));
         }
 

@@ -29,7 +29,7 @@ const ingredientsApi = createApi({
       query: (params) => {
         const headers = getHeader();
         return {
-          url: `/api/ingredients/measurement-units`,
+          url: `/api/ingredients/measures`,
           method: 'GET',
           ...(headers ? { headers } : {}),
           ...(params ? { params } : {}),

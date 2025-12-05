@@ -27,7 +27,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         // POST: api/recipes
         [RequireUserId]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RecipeIngredientDTO newRecipeUpdateDto)
+        public async Task<IActionResult> Create([FromBody] RecipeIngredientNutrientDTO newRecipeUpdateDto)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             

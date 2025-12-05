@@ -27,8 +27,8 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
     
-    // GET api/ingredients/measures
-    [HttpGet("measures/{isLiquid:bool}")]
+    // GET api/ingredients/measures/{isLiquid:bool}
+    [HttpGet("measures")]
     public async Task<IActionResult> GetMeasures(bool isLiquid)
     {
         var result = await _ingredientService.GetMeasures(isLiquid);

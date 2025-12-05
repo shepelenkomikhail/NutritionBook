@@ -16,4 +16,13 @@ export type RecipePayload = {
     amount: number;
     unit: string;
   }>;
+  nutrients?: Array<{
+    name: string;
+    unitOfMeasureDTO: {
+      id: string | null;
+      name: string;
+      isLiquidMeasure: boolean;
+    };
+    amount: number;
+  }>;
 };

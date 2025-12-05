@@ -82,7 +82,7 @@ public static class RecipeServiceExtensions
             
             var unitOfMeasure = await unitOfWork.Repository<UnitOfMeasure, Guid>()
                 .GetSingleOrDefaultAsync(u => 
-                    u.Name.Equals(ingredientAmount.Unit.Trim(), StringComparison.CurrentCultureIgnoreCase));
+                    u.Name.Equals(ingredientAmount));
 
             if (ingredientEntity == null || unitOfMeasure == null)
             {

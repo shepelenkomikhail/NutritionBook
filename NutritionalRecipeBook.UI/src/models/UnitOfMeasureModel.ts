@@ -1,5 +1,5 @@
 export interface UnitOfMeasureModel {
-  id: string;
+  id?: string;
   name: string;
-  IsLiquidMeasure: boolean;
+  isLiquidMeasure: boolean;
 }

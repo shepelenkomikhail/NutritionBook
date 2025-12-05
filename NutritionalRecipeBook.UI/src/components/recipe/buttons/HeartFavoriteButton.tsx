@@ -3,7 +3,7 @@ import { HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { useLazyGetFavoriteRecipesQuery } from '@api';
 import { useRecipeMutation } from '@hooks';
 import { RecipeModel, PagedResult } from '@models';
-import { useEffect } from 'react';
+import { useEffect, type MouseEvent } from 'react';
 
 interface Props {
   recipeId: string | undefined;
@@ -28,7 +28,7 @@ function HeartFavoriteButton({ recipeId, className, size = 'middle', variant = '
 
   const isFavorite = favoriteItems.some((f: RecipeModel) => f.id === recipeId);
 
-  const handleToggle = async (e: any) => {
+  const handleToggle = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     if (!recipeId) return;
 
@@ -50,7 +50,7 @@ function HeartFavoriteButton({ recipeId, className, size = 'middle', variant = '
       className={className}
       aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
       aria-pressed={isFavorite}
-      onClick={(e) => handleToggle(e)}
+      onClick={(e) => handleToggle(e as MouseEvent<HTMLButtonElement>)}
       loading={isLoading}
       icon={
         isFavorite ? (
