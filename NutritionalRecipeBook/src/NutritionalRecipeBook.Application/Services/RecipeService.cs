@@ -371,7 +371,7 @@ namespace NutritionalRecipeBook.Application.Services
             try
             {
                 var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
-                    .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId));
+                    .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId && ur.IsOwner));
                 
                 query = query.ApplyFilter(filterDto);
 
