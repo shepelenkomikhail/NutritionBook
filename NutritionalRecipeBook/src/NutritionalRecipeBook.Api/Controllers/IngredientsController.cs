@@ -5,27 +5,25 @@ using NutritionalRecipeBook.Application.Contracts;
 namespace NutritionalRecipeBook.Api.Controllers;
 
 [ApiController]
-//[Authorize]
+[Authorize]
 [Route("api/[controller]")]
 public class IngredientsController : ControllerBase
 {
     private readonly IIngredientService _ingredientService;
-    private readonly INutrientService _nutrientService;
     private readonly ILogger<RecipesController> _logger;
 
-    public IngredientsController(IIngredientService ingredientService, ILogger<RecipesController> logger, INutrientService nutrientService)
+    public IngredientsController(IIngredientService ingredientService, ILogger<RecipesController> logger)
     {
         _ingredientService = ingredientService;
         _logger = logger;
-        _nutrientService = nutrientService;
     }
     
     // GET api/ingredients
     [HttpGet]
     public async Task<IActionResult> GetAllIngredients()
     {
-        //var result = await _ingredientService.GetAllIngredientsWithNutrientInfoAsync();
-        var result = await _nutrientService.GetAllNutrientsAsync();
+        var result = await _ingredientService.GetAllIngredientsWithNutrientInfoAsync();
+        
         return Ok(result);
     }
     
