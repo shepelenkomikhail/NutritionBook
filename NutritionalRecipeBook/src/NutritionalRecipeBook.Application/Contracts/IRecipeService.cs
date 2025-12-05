@@ -6,15 +6,15 @@ namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface IRecipeService
 {
-    Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO recipeUpdateDto, Guid userId);
+    Task<Guid?> CreateRecipeAsync(RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
     
-    Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO recipeUpdateDto, Guid userId);
+    Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
     
     Task<Guid?> GetRecipeIdByNameAsync(string name);
     
     Task<bool> DeleteRecipeAsync(Guid id, Guid userId);
     
-    Task<RecipeIngredientDTO?> GetRecipeByIdAsync(Guid id);
+    Task<RecipeIngredientNutrientDTO?> GetRecipeByIdAsync(Guid id);
     
     IEnumerable<RecipeDTO> GetAllRecipesAsync();
     

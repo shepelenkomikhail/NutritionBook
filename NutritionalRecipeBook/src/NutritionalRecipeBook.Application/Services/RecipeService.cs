@@ -1,7 +1,4 @@
 using Microsoft.Extensions.Logging;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 using NutritionalRecipeBook.Application.DTOs;
@@ -29,7 +26,7 @@ namespace NutritionalRecipeBook.Application.Services
             _ingredientService = ingredientService;
         }
 
-        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO? recipeDto, Guid userId)
+        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientNutrientDTO? recipeDto, Guid userId)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -73,6 +70,7 @@ namespace NutritionalRecipeBook.Application.Services
                     await this.ProcessRecipeIngredientsAsync(
                         recipeEntity, 
                         recipeDto.Ingredients,
+                        recipeDto.Nutrients,
                         _logger,
                         _unitOfWork,
                         _ingredientService
@@ -101,7 +99,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO? recipeDto, Guid userId)
+        public async Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientNutrientDTO? recipeDto, Guid userId)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -144,6 +142,7 @@ namespace NutritionalRecipeBook.Application.Services
                     await this.UpdateRecipeIngredientsAsync(
                         existingRecipe, 
                         recipeDto.Ingredients,
+                        recipeDto.Nutrients,
                         _logger,
                         _unitOfWork,
                         _ingredientService
@@ -273,7 +272,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public async Task<RecipeIngredientDTO?> GetRecipeByIdAsync(Guid id)
+        public async Task<RecipeIngredientNutrientDTO?> GetRecipeByIdAsync(Guid id)
         {
             try
             {
@@ -296,18 +295,76 @@ namespace NutritionalRecipeBook.Application.Services
                             ri.Ingredient.IsLiquid
                         ),
                         ri.Amount,
-                        ri.UnitOfMeasure.Name
+                        ri.UnitOfMeasure?.Name ?? string.Empty
                     ))
                     .ToList();
 
                 _logger.LogInformation("Retrieved {Count} ingredients for recipe ID {Id}.",
                     ingredientAmountDtos.Count, id);
 
-                return new RecipeIngredientDTO(recipeDto, ingredientAmountDtos);
+                var ingredientIds = recipeIngredients
+                    .Where(ri => ri.IngredientId != Guid.Empty)
+                    .Select(ri => ri.IngredientId)
+                    .Distinct()
+                    .ToList();
+
+                var nutrientIngredients = await _unitOfWork.Repository<NutrientIngredient, (Guid, Guid)>()
+                    .GetWhereAsync(ni => ingredientIds.Contains(ni.IngredientId));
+
+                var nutrientIds = nutrientIngredients
+                    .Select(ni => ni.NutrientId)
+                    .Distinct()
+                    .ToList();
+
+                var nutrientsDict = (await _unitOfWork.Repository<Nutrient, Guid>()
+                        .GetWhereAsync(n => nutrientIds.Contains(n.Id)))
+                    .ToDictionary(n => n.Id, n => n);
+                
+                var totals = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var ri in recipeIngredients)
+                {
+                    var grams = this.ToGrams(_logger, ri.Amount, ri.UnitOfMeasure?.Name ?? string.Empty);
+                    var factor = grams / 100m;
+
+                    var niForIngredient = nutrientIngredients.Where(ni => ni.IngredientId == ri.IngredientId);
+                    foreach (var ni in niForIngredient)
+                    {
+                        if (!nutrientsDict.TryGetValue(ni.NutrientId, out var nutrient))
+                        {
+                            continue;
+                        }
+
+                        var key = $"{nutrient.Name}|{nutrient.Unit}".ToLower();
+                        var amount = ni.IngredientAmountPer100G * factor;
+
+                        if (!totals.TryAdd(key, amount))
+                        {
+                            totals[key] += amount;
+                        }
+                    }
+                }
+
+                var nutrients = totals
+                    .Select(kvp =>
+                    {
+                        var parts = kvp.Key.Split('|');
+                        var name = parts.Length > 0 ? parts[0] : string.Empty;
+                        var unit = parts.Length > 1 ? parts[1] : string.Empty;
+                        return new NutrientDTO(
+                            name,
+                            new UnitOfMeasureDTO(null, unit, false),
+                            kvp.Value);
+                    })
+                    .OrderBy(n => n.Name)
+                    .ToList();
+
+                return new RecipeIngredientNutrientDTO(recipeDto, ingredientAmountDtos, nutrients);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred while retrieving recipe ID {Id}.", id);
+                
                 return null;
             }
         }
