@@ -5,5 +5,6 @@ public record IngredientNutrientApiDTO(
     int Calories,
     double Proteins,
     double Carbs,
-    double Fats
-    );
+    double Fats,
+    string UnitOfMeasure
+);

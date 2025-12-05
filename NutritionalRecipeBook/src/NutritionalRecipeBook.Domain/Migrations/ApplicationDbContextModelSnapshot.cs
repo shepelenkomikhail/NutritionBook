@@ -723,7 +723,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000001"),
                             Content = "Comment 1 by UserName1 on Recipe 1",
-                            CreatedAt = new DateTime(2025, 12, 4, 16, 32, 1, 885, DateTimeKind.Utc).AddTicks(9614),
+                            CreatedAt = new DateTime(2025, 12, 5, 9, 34, 27, 895, DateTimeKind.Utc).AddTicks(5592),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000001"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000001")
                         },
@@ -731,7 +731,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000002"),
                             Content = "Comment 2 by UserName2 on Recipe 2",
-                            CreatedAt = new DateTime(2025, 12, 4, 16, 22, 1, 885, DateTimeKind.Utc).AddTicks(9629),
+                            CreatedAt = new DateTime(2025, 12, 5, 9, 24, 27, 895, DateTimeKind.Utc).AddTicks(5607),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000002"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000002")
                         },
@@ -739,7 +739,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000003"),
                             Content = "Comment 3 by UserName3 on Recipe 3",
-                            CreatedAt = new DateTime(2025, 12, 4, 16, 12, 1, 885, DateTimeKind.Utc).AddTicks(9635),
+                            CreatedAt = new DateTime(2025, 12, 5, 9, 14, 27, 895, DateTimeKind.Utc).AddTicks(5613),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000003"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000003")
                         },
@@ -747,7 +747,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000004"),
                             Content = "Comment 4 by UserName4 on Recipe 4",
-                            CreatedAt = new DateTime(2025, 12, 4, 16, 2, 1, 885, DateTimeKind.Utc).AddTicks(9642),
+                            CreatedAt = new DateTime(2025, 12, 5, 9, 4, 27, 895, DateTimeKind.Utc).AddTicks(5618),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000004"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000004")
                         },
@@ -755,7 +755,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000005"),
                             Content = "Comment 5 by UserName5 on Recipe 5",
-                            CreatedAt = new DateTime(2025, 12, 4, 15, 52, 1, 885, DateTimeKind.Utc).AddTicks(9648),
+                            CreatedAt = new DateTime(2025, 12, 5, 8, 54, 27, 895, DateTimeKind.Utc).AddTicks(5623),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000005"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000005")
                         },
@@ -763,7 +763,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000006"),
                             Content = "Comment 6 by UserName6 on Recipe 6",
-                            CreatedAt = new DateTime(2025, 12, 4, 15, 42, 1, 885, DateTimeKind.Utc).AddTicks(9655),
+                            CreatedAt = new DateTime(2025, 12, 5, 8, 44, 27, 895, DateTimeKind.Utc).AddTicks(5629),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000006"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000006")
                         },
@@ -771,7 +771,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000007"),
                             Content = "Comment 7 by UserName7 on Recipe 7",
-                            CreatedAt = new DateTime(2025, 12, 4, 15, 32, 1, 885, DateTimeKind.Utc).AddTicks(9661),
+                            CreatedAt = new DateTime(2025, 12, 5, 8, 34, 27, 895, DateTimeKind.Utc).AddTicks(5634),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000007"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000007")
                         },
@@ -779,7 +779,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000008"),
                             Content = "Comment 8 by UserName8 on Recipe 8",
-                            CreatedAt = new DateTime(2025, 12, 4, 15, 22, 1, 885, DateTimeKind.Utc).AddTicks(9667),
+                            CreatedAt = new DateTime(2025, 12, 5, 8, 24, 27, 895, DateTimeKind.Utc).AddTicks(5640),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000008"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000008")
                         },
@@ -787,7 +787,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000009"),
                             Content = "Comment 9 by UserName9 on Recipe 9",
-                            CreatedAt = new DateTime(2025, 12, 4, 15, 12, 1, 885, DateTimeKind.Utc).AddTicks(9673),
+                            CreatedAt = new DateTime(2025, 12, 5, 8, 14, 27, 895, DateTimeKind.Utc).AddTicks(5645),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000009"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000009")
                         },
@@ -795,7 +795,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000010"),
                             Content = "Comment 10 by UserName10 on Recipe 10",
-                            CreatedAt = new DateTime(2025, 12, 4, 15, 2, 1, 885, DateTimeKind.Utc).AddTicks(9679),
+                            CreatedAt = new DateTime(2025, 12, 5, 8, 4, 27, 895, DateTimeKind.Utc).AddTicks(5651),
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000010"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000010")
                         });
@@ -1200,6 +1200,9 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsLiquidMeasure")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(3)
@@ -1213,31 +1216,49 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("80000000-0000-0000-0000-000000000001"),
+                            IsLiquidMeasure = false,
                             Name = "g"
                         },
                         new
                         {
                             Id = new Guid("80000000-0000-0000-0000-000000000002"),
+                            IsLiquidMeasure = false,
                             Name = "kg"
                         },
                         new
                         {
                             Id = new Guid("80000000-0000-0000-0000-000000000003"),
+                            IsLiquidMeasure = true,
                             Name = "ml"
                         },
                         new
                         {
                             Id = new Guid("80000000-0000-0000-0000-000000000004"),
-                            Name = "L"
+                            IsLiquidMeasure = true,
+                            Name = "l"
                         },
                         new
                         {
                             Id = new Guid("80000000-0000-0000-0000-000000000005"),
+                            IsLiquidMeasure = false,
                             Name = "tsp"
                         },
                         new
                         {
                             Id = new Guid("80000000-0000-0000-0000-000000000006"),
+                            IsLiquidMeasure = false,
+                            Name = "tbsp"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000007"),
+                            IsLiquidMeasure = true,
+                            Name = "tsp"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000008"),
+                            IsLiquidMeasure = true,
                             Name = "tbsp"
                         });
                 });
@@ -1322,7 +1343,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "2080879d-e0ac-4a07-8f26-dd2722769fb0",
+                            ConcurrencyStamp = "3aa2c8ed-a0f6-4d11-9975-2e14ef8d9b85",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name1",
@@ -1335,7 +1356,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "84abd8b7-67ea-4e73-a7ba-29f3ff5c5363",
+                            ConcurrencyStamp = "08ca3848-57d4-42ce-91a5-35f461ee65a4",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name2",
@@ -1348,7 +1369,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "bbef89a3-7b53-4721-be12-7501c87c09f3",
+                            ConcurrencyStamp = "4f083dae-bb7e-4550-857e-7165ccdb5592",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name3",
@@ -1361,7 +1382,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "19bef9ad-3519-4414-92ca-653a7429528d",
+                            ConcurrencyStamp = "10c19165-e03b-42d5-ae01-7c0103968527",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name4",
@@ -1374,7 +1395,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000005"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "ea6ec50a-3a90-4dea-92d8-7ae8f2e9434f",
+                            ConcurrencyStamp = "09c6ef8e-19e0-4395-b1b4-7c4e0e0c792b",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name5",
@@ -1387,7 +1408,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000006"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "7ad645ef-d0e2-4436-8a8a-a1958b8c5300",
+                            ConcurrencyStamp = "20619977-b29e-4ae5-8645-e4c24763c9c4",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name6",
@@ -1400,7 +1421,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000007"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "2b5e17a0-edc2-41cc-b785-fa8b89c9a405",
+                            ConcurrencyStamp = "c91206a4-c985-493d-a3de-acf411674768",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name7",
@@ -1413,7 +1434,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000008"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "404de6e2-c0f4-4277-832c-6a82ea8ee831",
+                            ConcurrencyStamp = "e8ffbfb2-ea14-43c4-97dd-a9e9aefdf43b",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name8",
@@ -1426,7 +1447,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000009"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b8fdfeb6-e430-4014-b840-e6f4664cf411",
+                            ConcurrencyStamp = "8eefed4a-1988-4ead-8741-735f059231ab",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name9",
@@ -1439,7 +1460,7 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000010"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "e65415cd-e3cd-4b98-a899-ac10946bfc03",
+                            ConcurrencyStamp = "432b5468-6067-43d4-9063-8d1aca733a52",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             Name = "Name10",

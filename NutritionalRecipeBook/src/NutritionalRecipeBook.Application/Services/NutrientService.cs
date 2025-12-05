@@ -7,6 +7,7 @@ namespace NutritionalRecipeBook.Application.Services;
 
 public class NutrientService: INutrientService
 {
+    private const int MaxQueryLength = 100;
     private readonly ILogger<NutrientService> _logger;
     private readonly HttpClient _httpClient;
     
@@ -18,29 +19,89 @@ public class NutrientService: INutrientService
     
     public async Task<IEnumerable<IngredientNutrientApiDTO>> GetAllNutrientsAsync()
     {
-        var url = new Uri("/nutrients", UriKind.Relative);
+        EnsureHttpClientConfigured();
         
+        var url = new Uri("/nutrients", UriKind.Relative);
         _logger.LogInformation("Fetching all nutrients from {Url}", url);
         
-        var items = await _httpClient.GetFromJsonAsync<List<IngredientNutrientApiDTO>>(url) 
-                    ?? new List<IngredientNutrientApiDTO>();
-        
-        return items;
+        return await FetchNutrientsAsync(url);
     }
 
     public async Task<IEnumerable<IngredientNutrientApiDTO>> SearchNutrientsAsync(string query)
     {
         if (string.IsNullOrWhiteSpace(query))
         {
+            _logger.LogWarning("Skipping empty nutrient search query");
+            
             return Array.Empty<IngredientNutrientApiDTO>();
         }
-       
+        query = query.Trim();
+        if (query.Length > MaxQueryLength)
+        {
+            _logger.LogWarning("Search query truncated because it exceeded {MaxLength} characters",
+                MaxQueryLength);
+            
+            query = query[..MaxQueryLength];
+        }
+        
+        EnsureHttpClientConfigured();
         var url = new Uri($"/search?query={Uri.EscapeDataString(query)}", UriKind.Relative);
+        
         _logger.LogInformation("Searching nutrients with query '{Query}' at {Url}", query, url);
         
-        var items = await _httpClient.GetFromJsonAsync<List<IngredientNutrientApiDTO>>(url) 
-                    ?? new List<IngredientNutrientApiDTO>();
+        return await FetchNutrientsAsync(url);
+    }
+
+    private void EnsureHttpClientConfigured()
+    {
+        if (_httpClient.BaseAddress is null)
+        {
+            throw new InvalidOperationException(
+                "HttpClient BaseAddress must be configured for NutrientService");
+        }
+    }
+
+    private async Task<IEnumerable<IngredientNutrientApiDTO>> FetchNutrientsAsync(Uri requestUri, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Nutrients API returned non-success status {StatusCode}", response.StatusCode);
+                
+                return Array.Empty<IngredientNutrientApiDTO>();
+            }
+            var items = await response.Content.ReadFromJsonAsync<List<IngredientNutrientApiDTO>>(cancellationToken: cancellationToken)
+                        ?? new List<IngredientNutrientApiDTO>();
+            
+            return items.Where(IsValidNutrient).ToArray();
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex,
+                "HTTP error during nutrient API call to {RequestUri}", requestUri);
+        }
+        catch (NotSupportedException ex)
+        {
+            _logger.LogError(ex, 
+                "Unsupported media type from nutrient API at {RequestUri}", requestUri);
+        }
+        catch (System.Text.Json.JsonException ex)
+        {
+            _logger.LogError(ex,
+                "Failed to deserialize nutrient API payload from {RequestUri}", requestUri);
+        }
         
-        return items;
+        return Array.Empty<IngredientNutrientApiDTO>();
+    }
+
+    private static bool IsValidNutrient(IngredientNutrientApiDTO dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.UnitOfMeasure))
+        {
+            return false;
+        }
+        return dto.Calories >= 0 && dto.Proteins >= 0 && dto.Carbs >= 0 && dto.Fats >= 0;
     }
 }

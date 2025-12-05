@@ -7,4 +7,5 @@ public record Nutrient(
     [property: JsonPropertyName("calories")] int Calories, 
     [property: JsonPropertyName("proteins")] double Proteins, 
     [property: JsonPropertyName("carbs")] double Carbs, 
-    [property: JsonPropertyName("fats")] double Fats);
+    [property: JsonPropertyName("fats")] double Fats,
+    [property: JsonPropertyName("uom")] string UnitOfMeasure);
