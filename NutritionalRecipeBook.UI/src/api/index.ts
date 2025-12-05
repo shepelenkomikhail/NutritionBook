@@ -4,6 +4,7 @@ import authApi from './apis/authApi.ts';
 import commentsApi from './apis/commentsApi.ts';
 import authReducer from './slices/authSlice.ts';
 import userRecipesReducer from './slices/userRecipeSlice.ts';
+import ingredientsApi from './apis/ingredientApi.ts';
 
 const store = configureStore({
   reducer: {
@@ -12,15 +13,21 @@ const store = configureStore({
     [recipesApi.reducerPath]: recipesApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
     [commentsApi.reducerPath]: commentsApi.reducer,
+    [ingredientsApi.reducerPath]: ingredientsApi.reducer
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware().concat(
       recipesApi.middleware,
       authApi.middleware,
-      commentsApi.middleware
+      commentsApi.middleware,
+      ingredientsApi.middleware
     );
   }
 });
+
+export const { useRegisterMutation, useLoginMutation } = authApi;
+
+export const { useGetIngredientsQuery, useGetMeasurementUnitsQuery } = ingredientsApi;
 
 export const {
   useCreateRecipeMutation,
@@ -34,11 +41,9 @@ export const {
   useUnmarkFavoriteRecipeMutation,
 } = recipesApi;
 
-export const { useRegisterMutation, useLoginMutation } = authApi;
-
-export const { 
-  useCreateCommentMutation, 
-  useLazyGetCommentsQuery, 
+export const {
+  useCreateCommentMutation,
+  useLazyGetCommentsQuery,
   useDeleteCommentMutation,
   useGetMyCommentsQuery,
   useLazyGetMyCommentsQuery,
