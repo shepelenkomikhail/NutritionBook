@@ -1,4 +1,4 @@
-import { RecipePayload, PagedResult, RecipeModel, RecipeDetailsResponse } from '@models';
+import { RecipePayload, PagedResult, RecipeModel } from '@models';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
@@ -69,7 +69,7 @@ const recipesApi = createApi({
         };
       },
     }),
-    getRecipeById: builder.query<RecipeDetailsResponse, string>({
+    getRecipeById: builder.query<RecipePayload, string>({
       providesTags: ['Recipe'],
       query: (id: string) => {
         const headers = getHeader();

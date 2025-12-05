@@ -40,6 +40,8 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
     }
   }
 
+  console.log(recipeData);
+
   const handleDeleteComment = async (item: CommentModel, currentPageCount: number) => {
     if (!item.id) return;
     const allow = myCommentIds.has(item.id);
