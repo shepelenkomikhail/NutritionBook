@@ -1,4 +1,4 @@
-namespace NutritionalRecipeBook.Application.DTOs;
+namespace NutritionalRecipeBook.Application.DTOs.IngredientControllerDTOs;
 
 public record IngredientNutrientApiDTO(
     string Name,
@@ -6,5 +6,5 @@ public record IngredientNutrientApiDTO(
     double Proteins,
     double Carbs,
     double Fats,
-    string UnitOfMeasure
+    string Uom
 );

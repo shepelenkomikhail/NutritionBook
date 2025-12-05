@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
-using NutritionalRecipeBook.Application.DTOs;
+using NutritionalRecipeBook.Application.DTOs.IngredientControllerDTOs;
 
 namespace NutritionalRecipeBook.Application.Services;
 
@@ -61,18 +61,21 @@ public class NutrientService: INutrientService
         }
     }
 
-    private async Task<IEnumerable<IngredientNutrientApiDTO>> FetchNutrientsAsync(Uri requestUri, CancellationToken cancellationToken = default)
+    private async Task<IEnumerable<IngredientNutrientApiDTO>> FetchNutrientsAsync(Uri requestUri)
     {
         try
         {
-            using var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+            using var response = await _httpClient.GetAsync(requestUri);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning("Nutrients API returned non-success status {StatusCode}", response.StatusCode);
                 
                 return Array.Empty<IngredientNutrientApiDTO>();
             }
-            var items = await response.Content.ReadFromJsonAsync<List<IngredientNutrientApiDTO>>(cancellationToken: cancellationToken)
+            
+            _logger.LogInformation("Nutrients API returned {StatusCode}", response.StatusCode);
+            
+            var items = await response.Content.ReadFromJsonAsync<List<IngredientNutrientApiDTO>>()
                         ?? new List<IngredientNutrientApiDTO>();
             
             return items.Where(IsValidNutrient).ToArray();
@@ -98,7 +101,7 @@ public class NutrientService: INutrientService
 
     private static bool IsValidNutrient(IngredientNutrientApiDTO dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.UnitOfMeasure))
+        if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Uom))
         {
             return false;
         }
