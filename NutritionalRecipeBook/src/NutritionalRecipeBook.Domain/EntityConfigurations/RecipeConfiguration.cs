@@ -20,6 +20,9 @@ public class RecipeConfiguration : IEntityTypeConfiguration<Recipe>
             .HasMaxLength(10000)
             .IsRequired();
         
+        builder.Property(r => r.CaloriesPerServing)
+            .HasColumnType("decimal(18,2)");
+        
         builder.Property(r => r.ImageUrl)
             .HasMaxLength(500);
 

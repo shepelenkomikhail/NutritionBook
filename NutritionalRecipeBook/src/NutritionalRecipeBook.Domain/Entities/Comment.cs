@@ -6,6 +6,7 @@ public class Comment: BaseEntity<Guid>
     public DateTime CreatedAt { get; set; }
     public Guid UserId { get; set; }
     public Guid RecipeId { get; set; }
+    public int Rating { get; set; }
     
     public virtual User User { get; set; } = null!;
     public virtual Recipe Recipe { get; set; } = null!;

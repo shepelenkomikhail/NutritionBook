@@ -6,5 +6,5 @@ public record CommentDTO(
     DateTime CreatedAt,
     Guid RecipeId,
     Guid UserId,
-    int? Rating
+    int Rating
 );

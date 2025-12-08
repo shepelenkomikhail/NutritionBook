@@ -61,7 +61,6 @@ namespace NutritionalRecipeBook.Application.Services
                     RecipeId = recipeEntity.Id,
                     IsOwner = true,
                     IsFavourite = false,
-                    Rating = 0
                 };
                 await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(userRecipe);
 
@@ -386,16 +385,19 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public async Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(int pageNumber, int pageSize, RecipeFilterDTO filterDto = null)
+        public async Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(
+            int pageNumber, int pageSize, RecipeFilterDTO? filterDto = null)
         {
             try
             {
+                _logger.LogInformation(filterDto.ToString());
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
                 _logger.LogInformation("Building query for recipes with search '{Search}', " +
-                                       "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
-                                       "minServ {MinServ}, maxServ {MaxServ}.",
+                                         "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
+                                       "minServ {MinServ}, maxServ {MaxServ}, minCal {MinCal}, maxCal {MaxCal}.",
                     filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
-                    filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);
+                    filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings,
+                    filterDto.MinCaloriesPerServing, filterDto.MaxCaloriesPerServing);
                 
                 query = query.ApplyFilter(filterDto);
 

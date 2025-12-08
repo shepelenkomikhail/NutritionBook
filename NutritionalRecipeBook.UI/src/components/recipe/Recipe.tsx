@@ -41,8 +41,8 @@ function Recipe() {
 
   const {
     recipes, totalCount, search, setSearch, pageNumber, setPageNumber, pageSize, isLoadingQuery,
-    minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, setMinCookingTimeInMin,
-    setMaxCookingTimeInMin, setMinServings, setMaxServings,
+    minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, minCalories, maxCalories,
+    setMinCookingTimeInMin, setMaxCookingTimeInMin, setMinServings, setMaxServings, setMinCalories, setMaxCalories
   } = useRecipeQuery(isPersonalizedRecipes, isFavoriteRecipes);
 
   const handleOpenEdit = (recipe: RecipeModel) => {
@@ -122,15 +122,21 @@ function Recipe() {
           maxCookingTimeInMin={maxCookingTimeInMin}
           minServings={minServings}
           maxServings={maxServings}
+          minCalories={minCalories}
+          maxCalories={maxCalories}
           onMinCookingTimeChange={setMinCookingTimeInMin}
           onMaxCookingTimeChange={setMaxCookingTimeInMin}
           onMinServingsChange={setMinServings}
           onMaxServingsChange={setMaxServings}
+          onMinCaloriesChange={setMinCalories}
+          onMaxCaloriesChange={setMaxCalories}
           onClearFilters={() => {
             setMinCookingTimeInMin(undefined);
             setMaxCookingTimeInMin(undefined);
             setMinServings(undefined);
             setMaxServings(undefined);
+            setMinCalories(undefined);
+            setMaxCalories(undefined);
             setPageNumber(1);
           }}
         />

@@ -19,5 +19,8 @@ public class NutrientIngredientConfiguration : IEntityTypeConfiguration<Nutrient
             .WithMany(i => i.NutrientIngredients)
             .HasForeignKey(ni => ni.IngredientId);
         builder.Ignore(ni => ni.Id);
+        
+        builder.Property(ni => ni.IngredientAmountPer100G)
+            .HasColumnType("decimal(18,2)");
     }
 }

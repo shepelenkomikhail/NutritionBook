@@ -6,6 +6,7 @@ export type RecipePayload = {
     cookingTimeInMin: number;
     servings: number;
     imageUrl?: string;
+    caloriesPerServing?: number;
   };
   ingredients: Array<{
     ingredientDTO: {

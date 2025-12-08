@@ -4,7 +4,7 @@ namespace NutritionalRecipeBook.Application.DTOs.Mappers;
 
 public static class CommentMapper
 {
-    public static CommentDTO ToDto(Comment entity, int? rating = null)
+    public static CommentDTO ToDto(Comment entity)
     {
         return new CommentDTO(
             entity.Id,
@@ -12,7 +12,7 @@ public static class CommentMapper
             entity.CreatedAt,
             entity.RecipeId,
             entity.UserId,
-            rating
+            entity.Rating
         );
     }
 
@@ -23,7 +23,8 @@ public static class CommentMapper
             Content = dto.Content.Trim(),
             CreatedAt = dto.CreatedAt,
             RecipeId = dto.RecipeId,
-            UserId = dto.UserId
+            UserId = dto.UserId,
+            Rating = dto.Rating
         };
     }
 }

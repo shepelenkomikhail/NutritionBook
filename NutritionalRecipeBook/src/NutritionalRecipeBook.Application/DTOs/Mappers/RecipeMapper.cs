@@ -13,7 +13,8 @@ public static class RecipeMapper
             entity.Instructions,
             entity.CookingTimeInMin,
             entity.Servings,
-            entity.ImageUrl
+            entity.ImageUrl,
+            entity.CaloriesPerServing
         );
     }
 
@@ -26,7 +27,8 @@ public static class RecipeMapper
             Instructions = dto.Instructions?.Trim() ?? string.Empty,
             CookingTimeInMin = dto.CookingTimeInMin,
             Servings = dto.Servings,
-            ImageUrl = dto.ImageUrl
+            ImageUrl = dto.ImageUrl,
+            CaloriesPerServing = dto.CaloriesPerServing
         };
     }
 }
