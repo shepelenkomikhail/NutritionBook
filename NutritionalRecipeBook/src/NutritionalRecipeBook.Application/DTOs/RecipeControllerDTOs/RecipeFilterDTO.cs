@@ -5,5 +5,7 @@ public record RecipeFilterDTO(
     int? MinCookingTimeInMin,
     int? MaxCookingTimeInMin,
     int? MinServings,
-    int? MaxServings 
+    int? MaxServings,
+    int? MinCaloriesPerServing,
+    int? MaxCaloriesPerServing
 );

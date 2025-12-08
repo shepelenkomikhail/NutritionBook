@@ -284,7 +284,11 @@ public static class RecipeServiceExtensions
             .WhereIfNoTracking(filterDto.MinServings.HasValue,
                 r => r.Servings >= filterDto.MinServings!.Value)
             .WhereIfNoTracking(filterDto.MaxServings.HasValue,
-                r => r.Servings <= filterDto.MaxServings!.Value);
+                r => r.Servings <= filterDto.MaxServings!.Value)
+            .WhereIfNoTracking(filterDto.MinCaloriesPerServing.HasValue,
+                r => r.CaloriesPerServing >= filterDto.MinCaloriesPerServing!.Value)
+            .WhereIfNoTracking(filterDto.MaxCaloriesPerServing.HasValue,
+                r => r.CaloriesPerServing <= filterDto.MaxCaloriesPerServing!.Value);
     }
     
     public static decimal ToGrams(

@@ -386,13 +386,14 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
         
-        public async Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(int pageNumber, int pageSize, RecipeFilterDTO filterDto = null)
+        public async Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(
+            int pageNumber, int pageSize, RecipeFilterDTO? filterDto = null)
         {
             try
             {
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
                 _logger.LogInformation("Building query for recipes with search '{Search}', " +
-                                       "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
+                                         "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
                                        "minServ {MinServ}, maxServ {MaxServ}.",
                     filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
                     filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);

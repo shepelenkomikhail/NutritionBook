@@ -136,7 +136,9 @@ namespace NutritionalRecipeBook.Api.Controllers
                 filter?.MinCookingTimeInMin, 
                 filter?.MaxCookingTimeInMin,
                 filter?.MinServings,
-                filter?.MaxServings
+                filter?.MaxServings,
+                filter?.MinCaloriesPerServing,
+                filter?.MaxCaloriesPerServing
             );
             var pagedResult = await _recipeService.GetRecipesAsync(pageNumber, pageSize, filterDto);
             
@@ -157,7 +159,9 @@ namespace NutritionalRecipeBook.Api.Controllers
                 filter?.MinCookingTimeInMin,
                 filter?.MaxCookingTimeInMin,
                 filter?.MinServings,
-                filter?.MaxServings
+                filter?.MaxServings,
+                filter?.MinCaloriesPerServing,
+                filter?.MaxCaloriesPerServing
             );
             var paged = await _recipeService.GetRecipesForUserAsync(pageNumber, pageSize, userId, filterDto);
      
@@ -196,7 +200,9 @@ namespace NutritionalRecipeBook.Api.Controllers
                 filter?.MinCookingTimeInMin,
                 filter?.MaxCookingTimeInMin,
                 filter?.MinServings,
-                filter?.MaxServings
+                filter?.MaxServings,
+                filter?.MinCaloriesPerServing,
+                filter?.MaxCaloriesPerServing                
             );
 
             var result = await _recipeService.GetFavoriteRecipesAsync(userId, pageNumber, pageSize, filterDto);

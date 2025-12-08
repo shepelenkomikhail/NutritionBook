@@ -7,5 +7,6 @@ public record RecipeDTO(
     string Instructions,
     int CookingTimeInMin,
     int Servings, 
-    string ImageUrl
+    string ImageUrl,
+    decimal CaloriesPerServing
 );
