@@ -1,6 +1,6 @@
 import { Form } from 'antd';
 import type { FormInstance } from 'antd';
-import { calculateNutritionTotals } from './calculateNutritionTotals';
+import { calculateNutritionTotals } from '@utils/calculateNutritionTotals.ts';
 import type { FormIngredientModel } from '@models';
 import { lightLabelStyle } from '../../../themes/modelStyles';
 
@@ -35,9 +35,6 @@ function RecipeNutritionSummary({ form }: Props) {
                 <div className="text-[var(--fg-muted)]">Fats</div>
                 <div>{totals.fats} g</div>
               </div>
-            </div>
-            <div className="text-xs text-[var(--fg-muted)] mt-2">
-              Note: Nutrients are computed when the selected unit matches the ingredient's base unit (g/ml).
             </div>
           </div>
         );

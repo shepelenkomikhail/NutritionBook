@@ -12,6 +12,7 @@ import { HeartFavoriteButton } from './buttons';
 import { useIngredientsQuery } from '@hooks';
 import CommentForm from './details/CommentForm.tsx';
 const { Title } = Typography;
+import { calculateNutritionTotals } from '@utils/calculateNutritionTotals';
 
 interface RecipeModalProps {
   open: boolean;
@@ -39,8 +40,6 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
       triggerMyComments({ recipeId });
     }
   }
-
-  console.log(recipeData);
 
   const handleDeleteComment = async (item: CommentModel, currentPageCount: number) => {
     if (!item.id) return;
@@ -99,30 +98,29 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   }, [myCommentsData]);
 
   const nutritionTotals = useMemo(() => {
-    const items = recipeData?.ingredients ?? [];
-    const acc = items.reduce(
-      (sum, item) => {
-        const ing: IngredientNutritionInfoModel | undefined = catalog.find(c => c.name === item.ingredientDTO.name);
-        if (!ing) return sum;
-        const unitMatchesBase = !!ing.uom && item.unit === ing.uom;
-        const factor = unitMatchesBase ? (Number(item.amount) || 0) / 100 : 0;
-        if (factor > 0) {
-          sum.calories += (ing.calories ?? 0) * factor;
-          sum.proteins += (ing.proteins ?? 0) * factor;
-          sum.carbs += (ing.carbs ?? 0) * factor;
-          sum.fats += (ing.fats ?? 0) * factor;
-        }
-        return sum;
-      },
-      { calories: 0, proteins: 0, carbs: 0, fats: 0 }
-    );
-    const round = (n: number) => Math.round(n * 100) / 100;
-    return {
-      calories: round(acc.calories),
-      proteins: round(acc.proteins),
-      carbs: round(acc.carbs),
-      fats: round(acc.fats),
-    };
+    if (!recipeData?.ingredients) return { calories: 0, proteins: 0, carbs: 0, fats: 0 };
+
+    const formIngredients = recipeData.ingredients.map(item => {
+      const ingInfo: IngredientNutritionInfoModel | undefined =
+        catalog.find(c => c.name === item.ingredientDTO.name);
+
+      if (!ingInfo) return null;
+
+      return {
+        id: item.ingredientDTO.id ?? undefined,
+        name: item.ingredientDTO.name,
+        amount: Number(item.amount),
+        unit: item.unit,
+        uom: ingInfo.uom,
+        caloriesPer100: ingInfo.calories ?? 0,
+        proteinsPer100: ingInfo.proteins ?? 0,
+        carbsPer100: ingInfo.carbs ?? 0,
+        fatsPer100: ingInfo.fats ?? 0,
+        isLiquid: ingInfo.isLiquid ?? false,
+      };
+    }).filter(Boolean);
+
+    return calculateNutritionTotals(formIngredients as any);
   }, [recipeData?.ingredients, catalog]);
 
   return (
