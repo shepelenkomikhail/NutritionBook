@@ -18,6 +18,11 @@ public class ShoppingListIngredientConfiguration : IEntityTypeConfiguration<Shop
         builder.HasOne(sli => sli.Ingredient)
             .WithMany(i => i.ShoppingListIngredients)
             .HasForeignKey(sli => sli.IngredientId);
+        
+        builder.HasOne(sli => sli.UnitOfMeasure)
+            .WithMany(uom => uom.ShoppingListIngredients)
+            .HasForeignKey(sli => sli.UnitOfMeasureId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(sli => sli.Amount)
             .HasPrecision(10, 2);
