@@ -147,7 +147,7 @@ public class CommentService : ICommentsService
 
         var comments = (await _unitOfWork.Repository<Comment, Guid>()
                 .GetWhereAsync(c => c.RecipeId == recipeId))
-            .OrderBy(c => c.CreatedAt)
+            .OrderByDescending(c => c.CreatedAt)
             .ToList();
 
         var ratings = (await _unitOfWork.Repository<UserRecipe, Guid>()

@@ -57,6 +57,8 @@ const recipesApi = createApi({
       maxCookingTimeInMin?: number;
       minServings?: number;
       maxServings?: number;
+      minCaloriesPerServing?: number;
+      maxCaloriesPerServing?: number;
     } | void>({
       providesTags: ['Recipe'],
       query: (params) => {
@@ -88,8 +90,8 @@ const recipesApi = createApi({
       maxCookingTimeInMin?: number;
       minServings?: number;
       maxServings?: number;
-      minCalories?: number;
-      maxCalories?: number;
+      minCaloriesPerServing?: number;
+      maxCaloriesPerServing?: number;
     } | void>({
       providesTags: ['Recipe'],
       query: (params)=>  {
@@ -110,8 +112,8 @@ const recipesApi = createApi({
       maxCookingTimeInMin?: number;
       minServings?: number;
       maxServings?: number;
-      minCalories?: number;
-      maxCalories?: number;
+      minCaloriesPerServing?: number;
+      maxCaloriesPerServing?: number;
     } | void>({
       providesTags: ['Recipe'],
       query: (params) => {

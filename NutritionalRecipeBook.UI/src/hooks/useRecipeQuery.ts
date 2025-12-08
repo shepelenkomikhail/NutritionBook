@@ -13,8 +13,8 @@ export const useRecipeQuery = (
   const [maxCookingTimeInMin, setMaxCookingTimeInMin] = useState<number | undefined>(undefined);
   const [minServings, setMinServings] = useState<number | undefined>(undefined);
   const [maxServings, setMaxServings] = useState<number | undefined>(undefined);
-  const [minCalories, setMinCalories] = useState<number | undefined>(undefined);
-  const [maxCalories, setMaxCalories] = useState<number | undefined>(undefined);
+  const [minCaloriesPerServing, setMinCalories] = useState<number | undefined>(undefined);
+  const [maxCaloriesPerServing, setMaxCalories] = useState<number | undefined>(undefined);
 
   const [triggerPublic, publicResult] = useLazyGetRecipesQuery();
   const [triggerUser, userResult] = useLazyGetRecipesByUserQuery();
@@ -41,8 +41,8 @@ export const useRecipeQuery = (
       maxCookingTimeInMin,
       minServings,
       maxServings,
-      minCalories,
-      maxCalories
+      minCaloriesPerServing,
+      maxCaloriesPerServing
     };
   }, [
     search,
@@ -52,9 +52,12 @@ export const useRecipeQuery = (
     maxCookingTimeInMin,
     minServings,
     maxServings,
-    minCalories,
-    maxCalories
+    minCaloriesPerServing,
+    maxCaloriesPerServing
   ]);
+
+  console.log(buildParams());
+
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -62,6 +65,7 @@ export const useRecipeQuery = (
     }, 200);
 
     return () => clearTimeout(handler);
+
   }, [trigger, buildParams]);
 
   const isLoadingQuery = result.isLoading || result.isFetching;
@@ -82,8 +86,8 @@ export const useRecipeQuery = (
     maxCookingTimeInMin,
     minServings,
     maxServings,
-    minCalories,
-    maxCalories,
+    minCaloriesPerServing,
+    maxCaloriesPerServing,
 
     setMinCookingTimeInMin: (v: number | undefined) => {
       setMinCookingTimeInMin(v);

@@ -391,12 +391,14 @@ namespace NutritionalRecipeBook.Application.Services
         {
             try
             {
+                _logger.LogInformation(filterDto.ToString());
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
                 _logger.LogInformation("Building query for recipes with search '{Search}', " +
                                          "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
-                                       "minServ {MinServ}, maxServ {MaxServ}.",
+                                       "minServ {MinServ}, maxServ {MaxServ}, minCal {MinCal}, maxCal {MaxCal}.",
                     filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
-                    filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings);
+                    filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings,
+                    filterDto.MinCaloriesPerServing, filterDto.MaxCaloriesPerServing);
                 
                 query = query.ApplyFilter(filterDto);
 

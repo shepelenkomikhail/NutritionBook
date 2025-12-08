@@ -37,7 +37,7 @@ export function calculateNutritionTotals(
     const isLiquid = baseUom === 'ml';
 
     const isVolumeUnit = ['ml', 'l', 'tsp', 'tbsp'].includes(r.unit);
-    const isWeightUnit = ['g', 'kg'].includes(r.unit);
+    const isWeightUnit = ['g', 'kg', 'tsp', 'tbsp'].includes(r.unit);
 
     if ((isSolid && !isWeightUnit) || (isLiquid && !isVolumeUnit)) {
       return acc;

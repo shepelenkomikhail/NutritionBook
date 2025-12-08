@@ -204,9 +204,6 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
                 <div>{nutritionTotals.fats} g</div>
               </div>
             </div>
-            <div className="text-xs text-[var(--fg-muted)] mt-2">
-              Note: Totals are computed only when an ingredient uses its base unit (g/ml).
-            </div>
           </div>
 
           <Divider className="my-4" />
