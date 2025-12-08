@@ -61,7 +61,6 @@ namespace NutritionalRecipeBook.Application.Services
                     RecipeId = recipeEntity.Id,
                     IsOwner = true,
                     IsFavourite = false,
-                    Rating = 0
                 };
                 await _unitOfWork.Repository<UserRecipe, Guid>().InsertAsync(userRecipe);
 

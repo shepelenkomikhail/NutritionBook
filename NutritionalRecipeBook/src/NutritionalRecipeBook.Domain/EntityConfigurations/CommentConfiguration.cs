@@ -15,7 +15,8 @@ public class CommentConfiguration: IEntityTypeConfiguration<Comment>
         builder.Property(c => c.Content)
             .IsRequired()
             .HasMaxLength(3000);
-
+        
+        builder.Property(c => c.Rating).IsRequired();
         builder.Property(c => c.CreatedAt).IsRequired();
         builder.Property(c => c.UserId).IsRequired();
         builder.Property(c => c.RecipeId).IsRequired();

@@ -101,6 +101,7 @@ public static class SeedData
                 Id = Guid.Parse($"50000000-0000-0000-0000-0000000000{i:D2}"),
                 Content = $"Comment {i} by {user.UserName} on {recipe.Name}",
                 CreatedAt = DateTime.UtcNow.AddMinutes(-i * 10),
+                Rating = (i % 5) + 1,
                 UserId = user.Id,
                 RecipeId = recipe.Id
             });
@@ -201,7 +202,6 @@ public static class SeedData
                 Id = Guid.Parse($"70000000-0000-0000-0000-0000000000{i:D2}"),
                 UserId = user.Id,
                 RecipeId = recipe.Id,
-                Rating = (i % 5) + 1,
                 IsOwner = i % 2 == 0,
                 IsFavourite = i % 3 == 0
             });
