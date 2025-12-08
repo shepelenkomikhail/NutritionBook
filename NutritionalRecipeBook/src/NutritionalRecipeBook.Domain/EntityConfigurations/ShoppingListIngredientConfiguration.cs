@@ -19,10 +19,6 @@ public class ShoppingListIngredientConfiguration : IEntityTypeConfiguration<Shop
             .WithMany(i => i.ShoppingListIngredients)
             .HasForeignKey(sli => sli.IngredientId);
 
-        builder.Property(sli => sli.Unit)
-            .IsRequired()
-            .HasMaxLength(20);
-
         builder.Property(sli => sli.Amount)
             .HasPrecision(10, 2);
         

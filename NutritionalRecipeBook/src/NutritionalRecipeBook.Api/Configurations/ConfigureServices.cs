@@ -20,6 +20,7 @@ namespace NutritionalRecipeBook.Api.Configurations
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICommentsService, CommentService>();
             services.AddScoped<INutrientService, NutrientService>();
+            services.AddScoped<IShoppingListService, ShoppingListService>();
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IJWTService, JWTService>();
 

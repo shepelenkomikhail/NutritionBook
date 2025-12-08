@@ -9,4 +9,5 @@ public class UnitOfMeasure : BaseEntity<Guid>
     public bool IsLiquidMeasure {get; set;}
     
     public virtual ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
+    public virtual ICollection<ShoppingListIngredient> ShoppingListIngredients { get; set; } = new List<ShoppingListIngredient>();
 }
