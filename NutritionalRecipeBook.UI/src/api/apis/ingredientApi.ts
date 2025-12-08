@@ -1,12 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { IngredientNutritionInfoModel, UnitOfMeasureModel } from '@models';
+import { getHeader } from '@utils/getHeader';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
-
-const getHeader = () =>
-  localStorage.getItem('token')
-    ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    : undefined;
 
 const ingredientsApi = createApi({
   reducerPath: 'ingredients',

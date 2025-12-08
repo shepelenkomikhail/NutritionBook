@@ -1,12 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { getHeader } from '@utils/getHeader';
 import type { CommentModel, PagedResult } from '@models';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
-
-const getHeader = () =>
-  localStorage.getItem('token')
-    ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    : undefined;
 
 const commentsApi = createApi({
   reducerPath: 'comments',

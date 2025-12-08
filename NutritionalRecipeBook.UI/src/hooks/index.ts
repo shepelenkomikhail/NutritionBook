@@ -4,3 +4,5 @@ export * from './useAuthMutation';
 export * from './useCommentMutation';
 export * from './useIngredientsQuery';
 export * from './useMeasurementUnitsQuery';
+export * from './useShoppingListMutation';
+export * from './useShoppingListQuery';
