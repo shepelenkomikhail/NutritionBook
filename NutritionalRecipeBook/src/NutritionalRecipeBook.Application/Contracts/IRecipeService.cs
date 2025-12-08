@@ -33,7 +33,7 @@ public interface IRecipeService
     
     Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath);
     
-    Task<(Stream Stream, string ContentType)?> GetImageAsync(string fileName, string webRootPath);
+    Task<(byte[] buffer, string ContentType)?> GetImageAsync(string fileName, string webRootPath);
 
     Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid userId);
     

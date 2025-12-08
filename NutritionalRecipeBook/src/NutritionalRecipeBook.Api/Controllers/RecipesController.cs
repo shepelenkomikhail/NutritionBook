@@ -76,7 +76,7 @@ namespace NutritionalRecipeBook.Api.Controllers
                 return NotFound();
             }
 
-            return File(result.Value.Stream, result.Value.ContentType);
+            return File(result.Value.buffer, result.Value.ContentType);
         }
 
         // PUT: api/recipes/{id}

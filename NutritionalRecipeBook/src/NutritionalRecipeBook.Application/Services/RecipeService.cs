@@ -569,7 +569,7 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
-        public async Task<(Stream Stream, string ContentType)?> GetImageAsync(string fileName, string webRootPath)
+        public async Task<(byte[] buffer, string ContentType)?> GetImageAsync(string fileName, string webRootPath)
         {
             try
             {
@@ -599,10 +599,18 @@ namespace NutritionalRecipeBook.Application.Services
                     _ => "application/octet-stream"
                 };
 
-                var stream = new FileStream(
-                    fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
-                
-                return (stream, contentType);
+                using var stream = new FileStream(
+                    fullPath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    4096,
+                    useAsync: true);
+
+                var buffer = new byte[stream.Length];
+                await stream.ReadAsync(buffer, 0, buffer.Length);
+
+                return (buffer, contentType);
             }
             catch (Exception ex)
             {
