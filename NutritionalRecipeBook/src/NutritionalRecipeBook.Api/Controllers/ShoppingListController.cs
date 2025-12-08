@@ -20,11 +20,11 @@ public class ShoppingListController: ControllerBase
     // POST: api/shoppinglist
     [HttpPost]
     [RequireUserId]
-    public async Task<IActionResult> CreateShoppingList([FromBody] Application.DTOs.ShoppingListDTO newShoppingListDto)
+    public async Task<IActionResult> AddItemsToShoppingList([FromBody] Application.DTOs.ShoppingListDTO newShoppingListDto)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
         
-        var result = await _shoppingListService.CreateShoppingList(newShoppingListDto, userId);
+        var result = await _shoppingListService.AddItemsToShoppingList(newShoppingListDto, userId);
         if (!result)
         {
             return BadRequest("Failed to create shopping list.");

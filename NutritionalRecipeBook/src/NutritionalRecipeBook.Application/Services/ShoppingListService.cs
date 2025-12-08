@@ -19,7 +19,7 @@ public class ShoppingListService: IShoppingListService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> CreateShoppingList(ShoppingListDTO? newShoppingList, Guid userId)
+    public async Task<bool> AddItemsToShoppingList(ShoppingListDTO? newShoppingList, Guid userId)
     {
         if (newShoppingList == null)
         {
@@ -28,52 +28,91 @@ public class ShoppingListService: IShoppingListService
             return false;
         }
 
+        if (newShoppingList?.IngredientUnitOfMeasures == null)
+        {
+            _logger.LogWarning("Ingredient list is null for user {UserId}", userId);
+            
+            return false;
+        }
+
         try
         {
-            var newShoppingListEntity = await _unitOfWork.Repository<ShoppingList, Guid>().InsertAsync(
-                new ShoppingList { UserId = newShoppingList.UserId });
-
-            if (newShoppingListEntity == false) 
+            var existingList = await _unitOfWork.Repository<ShoppingList, Guid>()
+                .GetSingleOrDefaultAsync(sl => sl.UserId == userId);
+            if (existingList == null)
             {
-                _logger.LogWarning("Failed to create shopping list for user {UserId}.", newShoppingList.UserId);
-                
-                return false;
-            }
-        
-            var newShoppingListId = (await _unitOfWork.Repository<ShoppingList, Guid>().GetSingleOrDefaultAsync(
-                sl => sl.UserId == newShoppingList.UserId))!.Id;
-            
-            foreach (var ingredient in newShoppingList.IngredientUnitOfMeasures)
-            {
-                var ingredientId = (await _unitOfWork.Repository<Ingredient, Guid>()
-                    .GetSingleOrDefaultAsync(i => i.Name == ingredient.Ingredient.Name))?.Id;
-                
-                var unitOfMeasureId = (await _unitOfWork.Repository<UnitOfMeasure, Guid>()
-                    .GetSingleOrDefaultAsync(uom => uom.Name == ingredient.UnitOfMeasure))?.Id;
+                var insertSucceeded = await _unitOfWork.Repository<ShoppingList, Guid>()
+                    .InsertAsync(new ShoppingList { UserId = userId });
 
-                if (ingredientId == null || unitOfMeasureId == null)
+                if (!insertSucceeded)
                 {
-                    _logger.LogWarning("Ingredient {Ingredient} or Unit of measure {Uom} not found.",
-                        ingredient.Ingredient.Name, ingredient.UnitOfMeasure);
+                    _logger.LogWarning("Failed to create new shopping list for user {UserId}", userId);
                     
+                    return false;
+                }
+
+                await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Create shopping list");
+
+                existingList = await _unitOfWork.Repository<ShoppingList, Guid>()
+                    .GetSingleOrDefaultAsync(sl => sl.UserId == userId);
+
+                if (existingList == null)
+                {
+                    _logger.LogError("Failed to reload newly created shopping list for user {UserId}", userId);
+                    
+                    return false;
+                }
+            }
+
+            var shoppingListId = existingList.Id;
+
+            var existingIngredients = (await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().GetWhereAsync(sli => sli.ShoppingListId == shoppingListId))
+                .ToDictionary(x => x.IngredientId, x => x);
+
+            foreach (var ingredientDto in newShoppingList.IngredientUnitOfMeasures)
+            {
+                if (ingredientDto?.Ingredient == null)
+                    continue;
+
+                var ingredientEntity = await _unitOfWork
+                    .Repository<Ingredient, Guid>()
+                    .GetSingleOrDefaultAsync(i => i.Name == ingredientDto.Ingredient.Name);
+
+                var uomEntity = await _unitOfWork
+                    .Repository<UnitOfMeasure, Guid>()
+                    .GetSingleOrDefaultAsync(uom => uom.Name == ingredientDto.UnitOfMeasure);
+
+                if (ingredientEntity == null || uomEntity == null)
+                {
+                    _logger.LogWarning("Ingredient {Ingredient} or UoM {Uom} not found",
+                        ingredientDto.Ingredient.Name, ingredientDto.UnitOfMeasure);
                     continue;
                 }
-                
-                await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().InsertAsync(new ShoppingListIngredient
+
+                if (existingIngredients.TryGetValue(ingredientEntity.Id, out var existingSli))
                 {
-                    IngredientId = ingredientId.Value,
-                    ShoppingListId = newShoppingListId,
-                    Amount = ingredient.Amount,
-                    UnitOfMeasureId = unitOfMeasureId.Value
-                });
+                    existingSli.Amount += ingredientDto.Amount;
+                    
+                    await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().UpdateAsync(existingSli);
+                }
+                else
+                {
+                    await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().InsertAsync(new ShoppingListIngredient
+                    {
+                        IngredientId = ingredientEntity.Id,
+                        ShoppingListId = shoppingListId,
+                        Amount = ingredientDto.Amount,
+                        UnitOfMeasureId = uomEntity.Id
+                    });
+                }
             }
-            
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Create shopping list");
+
+            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update shopping list");
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError("An error occured while create a shopping list - {ErrorMessage}", e.Message);
-            
+            _logger.LogError(ex, "Exception occurred while creating/updating shopping list for user {UserId}", userId);
+           
             return false;
         }
     }
