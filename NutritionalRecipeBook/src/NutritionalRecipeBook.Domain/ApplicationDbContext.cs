@@ -15,6 +15,8 @@ public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<Guid>, G
     public virtual DbSet<Ingredient> Ingredients { get; set; } 
     public virtual DbSet<ShoppingList> ShoppingLists { get; set; }
     public virtual DbSet<Nutrient> Nutrients { get; set; }
+    public virtual DbSet<Comment> Comments { get; set; }
+    public virtual DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
     public virtual DbSet<RecipeIngredient> RecipeIngredients { get; set; }
     public virtual DbSet<NutrientIngredient> NutrientIngredients { get; set; }
     public virtual DbSet<ShoppingListIngredient> ShoppingListIngredients { get; set; }
@@ -53,7 +55,8 @@ public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<Guid>, G
         var recipes = SeedData.GetRecipes();
         var comments = SeedData.GetComments(users, recipes);
         var shoppingLists = SeedData.GetShoppingLists(users);
-        var recipeIngredients = SeedData.GetRecipeIngredients(recipes, ingredients);
+        var units = SeedData.GetUnitOfMeasures();
+        var recipeIngredients = SeedData.GetRecipeIngredients(recipes, ingredients, units);
         var nutrientIngredients = SeedData.GetNutrientIngredients(nutrients, ingredients);
         var shoppingListIngredients = SeedData.GetShoppingListIngredients(shoppingLists, ingredients);
         var userRecipes = SeedData.GetUserRecipes(users, recipes);
@@ -64,6 +67,7 @@ public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<Guid>, G
         modelBuilder.ApplyConfiguration(new RecipeConfiguration());
         modelBuilder.ApplyConfiguration(new ShoppingListConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new UnitOfMeasureConfiguration());
         modelBuilder.ApplyConfiguration(new UserRecipeConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeIngredientConfiguration());
         modelBuilder.ApplyConfiguration(new NutrientIngredientConfiguration());
@@ -74,9 +78,9 @@ public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<Guid>, G
         modelBuilder.Entity<Nutrient>().HasData(nutrients.ToArray());
         modelBuilder.Entity<Recipe>().HasData(recipes.ToArray());
         modelBuilder.Entity<ShoppingList>().HasData(shoppingLists.ToArray());
-
         modelBuilder.Entity<Comment>().HasData(comments.ToArray());
-
+        modelBuilder.Entity<UnitOfMeasure>().HasData(units.ToArray());
+        
         modelBuilder.Entity<UserRecipe>().HasData(userRecipes.ToArray());
         modelBuilder.Entity<RecipeIngredient>().HasData(recipeIngredients.ToArray());
         modelBuilder.Entity<NutrientIngredient>().HasData(nutrientIngredients.ToArray());

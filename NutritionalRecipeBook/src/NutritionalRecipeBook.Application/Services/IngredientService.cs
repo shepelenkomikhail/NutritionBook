@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs;
+using NutritionalRecipeBook.Application.DTOs.IngredientControllerDTOs;
 using NutritionalRecipeBook.Domain.Entities;
 using NutritionalRecipeBook.Application.Services.Helpers;
 using NutritionalRecipeBook.Infrastructure.Contracts;
@@ -11,11 +12,16 @@ public class IngredientService : IIngredientService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<IngredientService> _logger;
-
-    public IngredientService(IUnitOfWork unitOfWork, ILogger<IngredientService> logger)
+    private readonly INutrientService _nutrientService;
+    
+    public IngredientService(
+        IUnitOfWork unitOfWork, 
+        ILogger<IngredientService> logger,
+        INutrientService nutrientService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _nutrientService = nutrientService;
     }
     
     public async Task<bool> CreateIngredientAsync(IngredientDTO? ingredientDto)
@@ -81,7 +87,6 @@ public class IngredientService : IIngredientService
         );
     }
     
-    
     public async Task<Guid?> GetIngredientIdByNameAsync(string name)
     {
         try
@@ -136,5 +141,62 @@ public class IngredientService : IIngredientService
         }
 
         return true;
+    }
+
+    public async Task<IEnumerable<IngredientNutrientInfoDTO>> GetAllIngredientsWithNutrientInfoAsync()
+    {
+        var nutrientInfos = (await _nutrientService.GetAllNutrientsAsync()).ToArray();
+        if (nutrientInfos.Length == 0)
+        {
+            _logger.LogWarning("No nutrient info returned from API");
+            
+            return Array.Empty<IngredientNutrientInfoDTO>();
+        }
+
+        var unitOfMeasures = _unitOfWork.Repository<UnitOfMeasure, Guid>().GetAll();
+        
+        var uomDictionary = unitOfMeasures
+            .ToLookup(
+                uom => uom.Name,
+                uom => new UnitOfMeasureDTO(uom.Id, uom.Name, uom.IsLiquidMeasure)
+            );
+
+        var result = new List<IngredientNutrientInfoDTO>(nutrientInfos.Length);
+        
+        foreach (var nutrient in nutrientInfos)
+        {
+            var nutrientUnit = nutrient.Uom;
+
+            if (!uomDictionary.Contains(nutrientUnit))
+            {
+                _logger.LogWarning("Unit of measure '{Unit}' missing for nutrient '{Name}'",
+                    nutrientUnit, nutrient.Name);
+
+                continue;
+            }
+
+            var uomDtos = uomDictionary[nutrientUnit];
+
+            var uomDto = uomDtos.First();
+
+            result.Add(new IngredientNutrientInfoDTO(nutrient, uomDto));
+        }
+
+        _logger.LogInformation("Returning {Count} ingredients with nutrient info", result.Count);
+        
+        return result;
+    }
+
+    public async Task<IEnumerable<UnitOfMeasureDTO>> GetMeasures(bool isLiquid)
+    {
+        var measures = await _unitOfWork.Repository<UnitOfMeasure, Guid>()
+            .GetWhereAsync(uom => uom.IsLiquidMeasure == isLiquid);
+        
+        var measuresDto = measures
+            .Select(uom => new UnitOfMeasureDTO(uom.Id, uom.Name, uom.IsLiquidMeasure));
+        
+        _logger.LogInformation("Returning all measures.");
+        
+        return measuresDto;
     }
 }

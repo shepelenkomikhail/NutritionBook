@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLazyGetRecipeByIdQuery, useLazyGetCommentsQuery, useDeleteCommentMutation, useLazyGetMyCommentsQuery } from '@api';
 import { Divider, Modal, Spin, Typography, List } from 'antd';
-import { type CommentModel, ShowIngredientModel, type PagedResult } from '@models';
+import { type CommentModel, ShowIngredientModel, type PagedResult, IngredientNutritionInfoModel } from '@models';
 import { useCommentMutation } from '@hooks';
 import { toast } from '@utils/toast.tsx';
 import RecipeRatingSummary from './details/RecipeRatingSummary';
 import RecipeImage from './details/RecipeImage';
 import RecipeMeta from './details/RecipeMeta';
 import CommentsList from './details/CommentsList';
-import CommentForm from './details/CommentForm';
 import { HeartFavoriteButton } from './buttons';
+import { useIngredientsQuery } from '@hooks';
+import CommentForm from './details/CommentForm.tsx';
 const { Title } = Typography;
 
 interface RecipeModalProps {
@@ -23,6 +24,7 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   const { submit, isLoading: isSubmitting } = useCommentMutation();
   const [triggerComments, { data: commentsData, isLoading: isCommentsLoading }] = useLazyGetCommentsQuery();
   const [triggerMyComments, { data: myCommentsData }] = useLazyGetMyCommentsQuery();
+  const { ingredients: catalog } = useIngredientsQuery();
   const [page, setPage] = useState<number>(1);
   const pageSize = 3;
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -37,6 +39,8 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
       triggerMyComments({ recipeId });
     }
   }
+
+  console.log(recipeData);
 
   const handleDeleteComment = async (item: CommentModel, currentPageCount: number) => {
     if (!item.id) return;
@@ -93,6 +97,33 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
       .filter((id): id is string => typeof id === 'string' && !!id);
     return new Set(ids);
   }, [myCommentsData]);
+
+  const nutritionTotals = useMemo(() => {
+    const items = recipeData?.ingredients ?? [];
+    const acc = items.reduce(
+      (sum, item) => {
+        const ing: IngredientNutritionInfoModel | undefined = catalog.find(c => c.name === item.ingredientDTO.name);
+        if (!ing) return sum;
+        const unitMatchesBase = !!ing.uom && item.unit === ing.uom;
+        const factor = unitMatchesBase ? (Number(item.amount) || 0) / 100 : 0;
+        if (factor > 0) {
+          sum.calories += (ing.calories ?? 0) * factor;
+          sum.proteins += (ing.proteins ?? 0) * factor;
+          sum.carbs += (ing.carbs ?? 0) * factor;
+          sum.fats += (ing.fats ?? 0) * factor;
+        }
+        return sum;
+      },
+      { calories: 0, proteins: 0, carbs: 0, fats: 0 }
+    );
+    const round = (n: number) => Math.round(n * 100) / 100;
+    return {
+      calories: round(acc.calories),
+      proteins: round(acc.proteins),
+      carbs: round(acc.carbs),
+      fats: round(acc.fats),
+    };
+  }, [recipeData?.ingredients, catalog]);
 
   return (
     <Modal
@@ -154,6 +185,31 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
               </List.Item>
             )}
           />
+
+          <div className="mt-4 border border-[var(--border)] rounded-md p-3">
+            <div className="font-medium mb-2">Nutritional Content</div>
+            <div className="grid grid-cols-4 gap-2 text-[var(--fg)]">
+              <div>
+                <div className="text-[var(--fg-muted)]">Calories</div>
+                <div>{nutritionTotals.calories} kcal</div>
+              </div>
+              <div>
+                <div className="text-[var(--fg-muted)]">Proteins</div>
+                <div>{nutritionTotals.proteins} g</div>
+              </div>
+              <div>
+                <div className="text-[var(--fg-muted)]">Carbs</div>
+                <div>{nutritionTotals.carbs} g</div>
+              </div>
+              <div>
+                <div className="text-[var(--fg-muted)]">Fats</div>
+                <div>{nutritionTotals.fats} g</div>
+              </div>
+            </div>
+            <div className="text-xs text-[var(--fg-muted)] mt-2">
+              Note: Totals are computed only when an ingredient uses its base unit (g/ml).
+            </div>
+          </div>
 
           <Divider className="my-4" />
 

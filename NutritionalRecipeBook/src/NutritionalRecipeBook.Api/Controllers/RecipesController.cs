@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Api.Filters;
 using NutritionalRecipeBook.Api.Models;
@@ -27,17 +26,17 @@ namespace NutritionalRecipeBook.Api.Controllers
         // POST: api/recipes
         [RequireUserId]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RecipeIngredientDTO newRecipeUpdateDto)
+        public async Task<IActionResult> CreateRecipe([FromBody] RecipeIngredientNutrientDTO newRecipeDto)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
-            Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeUpdateDto, userId);
+            Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeDto, userId);
             if (newRecipeId == null)
             {
                 return BadRequest("Failed to create recipe.");
             }
 
-            return Created($"/api/recipes/{newRecipeId}", newRecipeUpdateDto);
+            return Created($"/api/recipes/{newRecipeId}", newRecipeDto);
         }
         
         // POST: api/recipes/image
@@ -83,7 +82,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         // PUT: api/recipes/{id}
         [RequireUserId]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeIngredientDTO updatedRecipeDto)
+        public async Task<IActionResult> UpdateRecipe(Guid id, [FromBody] RecipeIngredientNutrientDTO updatedRecipeDto)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
@@ -99,7 +98,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         // DELETE: api/recipes/{id}
         [HttpDelete("{id}")]
         [RequireUserId]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteRecipe(Guid id)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             

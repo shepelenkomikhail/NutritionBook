@@ -1,4 +1,4 @@
-using NutritionalRecipeBook.Application.DTOs;
+using NutritionalRecipeBook.Application.DTOs.IngredientControllerDTOs;
 
 namespace NutritionalRecipeBook.Application.Contracts;
 

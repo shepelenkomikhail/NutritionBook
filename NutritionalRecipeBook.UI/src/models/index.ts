@@ -12,3 +12,7 @@ export * from './PagedResult';
 export * from './RecipeDTO';
 export * from './RecipeDetailsResponse';
 export * from './UploadImageResponse';
+export * from './IngredientNutritionInfoModel';
+export * from './UnitOfMeasureModel';
+export * from './FormIngredientModel';
+export * from './NutrientDTO';
