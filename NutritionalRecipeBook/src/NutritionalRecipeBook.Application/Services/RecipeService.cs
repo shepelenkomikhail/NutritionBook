@@ -327,8 +327,8 @@ namespace NutritionalRecipeBook.Application.Services
                     var grams = this.ToGrams(_logger, ri.Amount, ri.UnitOfMeasure?.Name ?? string.Empty);
                     var factor = grams / 100m;
 
-                    var niForIngredient = nutrientIngredients.Where(ni => ni.IngredientId == ri.IngredientId);
-                    foreach (var ni in niForIngredient)
+                    var nutrientIngredientConnections = nutrientIngredients.Where(ni => ni.IngredientId == ri.IngredientId);
+                    foreach (var ni in nutrientIngredientConnections)
                     {
                         if (!nutrientsDict.TryGetValue(ni.NutrientId, out var nutrient))
                         {

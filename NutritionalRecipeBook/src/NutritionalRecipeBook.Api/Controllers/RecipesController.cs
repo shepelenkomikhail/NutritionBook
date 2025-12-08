@@ -26,7 +26,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         // POST: api/recipes
         [RequireUserId]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RecipeIngredientNutrientDTO newRecipeDto)
+        public async Task<IActionResult> CreateRecipe([FromBody] RecipeIngredientNutrientDTO newRecipeDto)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
@@ -82,7 +82,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         // PUT: api/recipes/{id}
         [RequireUserId]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeIngredientNutrientDTO updatedRecipeDto)
+        public async Task<IActionResult> UpdateRecipe(Guid id, [FromBody] RecipeIngredientNutrientDTO updatedRecipeDto)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
@@ -98,7 +98,7 @@ namespace NutritionalRecipeBook.Api.Controllers
         // DELETE: api/recipes/{id}
         [HttpDelete("{id}")]
         [RequireUserId]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteRecipe(Guid id)
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
