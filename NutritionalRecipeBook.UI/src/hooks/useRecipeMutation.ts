@@ -97,6 +97,7 @@ export function useRecipeMutation() {
         cookingTimeInMin: values.cookingTimeInMin,
         servings: values.servings,
         imageUrl: values.imageUrl,
+        caloriesPerServing: round(totals.calories)/values.servings,
       },
       ingredients: mappedIngredients,
       nutrients,
