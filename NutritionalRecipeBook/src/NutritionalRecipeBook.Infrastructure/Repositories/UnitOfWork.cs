@@ -10,6 +10,7 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
     private readonly IRepositoryFactory _repositoryFactory;
+    private IDbContextTransaction? _transaction;
     private readonly Dictionary<Type, object> _repositories = new();
 
     public UnitOfWork(ApplicationDbContext context, IRepositoryFactory repositoryFactory)
@@ -35,17 +36,36 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task<bool> SaveAsync()
     {
+        var transactionActive = _transaction != null;
+
+        if (!transactionActive)
+            _transaction = await _context.Database.BeginTransactionAsync();
+
         try
         {
             await _context.SaveChangesAsync();
+
+            if (!transactionActive)
+            {
+                await _transaction!.CommitAsync();
+                await _transaction.DisposeAsync();
+                _transaction = null;
+            }
+
             return true;
         }
         catch (DbUpdateException ex)
         {
-            foreach (var entry in ex.Entries)
+            if (_transaction != null)
             {
-                entry.State = EntityState.Detached;
+                await _transaction.RollbackAsync();
+                await _transaction.DisposeAsync();
+                _transaction = null;
             }
+
+            foreach (var entry in ex.Entries)
+                entry.State = EntityState.Detached;
+
             return false;
         }
     }
