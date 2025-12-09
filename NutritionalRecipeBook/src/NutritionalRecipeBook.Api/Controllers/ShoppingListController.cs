@@ -48,4 +48,84 @@ public class ShoppingListController: ControllerBase
         
         return Ok(shoppingList);
     }
+
+    // PUT: api/shoppinglist
+    [HttpPut]
+    [RequireUserId]
+    public async Task<IActionResult> UpdateShoppingList([FromBody] Application.DTOs.ShoppingListDTO updatedShoppingListDto)
+    {
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+        var result = await _shoppingListService.UpdateShoppingList(updatedShoppingListDto, userId);
+        if (result == null)
+        {
+            return BadRequest("Failed to update shopping list.");
+        }
+
+        return Ok(result);
+    }
+
+    // DELETE: api/shoppinglist/{ingredientId}
+    [HttpDelete("{ingredientId}")]
+    [RequireUserId]
+    public async Task<IActionResult> DeleteItemFromShoppingList(Guid ingredientId)
+    {
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+        var result = await _shoppingListService.DeleteItemFromShoppingList(ingredientId, userId);
+        if (!result)
+        {
+            return BadRequest("Failed to delete item from shopping list.");
+        }
+
+        return Ok("Item deleted successfully.");
+    }
+
+    // DELETE: api/shoppinglist/clear
+    [HttpDelete("clear")]
+    [RequireUserId]
+    public async Task<IActionResult> ClearShoppingList()
+    {
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+        var result = await _shoppingListService.ClearShoppingList(userId);
+        if (!result)
+        {
+            return BadRequest("Failed to clear shopping list.");
+        }
+
+        return Ok("Shopping list cleared successfully.");
+    }
+
+    // PUT: api/shoppinglist/item/{ingredientId}/bought
+    [HttpPut("item/{ingredientId}/bought")]
+    [RequireUserId]
+    public async Task<IActionResult> UpdateItemIsBoughtStatus(Guid ingredientId, [FromBody] bool isBought)
+    {
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+        var result = await _shoppingListService.UpdateItemIsBoughtStatus(userId, ingredientId, isBought);
+        if (!result)
+        {
+            return BadRequest("Failed to update item bought status.");
+        }
+
+        return Ok("Item status updated successfully.");
+    }
+
+    // PUT: api/shoppinglist/bought
+    [HttpPut("bought")]
+    [RequireUserId]
+    public async Task<IActionResult> UpdateAllItemsIsBoughtStatus([FromBody] bool isBought)
+    {
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+
+        var result = await _shoppingListService.UpdateAllItemsIsBoughtStatus(userId, isBought);
+        if (!result)
+        {
+            return BadRequest("Failed to update bought status for all items.");
+        }
+
+        return Ok("All item statuses updated successfully.");
+    }
 }
