@@ -10,8 +10,10 @@ public class ShoppingListIngredient: BaseEntity<(Guid RecipeId, Guid IngredientI
     public Guid IngredientId { get; set; }
     public virtual Ingredient Ingredient { get; set; } = null!;
     
-    public decimal Amount { get; set; }
-    
     public Guid UnitOfMeasureId { get; set; }
     public virtual UnitOfMeasure UnitOfMeasure { get; set; } = null!;
+    
+    public decimal Amount { get; set; }
+    
+    public bool IsBought { get; set; }
 }

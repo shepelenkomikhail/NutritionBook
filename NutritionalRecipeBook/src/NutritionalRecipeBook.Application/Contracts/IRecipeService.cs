@@ -7,23 +7,17 @@ namespace NutritionalRecipeBook.Application.Contracts;
 public interface IRecipeService
 {
     Task<Guid?> CreateRecipeAsync(RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
-    
     Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
-    
-    Task<Guid?> GetRecipeIdByNameAsync(string name);
-    
     Task<bool> DeleteRecipeAsync(Guid id, Guid userId);
     
+    Task<Guid?> GetRecipeIdByNameAsync(string name);
     Task<RecipeIngredientNutrientDTO?> GetRecipeByIdAsync(Guid id);
-    
     IEnumerable<RecipeDTO> GetAllRecipesAsync();
-    
     Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(
             int pageNumber,
             int pageSize,
             RecipeFilterDTO? filterDto = null
     );
-    
     Task<PagedResultDTO<RecipeDTO>> GetRecipesForUserAsync(
         int pageNumber,
         int pageSize,
@@ -32,13 +26,10 @@ public interface IRecipeService
     );
     
     Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath);
-    
     Task<(byte[] buffer, string ContentType)?> GetImageAsync(string fileName, string webRootPath);
 
     Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid userId);
-    
     Task<bool> UnmarkFavoriteRecipeAsync(Guid recipeId, Guid userId);
-    
     Task<PagedResultDTO<RecipeDTO>> GetFavoriteRecipesAsync(
         Guid userId,
         int pageNumber,
