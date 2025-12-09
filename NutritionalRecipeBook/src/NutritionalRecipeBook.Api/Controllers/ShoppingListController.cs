@@ -56,7 +56,7 @@ public class ShoppingListController: ControllerBase
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
-        var result = await _shoppingListService.UpdateShoppingList(updatedShoppingListDto, userId);
+        var result = await _shoppingListService.UpdateShoppingListAsync(updatedShoppingListDto, userId);
         if (result == null)
         {
             return BadRequest("Failed to update shopping list.");
@@ -72,7 +72,7 @@ public class ShoppingListController: ControllerBase
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
-        var result = await _shoppingListService.DeleteItemFromShoppingList(ingredientId, userId);
+        var result = await _shoppingListService.DeleteItemFromShoppingListAsync(ingredientId, userId);
         if (!result)
         {
             return BadRequest("Failed to delete item from shopping list.");
@@ -88,7 +88,7 @@ public class ShoppingListController: ControllerBase
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
-        var result = await _shoppingListService.ClearShoppingList(userId);
+        var result = await _shoppingListService.ClearShoppingListAsync(userId);
         if (!result)
         {
             return BadRequest("Failed to clear shopping list.");
@@ -104,7 +104,7 @@ public class ShoppingListController: ControllerBase
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
-        var result = await _shoppingListService.UpdateItemIsBoughtStatus(userId, ingredientId, isBought);
+        var result = await _shoppingListService.UpdateItemIsBoughtStatusAsync(userId, ingredientId, isBought);
         if (!result)
         {
             return BadRequest("Failed to update item bought status.");
@@ -120,7 +120,7 @@ public class ShoppingListController: ControllerBase
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
-        var result = await _shoppingListService.UpdateAllItemsIsBoughtStatus(userId, isBought);
+        var result = await _shoppingListService.UpdateAllItemsIsBoughtStatusAsync(userId, isBought);
         if (!result)
         {
             return BadRequest("Failed to update bought status for all items.");

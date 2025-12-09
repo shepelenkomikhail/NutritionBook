@@ -19,7 +19,7 @@ public class ShoppingListService: IShoppingListService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> AddItemsToShoppingList(ShoppingListDTO? newShoppingList, Guid userId)
+    public async Task<bool> AddItemsToShoppingListAsync(ShoppingListDTO? newShoppingList, Guid userId)
     {
         if (newShoppingList == null)
         {
@@ -128,7 +128,7 @@ public class ShoppingListService: IShoppingListService
         }
     }
 
-    public async Task<ShoppingListDTO?> UpdateShoppingList(ShoppingListDTO? updatedShoppingList, Guid userId)
+    public async Task<ShoppingListDTO?> UpdateShoppingListAsync(ShoppingListDTO? updatedShoppingList, Guid userId)
     {
         if (updatedShoppingList == null)
         {
@@ -137,7 +137,7 @@ public class ShoppingListService: IShoppingListService
             return null;
         }
 
-        var addItemsResult = await AddItemsToShoppingList(updatedShoppingList, userId);
+        var addItemsResult = await AddItemsToShoppingListAsync(updatedShoppingList, userId);
         if (!addItemsResult)
         {
             _logger.LogWarning("Failed to update shopping list for user {UserId}", userId);
@@ -145,10 +145,10 @@ public class ShoppingListService: IShoppingListService
             return null;
         }
 
-        return await GetShoppingList(userId);
+        return await GetShoppingListAsync(userId);
     }
 
-    public async Task<bool> DeleteItemFromShoppingList(Guid? ingredientId, Guid userId)
+    public async Task<bool> DeleteItemFromShoppingListAsync(Guid? ingredientId, Guid userId)
     {
         if (ingredientId == null)
         {
@@ -175,7 +175,7 @@ public class ShoppingListService: IShoppingListService
         return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Deleting item from shopping list");
     }
 
-    public async Task<bool> ClearShoppingList(Guid userId)
+    public async Task<bool> ClearShoppingListAsync(Guid userId)
     {
         try
         {
@@ -193,7 +193,7 @@ public class ShoppingListService: IShoppingListService
         return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Clear shopping list");
     }
 
-    public async Task<bool> UpdateItemIsBoughtStatus(Guid userId, Guid? ingredientId, bool? isBought)
+    public async Task<bool> UpdateItemIsBoughtStatusAsync(Guid userId, Guid? ingredientId, bool? isBought)
     {
         if(ingredientId == null || isBought == null)
         {
@@ -221,7 +221,7 @@ public class ShoppingListService: IShoppingListService
         return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update item IsBought status");
     }
 
-    public async Task<bool> UpdateAllItemsIsBoughtStatus(Guid userId, bool? isBought)
+    public async Task<bool> UpdateAllItemsIsBoughtStatusAsync(Guid userId, bool? isBought)
     {
         if(isBought == null)
         {
@@ -255,7 +255,7 @@ public class ShoppingListService: IShoppingListService
         }
     }
 
-    public async Task<ShoppingListDTO?> GetShoppingList(Guid userId)
+    public async Task<ShoppingListDTO?> GetShoppingListAsync(Guid userId)
     {
         try
         {

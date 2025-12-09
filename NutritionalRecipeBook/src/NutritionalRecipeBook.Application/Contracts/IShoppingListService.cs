@@ -4,13 +4,13 @@ namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface IShoppingListService
 {
-    Task<bool> AddItemsToShoppingList(ShoppingListDTO? newShoppingList, Guid userId);
-    Task<ShoppingListDTO?> UpdateShoppingList(ShoppingListDTO? updatedShoppingList, Guid userId);
-    Task<bool> DeleteItemFromShoppingList(Guid? ingredientId, Guid userId);
-    Task<bool> ClearShoppingList(Guid userId);
+    Task<bool> AddItemsToShoppingListAsync(ShoppingListDTO? newShoppingList, Guid userId);
+    Task<ShoppingListDTO?> UpdateShoppingListAsync(ShoppingListDTO? updatedShoppingList, Guid userId);
+    Task<bool> DeleteItemFromShoppingListAsync(Guid? ingredientId, Guid userId);
+    Task<bool> ClearShoppingListAsync(Guid userId);
     
-    Task<ShoppingListDTO?> GetShoppingList(Guid userId);
+    Task<ShoppingListDTO?> GetShoppingListAsync(Guid userId);
     
-    Task<bool> UpdateItemIsBoughtStatus(Guid userId, Guid? ingredientId, bool? isBought);
-    Task<bool> UpdateAllItemsIsBoughtStatus(Guid userId, bool? isBought);
+    Task<bool> UpdateItemIsBoughtStatusAsync(Guid userId, Guid? ingredientId, bool? isBought);
+    Task<bool> UpdateAllItemsIsBoughtStatusAsync(Guid userId, bool? isBought);
 }
