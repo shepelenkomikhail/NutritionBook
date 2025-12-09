@@ -9,12 +9,10 @@ namespace NutritionalRecipeBook.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthController: ControllerBase
 {
-    private readonly ILogger<AuthController> _logger;
     private readonly IUserService _userService;
     
-    public AuthController(ILogger<AuthController> logger, IUserService userService)
+    public AuthController(IUserService userService)
     {
-        _logger = logger;
         _userService = userService;
     }
     

@@ -1,8 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Api.Filters;
-using NutritionalRecipeBook.Api.Models;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs;
 
@@ -13,12 +11,10 @@ namespace NutritionalRecipeBook.Api.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : ControllerBase
 {
-    private readonly ILogger<CommentsController> _logger;
     private readonly ICommentsService _commentsService;
     
-    public CommentsController(ILogger<CommentsController> logger, ICommentsService commentsService)
+    public CommentsController(ICommentsService commentsService)
     {
-        _logger = logger;
         _commentsService = commentsService;
     }
     

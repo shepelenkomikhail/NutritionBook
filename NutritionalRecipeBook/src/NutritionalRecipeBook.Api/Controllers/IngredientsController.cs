@@ -10,12 +10,10 @@ namespace NutritionalRecipeBook.Api.Controllers;
 public class IngredientsController : ControllerBase
 {
     private readonly IIngredientService _ingredientService;
-    private readonly ILogger<RecipesController> _logger;
 
-    public IngredientsController(IIngredientService ingredientService, ILogger<RecipesController> logger)
+    public IngredientsController(IIngredientService ingredientService)
     {
         _ingredientService = ingredientService;
-        _logger = logger;
     }
     
     // GET api/ingredients
