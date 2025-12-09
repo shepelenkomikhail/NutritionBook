@@ -10,16 +10,16 @@ namespace NutritionalRecipeBook.Application.Services;
 
 public class ShoppingListService: IShoppingListService
 {
-    private readonly ILogger<CommentService> _logger;
+    private readonly ILogger<ShoppingListService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     
-    public ShoppingListService(ILogger<CommentService> logger, IUnitOfWork unitOfWork)
+    public ShoppingListService(ILogger<ShoppingListService> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> AddItemsToShoppingListAsync(ShoppingListDTO? newShoppingList, Guid userId)
+    public async Task<bool> AddItemsToShoppingList(ShoppingListDTO? newShoppingList, Guid userId)
     {
         if (newShoppingList == null)
         {
@@ -31,7 +31,7 @@ public class ShoppingListService: IShoppingListService
         if (newShoppingList?.IngredientUnitOfMeasures == null)
         {
             _logger.LogWarning("Ingredient list is null for user {UserId}", userId);
-            
+
             return false;
         }
 
@@ -66,13 +66,22 @@ public class ShoppingListService: IShoppingListService
 
             var shoppingListId = existingList.Id;
 
-            var existingIngredients = (await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().GetWhereAsync(sli => sli.ShoppingListId == shoppingListId))
-                .ToDictionary(x => x.IngredientId, x => x);
+            var existingIngredients = 
+                (await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>()
+                    .GetWhereAsync(sli => sli.ShoppingListId == shoppingListId))
+                .GroupBy(x => x.IngredientId)
+                .Select(g => g.FirstOrDefault())
+                .Where(x => x != null)
+                .ToDictionary(x => x!.IngredientId, x => x!);
 
             foreach (var ingredientDto in newShoppingList.IngredientUnitOfMeasures)
             {
                 if (ingredientDto?.Ingredient == null)
+                {
+                    _logger.LogWarning("IngredientDTO is null in shopping list for user {UserId}", userId);
+                    
                     continue;
+                }
 
                 var ingredientEntity = await _unitOfWork
                     .Repository<Ingredient, Guid>()
@@ -97,13 +106,14 @@ public class ShoppingListService: IShoppingListService
                 }
                 else
                 {
-                    await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().InsertAsync(new ShoppingListIngredient
-                    {
-                        IngredientId = ingredientEntity.Id,
-                        ShoppingListId = shoppingListId,
-                        Amount = ingredientDto.Amount,
-                        UnitOfMeasureId = uomEntity.Id
-                    });
+                    await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>()
+                        .InsertAsync(new ShoppingListIngredient
+                        {
+                            IngredientId = ingredientEntity.Id,
+                            ShoppingListId = shoppingListId,
+                            Amount = ingredientDto.Amount,
+                            UnitOfMeasureId = uomEntity.Id
+                        });
                 }
             }
 
@@ -111,13 +121,141 @@ public class ShoppingListService: IShoppingListService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred while creating/updating shopping list for user {UserId}", userId);
+            _logger.LogError(ex, 
+                "Exception occurred while creating/updating shopping list for user {UserId}", userId);
            
             return false;
         }
     }
 
-    public async Task<ShoppingListDTO?> GetShoppingListAsync(Guid userId)
+    public async Task<ShoppingListDTO?> UpdateShoppingList(ShoppingListDTO? updatedShoppingList, Guid userId)
+    {
+        if (updatedShoppingList == null)
+        {
+            _logger.LogWarning("ShoppingListDTO is null for user {UserId}", userId);
+            
+            return null;
+        }
+
+        var addItemsResult = await AddItemsToShoppingList(updatedShoppingList, userId);
+        if (!addItemsResult)
+        {
+            _logger.LogWarning("Failed to update shopping list for user {UserId}", userId);
+            
+            return null;
+        }
+
+        return await GetShoppingList(userId);
+    }
+
+    public async Task<bool> DeleteItemFromShoppingList(Guid? ingredientId, Guid userId)
+    {
+        if (ingredientId == null)
+        {
+            _logger.LogWarning("IngredientId is null for user {UserId}", userId);
+            
+            return false;
+        }
+
+        try
+        {
+            var shoppingList = await GetShoppingListEntityByUserId(userId);
+            var shoppingListIngredient = await GetShoppingListIngredientEntity(shoppingList.Id, ingredientId.Value);
+            
+            await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().DeleteAsync(shoppingListIngredient);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, 
+                "Exception occurred while deleting item from shopping list for user {UserId}", userId);
+            
+            return false;
+        }
+        
+        return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Deleting item from shopping list");
+    }
+
+    public async Task<bool> ClearShoppingList(Guid userId)
+    {
+        try
+        {
+            var shoppingList = await GetShoppingListEntityByUserId(userId);
+            
+            await _unitOfWork.Repository<ShoppingList, Guid>().DeleteAsync(shoppingList.Id);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Exception occurred while clearing shopping list for user {UserId}", userId);
+            
+            return false;
+        }
+        
+        return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Clear shopping list");
+    }
+
+    public async Task<bool> UpdateItemIsBoughtStatus(Guid userId, Guid? ingredientId, bool? isBought)
+    {
+        if(ingredientId == null || isBought == null)
+        {
+            _logger.LogWarning("IngredientId or isBought parameter is null for user {UserId}", userId);
+            
+            return false;
+        }
+
+        try
+        {
+            var shoppingList = await GetShoppingListEntityByUserId(userId);
+            var shoppingListIngredient = await GetShoppingListIngredientEntity(shoppingList.Id, ingredientId.Value);
+            
+            shoppingListIngredient.IsBought = isBought.Value;
+            
+            await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().UpdateAsync(shoppingListIngredient);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Exception occurred while update item status shopping list for user {UserId}", userId);
+            
+            return false;
+        }
+        
+        return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update item IsBought status");
+    }
+
+    public async Task<bool> UpdateAllItemsIsBoughtStatus(Guid userId, bool? isBought)
+    {
+        if(isBought == null)
+        {
+            _logger.LogWarning("isBought parameter is null for user {UserId}", userId);
+            
+            return false;
+        }
+
+        try
+        {
+            var shoppingList = await GetShoppingListEntityByUserId(userId);
+
+            var shoppingListIngredients = await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>()
+                .GetWhereAsync(sli => sli.ShoppingListId == shoppingList.Id);
+
+            foreach (var sli in shoppingListIngredients)
+            {
+                sli.IsBought = isBought.Value;
+                
+                await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().UpdateAsync(sli);
+            }
+
+            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update all items IsBought status");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Exception occurred while updating all statuses in" +
+                                " shopping list for user {UserId}", userId);
+            
+            return false;
+        }
+    }
+
+    public async Task<ShoppingListDTO?> GetShoppingList(Guid userId)
     {
         try
         {
@@ -159,15 +297,30 @@ public class ShoppingListService: IShoppingListService
             var ingredientLookup = ingredients.ToDictionary(x => x.Id);
             var uomDictionary = uoms.ToDictionary(x => x.Id);
 
-            var ingredientDtos = listIngredients
-                .Select(sli => new IngredientUnitOfMeasureDTO(
-                new IngredientDTO(
-                    ingredientLookup[sli.IngredientId].Id,
-                    ingredientLookup[sli.IngredientId].Name,
-                    ingredientLookup[sli.IngredientId].IsLiquid),
-                uomDictionary[sli.UnitOfMeasureId].Name,
-                sli.Amount
-            )).ToArray();
+            // Build DTOs defensively: skip entries when either ingredient or uom is missing to avoid KeyNotFoundException
+            var dtoList = new List<IngredientUnitOfMeasureDTO>();
+            foreach (var sli in listIngredients)
+            {
+                if (!ingredientLookup.TryGetValue(sli.IngredientId, out var ing))
+                {
+                    _logger.LogWarning("Ingredient {IngredientId} referenced in shopping list {ShoppingListId} not found in DB; skipping.", sli.IngredientId, shoppingList.Id);
+                    continue;
+                }
+
+                if (!uomDictionary.TryGetValue(sli.UnitOfMeasureId, out var uom))
+                {
+                    _logger.LogWarning("UnitOfMeasure {UnitOfMeasureId} referenced in shopping list {ShoppingListId} not found in DB; skipping.", sli.UnitOfMeasureId, shoppingList.Id);
+                    continue;
+                }
+
+                dtoList.Add(new IngredientUnitOfMeasureDTO(
+                    new IngredientDTO(ing.Id, ing.Name, ing.IsLiquid),
+                    uom.Name,
+                    sli.Amount
+                ));
+            }
+
+            var ingredientDtos = dtoList.ToArray();
 
             return new ShoppingListDTO(shoppingList.Id, userId, ingredientDtos);
         }
@@ -177,5 +330,38 @@ public class ShoppingListService: IShoppingListService
             
             return null;
         }
+    }
+    
+    private async Task<ShoppingList> GetShoppingListEntityByUserId(Guid userId)
+    {
+        var shoppingList = await _unitOfWork.Repository<ShoppingList, Guid>()
+            .GetSingleOrDefaultAsync(sl => sl.UserId == userId);
+
+        if (shoppingList == null)
+        {
+            _logger.LogWarning("No shopping list found for user {UserId}", userId);
+
+            // throw a specific exception so callers can distinguish this case from other failures
+            throw new InvalidOperationException($"No shopping list found for user {userId}");
+        }
+        
+        return shoppingList;
+    }
+    
+    private async Task<ShoppingListIngredient> GetShoppingListIngredientEntity(Guid shoppingListId, Guid ingredientId)
+    {
+        var shoppingListIngredient = await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>()
+            .GetSingleOrDefaultAsync(sli => sli.ShoppingListId == shoppingListId && sli.IngredientId == ingredientId);
+
+        if (shoppingListIngredient == null)
+        {
+            _logger.LogWarning("No shopping list ingredient found for ingredient " +
+                               "{IngredientId} in shopping list {ShoppingListId}", ingredientId, shoppingListId);
+
+            throw new InvalidOperationException(
+                $"No shopping list ingredient found for ingredient {ingredientId} in shopping list {shoppingListId}");
+        }
+        
+        return shoppingListIngredient;
     }
 }
