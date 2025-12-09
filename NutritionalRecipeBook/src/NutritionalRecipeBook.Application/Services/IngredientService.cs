@@ -68,66 +68,6 @@ public class IngredientService : IIngredientService
             return false;
         }
     }
-
-    public async Task<IngredientDTO?> GetIngredientByIdAsync(Guid ingredientId)
-    {
-        var existingIngredient = await _unitOfWork.Repository<Ingredient, Guid>().GetByIdAsync(ingredientId);
-        if (existingIngredient == null)
-        {
-            _logger.LogWarning("Ingredient with ID '{Id}' not found.", ingredientId);
-            
-            return null;
-        }
-        
-        return new IngredientDTO
-        (
-            existingIngredient.Id, 
-            existingIngredient.Name, 
-            existingIngredient.IsLiquid
-        );
-    }
-    
-    public async Task<Guid?> GetIngredientIdByNameAsync(string name)
-    {
-        try
-        {
-            var ingredient = await _unitOfWork.Repository<Ingredient, Guid>()
-                .GetSingleOrDefaultAsync(i => i.Name == name);
-            if (ingredient == null)
-            {
-                _logger.LogWarning("Ingredient with name '{IngredienteName}' not found.", name);
-                    
-                return null;
-            }
-
-            return ingredient.Id;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An unexpected error occurred while retrieving ingredient name {IngredientName}.", name);
-               
-            return null;
-        }
-    }
-    
-    public async Task<IngredientDTO?> GetIngredientByNameAsync(string name)
-    {
-        var existingIngredient = await _unitOfWork.Repository<Ingredient, Guid>()
-            .GetSingleOrDefaultAsync(i => i.Name == name);
-        if (existingIngredient == null)
-        {
-            _logger.LogWarning("Ingredient with name '{Name}' not found.", name);
-            
-            return null;
-        }
-        
-        return new IngredientDTO
-        (
-            existingIngredient.Id,
-            existingIngredient.Name,
-            existingIngredient.IsLiquid
-        );
-    }
     
     public async Task<bool> EnsureIngredientExistsAsync(IngredientDTO ingredientDto)
     {

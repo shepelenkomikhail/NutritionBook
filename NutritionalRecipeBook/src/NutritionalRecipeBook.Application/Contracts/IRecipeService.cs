@@ -10,9 +10,7 @@ public interface IRecipeService
     Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
     Task<bool> DeleteRecipeAsync(Guid id, Guid userId);
     
-    Task<Guid?> GetRecipeIdByNameAsync(string name);
     Task<RecipeIngredientNutrientDTO?> GetRecipeByIdAsync(Guid id);
-    IEnumerable<RecipeDTO> GetAllRecipesAsync();
     Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(
             int pageNumber,
             int pageSize,

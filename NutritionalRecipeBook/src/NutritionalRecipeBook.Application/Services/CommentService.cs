@@ -124,27 +124,6 @@ public class CommentService : ICommentsService
         }
     }
 
-    public async Task<CommentDTO?> GetCommentByIdAsync(Guid? commentId)
-    {
-        if (commentId == null)
-        {
-            _logger.LogWarning("Comment ID is null.");
-            
-            return null;
-        }
-
-        var existingComment = await _unitOfWork.Repository<Comment, Guid>()
-            .GetByIdAsync(commentId.Value);
-        if (existingComment == null)
-        {
-            _logger.LogWarning("Comment with ID '{Id}' not found.", commentId);
-            
-            return null;
-        }
-        
-        return CommentMapper.ToDto(existingComment);
-    }
-
     public async Task<IEnumerable<CommentDTO>> GetAllCommentsForRecipeAsync(Guid? recipeId)
     {
         if (recipeId == null)

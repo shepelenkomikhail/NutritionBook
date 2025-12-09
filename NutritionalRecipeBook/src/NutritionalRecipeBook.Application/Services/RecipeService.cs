@@ -218,31 +218,6 @@ namespace NutritionalRecipeBook.Application.Services
                 return null;
             }
         }
-
-        public async Task<Guid?> GetRecipeIdByNameAsync(string name)
-        {
-            try
-            {
-                var recipe = await _unitOfWork.Repository<Recipe, Guid>()
-                    .GetSingleOrDefaultAsync(r => r.Name.ToLower() == name.ToLower());
-
-                if (recipe == null)
-                {
-                    _logger.LogWarning("Recipe with name '{RecipeName}' not found.", name);
-                   
-                    return null;
-                }
-
-                return recipe.Id;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, 
-                    "An unexpected error occurred while retrieving recipe name {RecipeName}.", name);
-                
-                return null;
-            }
-        }
         
         public async Task<bool> DeleteRecipeAsync(Guid id, Guid userId)
         {
@@ -365,23 +340,6 @@ namespace NutritionalRecipeBook.Application.Services
                 _logger.LogError(ex, "An unexpected error occurred while retrieving recipe ID {Id}.", id);
                 
                 return null;
-            }
-        }
-        
-        public IEnumerable<RecipeDTO> GetAllRecipesAsync()
-        {
-            try
-            {
-                var recipeEntities = _unitOfWork.Repository<Recipe, Guid>().GetAll();
-                var recipeDtos = recipeEntities.Select(recipeEntity => RecipeMapper.ToDto(recipeEntity));
-
-                return recipeDtos;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An unexpected error occurred while retrieving all recipes.");
-                
-                return Enumerable.Empty<RecipeDTO>();
             }
         }
         
