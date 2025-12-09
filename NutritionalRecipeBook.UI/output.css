@@ -190,11 +190,44 @@
   .relative {
     position: relative;
   }
+  .-top-4 {
+    top: calc(var(--spacing) * -4);
+  }
+  .-top-6 {
+    top: calc(var(--spacing) * -6);
+  }
+  .top-0 {
+    top: calc(var(--spacing) * 0);
+  }
+  .top-2 {
+    top: calc(var(--spacing) * 2);
+  }
+  .top-4 {
+    top: calc(var(--spacing) * 4);
+  }
+  .top-16 {
+    top: calc(var(--spacing) * 16);
+  }
   .top-20 {
     top: calc(var(--spacing) * 20);
   }
+  .top-24 {
+    top: calc(var(--spacing) * 24);
+  }
+  .right-0 {
+    right: calc(var(--spacing) * 0);
+  }
+  .right-2 {
+    right: calc(var(--spacing) * 2);
+  }
   .right-12 {
     right: calc(var(--spacing) * 12);
+  }
+  .right-20 {
+    right: calc(var(--spacing) * 20);
+  }
+  .left-2 {
+    left: calc(var(--spacing) * 2);
   }
   .left-4 {
     left: calc(var(--spacing) * 4);
@@ -286,8 +319,17 @@
   .\!h-12 {
     height: calc(var(--spacing) * 12) !important;
   }
+  .h-12 {
+    height: calc(var(--spacing) * 12);
+  }
   .h-16 {
     height: calc(var(--spacing) * 16);
+  }
+  .h-42 {
+    height: calc(var(--spacing) * 42);
+  }
+  .h-44 {
+    height: calc(var(--spacing) * 44);
   }
   .h-56 {
     height: calc(var(--spacing) * 56);
@@ -310,11 +352,20 @@
   .\!w-12 {
     width: calc(var(--spacing) * 12) !important;
   }
+  .\!w-16 {
+    width: calc(var(--spacing) * 16) !important;
+  }
   .\!w-28 {
     width: calc(var(--spacing) * 28) !important;
   }
   .\!w-42 {
     width: calc(var(--spacing) * 42) !important;
+  }
+  .\!w-56 {
+    width: calc(var(--spacing) * 56) !important;
+  }
+  .\!w-72 {
+    width: calc(var(--spacing) * 72) !important;
   }
   .\!w-\[12rem\] {
     width: 12rem !important;
@@ -334,6 +385,9 @@
   .w-11\/12 {
     width: calc(11/12 * 100%);
   }
+  .w-56 {
+    width: calc(var(--spacing) * 56);
+  }
   .w-full {
     width: 100%;
   }
@@ -343,8 +397,14 @@
   .\!min-w-1\/2 {
     min-width: calc(1/2 * 100%) !important;
   }
+  .min-w-full {
+    min-width: 100%;
+  }
   .border-collapse {
     border-collapse: collapse;
+  }
+  .cursor-pointer {
+    cursor: pointer;
   }
   .resize {
     resize: both;
@@ -424,6 +484,10 @@
   .rounded-xl {
     border-radius: var(--radius-xl);
   }
+  .rounded-b-2xl {
+    border-bottom-right-radius: var(--radius-2xl);
+    border-bottom-left-radius: var(--radius-2xl);
+  }
   .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
@@ -470,6 +534,9 @@
   }
   .py-6 {
     padding-block: calc(var(--spacing) * 6);
+  }
+  .py-8 {
+    padding-block: calc(var(--spacing) * 8);
   }
   .py-10 {
     padding-block: calc(var(--spacing) * 10);
@@ -533,6 +600,9 @@
   .text-\[var\(--fg-muted\)\] {
     color: var(--fg-muted);
   }
+  .lowercase {
+    text-transform: lowercase;
+  }
   .uppercase {
     text-transform: uppercase;
   }
@@ -567,6 +637,10 @@
   .duration-300 {
     --tw-duration: 300ms;
     transition-duration: 300ms;
+  }
+  .outline-none {
+    --tw-outline-style: none;
+    outline-style: none;
   }
   .last\:border-0 {
     &:last-child {

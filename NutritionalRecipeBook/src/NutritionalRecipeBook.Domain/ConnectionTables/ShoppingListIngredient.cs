@@ -11,5 +11,7 @@ public class ShoppingListIngredient: BaseEntity<(Guid RecipeId, Guid IngredientI
     public virtual Ingredient Ingredient { get; set; } = null!;
     
     public decimal Amount { get; set; }
-    public string Unit { get; set; } = string.Empty;
+    
+    public Guid UnitOfMeasureId { get; set; }
+    public virtual UnitOfMeasure UnitOfMeasure { get; set; } = null!;
 }

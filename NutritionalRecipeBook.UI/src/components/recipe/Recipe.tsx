@@ -1,7 +1,7 @@
 import 'simplebar-react/dist/simplebar.min.css';
 import SimpleBar from 'simplebar-react';
 import { useEffect, useState } from 'react';
-import { PlusOutlined, LogoutOutlined } from '@ant-design/icons';
+import { PlusOutlined, LogoutOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Button, FloatButton, Layout, Modal, Spin } from 'antd';
 import Title from 'antd/es/typography/Title';
 import { useRecipeQuery } from '@hooks';
@@ -14,10 +14,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../api/slices/authSlice.ts';
 import { TogglePersonalizedButton, ToggleFavoriteRecipesButton } from './buttons';
 import { setUserRecipes } from '../../api/slices/userRecipeSlice.ts';
+import ShoppingList from './ShoppingList.tsx';
 const { Content, Header } = Layout;
 
 function Recipe() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [, setIsLoading] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
   const { username, token } = useSelector((state: RootState) => state.auth);
@@ -39,9 +41,12 @@ function Recipe() {
     setIsModalOpen(false);
   };
 
+  const handleOpenCart = () => setIsCartOpen(true);
+  const handleCloseCart = () => setIsCartOpen(false);
+
   const {
     recipes, totalCount, search, setSearch, pageNumber, setPageNumber, pageSize, isLoadingQuery,
-    minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, minCalories, maxCalories,
+    minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, minCaloriesPerServing, maxCaloriesPerServing,
     setMinCookingTimeInMin, setMaxCookingTimeInMin, setMinServings, setMaxServings, setMinCalories, setMaxCalories
   } = useRecipeQuery(isPersonalizedRecipes, isFavoriteRecipes);
 
@@ -71,8 +76,7 @@ function Recipe() {
 
   return (
     <>
-      <Header className={`w-full !bg-[var(--bg)] !text-[var(--fg)] border-b border-[var(--border)]`}
-      >
+      <Header className={`w-full !bg-[var(--bg)] !text-[var(--fg)] border-b border-[var(--border)]`}>
         <div className="max-w-7xl mx-auto px-4 h-16 grid grid-cols-3 items-center">
           <div className="flex items-center gap-3">
             <ThemeToggleButton variant="inline" />
@@ -84,7 +88,14 @@ function Recipe() {
             </Title>
           </div>
 
-          <div className="flex items-center justify-end gap-6">
+          <div className="flex items-center justify-end gap-4">
+            <Button
+              type="text"
+              size={"large"}
+              icon={<ShoppingCartOutlined />}
+              aria-label="Open shopping list"
+              onClick={handleOpenCart}
+            />
             <Title level={5} className="!mb-0 !text-[var(--fg-muted)]">
               Hello, {username || 'Guest'}
             </Title>
@@ -122,8 +133,8 @@ function Recipe() {
           maxCookingTimeInMin={maxCookingTimeInMin}
           minServings={minServings}
           maxServings={maxServings}
-          minCalories={minCalories}
-          maxCalories={maxCalories}
+          minCalories={minCaloriesPerServing}
+          maxCalories={maxCaloriesPerServing}
           onMinCookingTimeChange={setMinCookingTimeInMin}
           onMaxCookingTimeChange={setMaxCookingTimeInMin}
           onMinServingsChange={setMinServings}
@@ -185,6 +196,8 @@ function Recipe() {
             </SimpleBar>
           </Spin>
         </Modal>
+
+        <ShoppingList isCartOpen={isCartOpen} handleCloseCart={handleCloseCart} />
       </Content>
     </>
   );

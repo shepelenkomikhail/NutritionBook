@@ -11,10 +11,6 @@ public class ShoppingListConfiguration : IEntityTypeConfiguration<ShoppingList>
         builder.ToTable("ShoppingLists");
         builder.HasKey(sl => sl.Id);
         builder.Property(sl => sl.Id).ValueGeneratedOnAdd();
-
-        builder.Property(sl => sl.Name)
-            .IsRequired()
-            .HasMaxLength(100);
         
         builder.HasIndex(sl => sl.UserId)
             .IsUnique();

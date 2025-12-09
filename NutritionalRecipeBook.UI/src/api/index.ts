@@ -5,6 +5,7 @@ import commentsApi from './apis/commentsApi.ts';
 import authReducer from './slices/authSlice.ts';
 import userRecipesReducer from './slices/userRecipeSlice.ts';
 import ingredientsApi from './apis/ingredientApi.ts';
+import shoppingListApi from './apis/shoppingListApi.ts';
 
 const store = configureStore({
   reducer: {
@@ -13,14 +14,16 @@ const store = configureStore({
     [recipesApi.reducerPath]: recipesApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
     [commentsApi.reducerPath]: commentsApi.reducer,
-    [ingredientsApi.reducerPath]: ingredientsApi.reducer
+    [ingredientsApi.reducerPath]: ingredientsApi.reducer,
+    [shoppingListApi.reducerPath]: shoppingListApi.reducer,
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware().concat(
       recipesApi.middleware,
       authApi.middleware,
       commentsApi.middleware,
-      ingredientsApi.middleware
+      ingredientsApi.middleware,
+      shoppingListApi.middleware
     );
   }
 });
@@ -28,6 +31,8 @@ const store = configureStore({
 export const { useRegisterMutation, useLoginMutation } = authApi;
 
 export const { useGetIngredientsQuery, useGetMeasurementUnitsQuery } = ingredientsApi;
+
+export const { useGetShoppingListQuery, useCreateShoppingListMutation } = shoppingListApi;
 
 export const {
   useCreateRecipeMutation,
@@ -50,6 +55,5 @@ export const {
 } = commentsApi;
 
 export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
 
 export default store;

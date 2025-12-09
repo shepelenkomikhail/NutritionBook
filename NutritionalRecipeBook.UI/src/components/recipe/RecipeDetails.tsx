@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLazyGetRecipeByIdQuery, useLazyGetCommentsQuery, useDeleteCommentMutation, useLazyGetMyCommentsQuery } from '@api';
-import { Divider, Modal, Spin, Typography, List } from 'antd';
-import { type CommentModel, ShowIngredientModel, type PagedResult, IngredientNutritionInfoModel } from '@models';
-import { useCommentMutation } from '@hooks';
+import { Divider, Modal, Spin, Typography, List, Button } from 'antd';
+import { type CommentModel, ShowIngredientModel, type PagedResult, IngredientNutritionInfoModel, type IngredientUnitOfMeasureModel, type UserIngredientUnitOfMeasuresModel } from '@models';
+import { useCommentMutation, useShoppingListMutation } from '@hooks';
 import { toast } from '@utils/toast.tsx';
 import RecipeRatingSummary from './details/RecipeRatingSummary';
 import RecipeImage from './details/RecipeImage';
@@ -13,6 +13,8 @@ import { useIngredientsQuery } from '@hooks';
 import CommentForm from './details/CommentForm.tsx';
 const { Title } = Typography;
 import { calculateNutritionTotals } from '@utils/calculateNutritionTotals';
+import type { FormIngredientModel } from '@models';
+import type { IngredientModel } from '@models';
 
 interface RecipeModalProps {
   open: boolean;
@@ -23,6 +25,7 @@ interface RecipeModalProps {
 function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   const [getData, { data: recipeData, isLoading }] = useLazyGetRecipeByIdQuery();
   const { submit, isLoading: isSubmitting } = useCommentMutation();
+  const { execute: saveShoppingList, isLoading: isSavingShoppingList } = useShoppingListMutation();
   const [triggerComments, { data: commentsData, isLoading: isCommentsLoading }] = useLazyGetCommentsQuery();
   const [triggerMyComments, { data: myCommentsData }] = useLazyGetMyCommentsQuery();
   const { ingredients: catalog } = useIngredientsQuery();
@@ -65,6 +68,32 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
     }
   };
 
+  const handleAddToShoppingList = async () => {
+    if (!recipeData?.ingredients) return;
+
+    const ingredientUnitOfMeasures: IngredientUnitOfMeasureModel[] = recipeData.ingredients.map((item) => {
+      const ingredient: IngredientModel = {
+        id: item.ingredientDTO.id ?? undefined,
+        name: item.ingredientDTO.name,
+        isLiquid: item.ingredientDTO.isLiquid,
+        amount: Number(item.amount),
+        unit: item.unit,
+      };
+
+      return {
+        ingredient,
+        unitOfMeasure: item.unit,
+        amount: Number(item.amount),
+      };
+    });
+
+    const payload: UserIngredientUnitOfMeasuresModel = {
+      ingredientUnitOfMeasures,
+    };
+
+    await saveShoppingList(payload);
+  };
+
   useEffect(() => {
     if (open && recipeId) {
       getData(recipeId);
@@ -98,29 +127,33 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   }, [myCommentsData]);
 
   const nutritionTotals = useMemo(() => {
-    if (!recipeData?.ingredients) return { calories: 0, proteins: 0, carbs: 0, fats: 0 };
+    if (!recipeData?.ingredients) {
+      return { calories: 0, proteins: 0, carbs: 0, fats: 0 } as const;
+    }
 
-    const formIngredients = recipeData.ingredients.map(item => {
-      const ingInfo: IngredientNutritionInfoModel | undefined =
-        catalog.find(c => c.name === item.ingredientDTO.name);
+    const formIngredients: FormIngredientModel[] = recipeData.ingredients
+      .map(item => {
+        const ingInfo: IngredientNutritionInfoModel | undefined =
+          catalog.find(c => c.name === item.ingredientDTO.name);
 
-      if (!ingInfo) return null;
+        if (!ingInfo) return null;
 
-      return {
-        id: item.ingredientDTO.id ?? undefined,
-        name: item.ingredientDTO.name,
-        amount: Number(item.amount),
-        unit: item.unit,
-        uom: ingInfo.uom,
-        caloriesPer100: ingInfo.calories ?? 0,
-        proteinsPer100: ingInfo.proteins ?? 0,
-        carbsPer100: ingInfo.carbs ?? 0,
-        fatsPer100: ingInfo.fats ?? 0,
-        isLiquid: ingInfo.isLiquid ?? false,
-      };
-    }).filter(Boolean);
+        return {
+          id: item.ingredientDTO.id ?? undefined,
+          name: item.ingredientDTO.name,
+          amount: Number(item.amount),
+          unit: item.unit,
+          uom: ingInfo.uom,
+          caloriesPer100: ingInfo.calories ?? 0,
+          proteinsPer100: ingInfo.proteins ?? 0,
+          carbsPer100: ingInfo.carbs ?? 0,
+          fatsPer100: ingInfo.fats ?? 0,
+          isLiquid: ingInfo.isLiquid ?? false,
+        } as FormIngredientModel;
+      })
+      .filter((x): x is FormIngredientModel => x !== null);
 
-    return calculateNutritionTotals(formIngredients as any);
+    return calculateNutritionTotals(formIngredients);
   }, [recipeData?.ingredients, catalog]);
 
   return (
@@ -143,7 +176,7 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
         <Spin className="w-full flex justify-center py-10" />
       ) : recipeData ? (
         <div className="p-4 rounded-lg bg-[var(--card)] text-[var(--fg)]">
-          <div className="absolute right-12 top-20 z-10">
+          <div className="absolute right-12 top-20 z-10 flex gap-2">
             <HeartFavoriteButton recipeId={recipeId} />
           </div>
 
@@ -171,8 +204,8 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
             Ingredients
           </Title>
           <List
-            dataSource={recipeData.ingredients}
-            renderItem={(item: ShowIngredientModel) => (
+            dataSource={recipeData.ingredients as ShowIngredientModel[]}
+            renderItem={(item) => (
               <List.Item className="border-b last:border-0 border-[var(--border)] text-[var(--fg)]">
                 <div className="flex justify-between w-full">
                   <span>{item.ingredientDTO.name}</span>
@@ -183,6 +216,14 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
               </List.Item>
             )}
           />
+          <Button
+            type="primary"
+            size="small"
+            loading={isSavingShoppingList}
+            onClick={handleAddToShoppingList}
+          >
+            Add to shopping list
+          </Button>
 
           <div className="mt-4 border border-[var(--border)] rounded-md p-3">
             <div className="font-medium mb-2">Nutritional Content</div>

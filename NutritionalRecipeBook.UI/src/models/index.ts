@@ -16,3 +16,5 @@ export * from './IngredientNutritionInfoModel';
 export * from './UnitOfMeasureModel';
 export * from './FormIngredientModel';
 export * from './NutrientDTO';
+export * from './UserIngredientUnitOfMeasuresModel';
+export * from './IngredientUnitOfMeasureModel';

@@ -29,7 +29,6 @@ public static class SeedData
             lists.Add(new ShoppingList
             {
                 Id = Guid.Parse($"10000000-0000-0000-0000-0000000000{users.IndexOf(user) + 1:D2}"),
-                Name = $"{user.UserName}'s Shopping List",
                 UserId = user.Id
             });
         }
@@ -183,7 +182,6 @@ public static class SeedData
                 ShoppingListId = sl.Id,
                 IngredientId = ingredient.Id,
                 Amount = 1 + i,
-                Unit = ingredient.IsLiquid ? "L" : "kg"
             });
         }
         return list;
