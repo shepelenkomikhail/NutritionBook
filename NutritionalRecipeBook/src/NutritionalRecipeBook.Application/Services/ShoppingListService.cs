@@ -19,7 +19,7 @@ public class ShoppingListService: IShoppingListService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> AddItemsToShoppingList(ShoppingListDTO? newShoppingList, Guid userId)
+    public async Task<bool> AddItemsToShoppingListAsync(ShoppingListDTO? newShoppingList, Guid userId)
     {
         if (newShoppingList == null)
         {
@@ -117,7 +117,7 @@ public class ShoppingListService: IShoppingListService
         }
     }
 
-    public async Task<ShoppingListDTO?> GetShoppingList(Guid userId)
+    public async Task<ShoppingListDTO?> GetShoppingListAsync(Guid userId)
     {
         try
         {

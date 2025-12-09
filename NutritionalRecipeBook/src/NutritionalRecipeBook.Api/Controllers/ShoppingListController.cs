@@ -24,7 +24,7 @@ public class ShoppingListController: ControllerBase
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
         
-        var result = await _shoppingListService.AddItemsToShoppingList(newShoppingListDto, userId);
+        var result = await _shoppingListService.AddItemsToShoppingListAsync(newShoppingListDto, userId);
         if (!result)
         {
             return BadRequest("Failed to create shopping list.");
@@ -40,7 +40,7 @@ public class ShoppingListController: ControllerBase
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
         
-        var shoppingList = await _shoppingListService.GetShoppingList(userId);
+        var shoppingList = await _shoppingListService.GetShoppingListAsync(userId);
         if (shoppingList == null)
         {
             return NotFound("Shopping list not found.");

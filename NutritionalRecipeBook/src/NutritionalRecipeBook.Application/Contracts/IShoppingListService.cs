@@ -4,7 +4,7 @@ namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface IShoppingListService
 {
-    Task<bool> AddItemsToShoppingList(ShoppingListDTO? newShoppingList, Guid userId);
+    Task<bool> AddItemsToShoppingListAsync(ShoppingListDTO? newShoppingList, Guid userId);
     
-    Task<ShoppingListDTO?> GetShoppingList(Guid userId);
+    Task<ShoppingListDTO?> GetShoppingListAsync(Guid userId);
 }
