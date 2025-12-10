@@ -396,8 +396,14 @@
   .gap-10 {
     gap: calc(var(--spacing) * 10);
   }
+  .\!self-end {
+    align-self: flex-end !important;
+  }
   .self-center {
     align-self: center;
+  }
+  .self-end {
+    align-self: flex-end;
   }
   .\!rounded-2xl {
     border-radius: var(--radius-2xl) !important;
