@@ -117,7 +117,9 @@ public class ShoppingListService: IShoppingListService
                 }
             }
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update shopping list");
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update shopping list");
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -139,7 +141,7 @@ public class ShoppingListService: IShoppingListService
 
         try
         {
-            var shoppingList = await GetShoppingListEntityByUserId(userId);
+            var shoppingList = await GetShoppingListEntityByUserIdAsync(userId);
             
             var sliRepo = _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>();
             var existingItems = await sliRepo.GetWhereAsync(sli => sli.ShoppingListId == shoppingList.Id);
@@ -236,7 +238,9 @@ public class ShoppingListService: IShoppingListService
                 return null;
             }
 
-            return await GetShoppingListAsync(userId);
+            var result = await GetShoppingListAsync(userId);
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -258,8 +262,8 @@ public class ShoppingListService: IShoppingListService
 
         try
         {
-            var shoppingList = await GetShoppingListEntityByUserId(userId);
-            var shoppingListIngredient = await GetShoppingListIngredientEntity(shoppingList.Id, ingredientId.Value);
+            var shoppingList = await GetShoppingListEntityByUserIdAsync(userId);
+            var shoppingListIngredient = await GetShoppingListIngredientEntityAsync(shoppingList.Id, ingredientId.Value);
             
             await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().DeleteAsync(shoppingListIngredient);
         }
@@ -271,14 +275,16 @@ public class ShoppingListService: IShoppingListService
             return false;
         }
         
-        return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Deleting item from shopping list");
+        var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Deleting item from shopping list");
+
+        return result;
     }
 
     public async Task<bool> ClearShoppingListAsync(Guid userId)
     {
         try
         {
-            var shoppingList = await GetShoppingListEntityByUserId(userId);
+            var shoppingList = await GetShoppingListEntityByUserIdAsync(userId);
             
             await _unitOfWork.Repository<ShoppingList, Guid>().DeleteAsync(shoppingList.Id);
         }
@@ -289,7 +295,9 @@ public class ShoppingListService: IShoppingListService
             return false;
         }
         
-        return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Clear shopping list");
+        var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Clear shopping list");
+
+        return result;
     }
 
     public async Task<bool> UpdateItemIsBoughtStatusAsync(Guid userId, Guid? ingredientId, bool? isBought)
@@ -303,8 +311,8 @@ public class ShoppingListService: IShoppingListService
 
         try
         {
-            var shoppingList = await GetShoppingListEntityByUserId(userId);
-            var shoppingListIngredient = await GetShoppingListIngredientEntity(shoppingList.Id, ingredientId.Value);
+            var shoppingList = await GetShoppingListEntityByUserIdAsync(userId);
+            var shoppingListIngredient = await GetShoppingListIngredientEntityAsync(shoppingList.Id, ingredientId.Value);
             
             shoppingListIngredient.IsBought = isBought.Value;
             
@@ -317,7 +325,9 @@ public class ShoppingListService: IShoppingListService
             return false;
         }
         
-        return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update item IsBought status");
+        var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update item IsBought status");
+
+        return result;
     }
 
     public async Task<bool> UpdateAllItemsIsBoughtStatusAsync(Guid userId, bool? isBought)
@@ -331,7 +341,7 @@ public class ShoppingListService: IShoppingListService
 
         try
         {
-            var shoppingList = await GetShoppingListEntityByUserId(userId);
+            var shoppingList = await GetShoppingListEntityByUserIdAsync(userId);
 
             var shoppingListIngredients = await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>()
                 .GetWhereAsync(sli => sli.ShoppingListId == shoppingList.Id);
@@ -343,7 +353,9 @@ public class ShoppingListService: IShoppingListService
                 await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>().UpdateAsync(sli);
             }
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update all items IsBought status");
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Update all items IsBought status");
+
+            return result;
         }
         catch (Exception e)
         {
@@ -401,13 +413,17 @@ public class ShoppingListService: IShoppingListService
             {
                 if (!ingredientLookup.TryGetValue(sli.IngredientId, out var ing))
                 {
-                    _logger.LogWarning("Ingredient {IngredientId} referenced in shopping list {ShoppingListId} not found in DB; skipping.", sli.IngredientId, shoppingList.Id);
+                    _logger.LogWarning("Ingredient {IngredientId} referenced in shopping list " +
+                                       "{ShoppingListId} not found in DB; skipping.",
+                        sli.IngredientId, shoppingList.Id);
                     continue;
                 }
 
                 if (!uomDictionary.TryGetValue(sli.UnitOfMeasureId, out var uom))
                 {
-                    _logger.LogWarning("UnitOfMeasure {UnitOfMeasureId} referenced in shopping list {ShoppingListId} not found in DB; skipping.", sli.UnitOfMeasureId, shoppingList.Id);
+                    _logger.LogWarning("UnitOfMeasure {UnitOfMeasureId} referenced in shopping list" +
+                                       " {ShoppingListId} not found in DB; skipping.",
+                        sli.UnitOfMeasureId, shoppingList.Id);
                     continue;
                 }
 
@@ -431,7 +447,7 @@ public class ShoppingListService: IShoppingListService
         }
     }
     
-    private async Task<ShoppingList> GetShoppingListEntityByUserId(Guid userId)
+    private async Task<ShoppingList> GetShoppingListEntityByUserIdAsync(Guid userId)
     {
         var shoppingList = await _unitOfWork.Repository<ShoppingList, Guid>()
             .GetSingleOrDefaultAsync(sl => sl.UserId == userId);
@@ -446,7 +462,7 @@ public class ShoppingListService: IShoppingListService
         return shoppingList;
     }
     
-    private async Task<ShoppingListIngredient> GetShoppingListIngredientEntity(Guid shoppingListId, Guid ingredientId)
+    private async Task<ShoppingListIngredient> GetShoppingListIngredientEntityAsync(Guid shoppingListId, Guid ingredientId)
     {
         var shoppingListIngredient = await _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>()
             .GetSingleOrDefaultAsync(sli => sli.ShoppingListId == shoppingListId && sli.IngredientId == ingredientId);

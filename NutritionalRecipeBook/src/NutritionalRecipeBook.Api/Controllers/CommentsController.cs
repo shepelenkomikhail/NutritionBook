@@ -21,7 +21,7 @@ public class CommentsController : ControllerBase
     // POST: api/comments
     [RequireUserId]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CommentDTO newCommentDto)
+    public async Task<IActionResult> CreateComment([FromBody] CommentDTO newCommentDto)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
@@ -39,7 +39,7 @@ public class CommentsController : ControllerBase
     
     // GET api/comments
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetAllCommentsForRecipeAsync(Guid? recipeId)
+    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetAllCommentsForRecipe(Guid? recipeId)
     {
         var comments = await _commentsService.GetAllCommentsForRecipeAsync(recipeId);
         
@@ -49,7 +49,7 @@ public class CommentsController : ControllerBase
     // GET api/comments/mine
     [RequireUserId]
     [HttpGet("mine")]
-    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetMyCommentsForRecipeAsync(Guid? recipeId)
+    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetMyCommentsForRecipe(Guid? recipeId)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
@@ -61,7 +61,7 @@ public class CommentsController : ControllerBase
     // DELETE api/comments
     [RequireUserId]
     [HttpDelete]
-    public async Task<IActionResult> DeleteCommentAsync(Guid commentId)
+    public async Task<IActionResult> DeleteComment(Guid commentId)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
         

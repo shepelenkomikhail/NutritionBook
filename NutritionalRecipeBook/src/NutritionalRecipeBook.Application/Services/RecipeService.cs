@@ -152,7 +152,9 @@ namespace NutritionalRecipeBook.Application.Services
                 
                 _logger.LogInformation("Recipe with ID {Id} and ingredients updated successfully.", id);
                 
-                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UpdateRecipeAsync");
+                var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UpdateRecipeAsync");
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -236,7 +238,9 @@ namespace NutritionalRecipeBook.Application.Services
 
                 _logger.LogInformation("Recipe with ID {Id} deleted successfully.", id);
                 
-                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteRecipeAsync");
+                var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteRecipeAsync");
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -456,7 +460,9 @@ namespace NutritionalRecipeBook.Application.Services
                     connections.Count, recipeId, userId);
             }
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
+
+            return result;
         }
 
         public async Task<PagedResultDTO<RecipeDTO>> GetFavoriteRecipesAsync(Guid userId, int pageNumber, int pageSize, RecipeFilterDTO? filterDto = null)
@@ -515,13 +521,17 @@ namespace NutritionalRecipeBook.Application.Services
                     await _unitOfWork.Repository<UserRecipe, Guid>().UpdateAsync(ur);
                 }
 
-                _logger.LogInformation("Unmarked favorite for {Count} connection(s) of recipe {RecipeId} for user {UserId}.", connections.Count, recipeId, userId);
+                _logger.LogInformation("Unmarked favorite for {Count} connection(s) of recipe {RecipeId} for user {UserId}.",
+                    connections.Count, recipeId, userId);
 
-                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UnmarkFavoriteRecipeAsync");
+                var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UnmarkFavoriteRecipeAsync");
+
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error unmarking favorite recipe {RecipeId} for user {UserId}.", recipeId, userId);
+                _logger.LogError(ex, "Error unmarking favorite recipe {RecipeId} for user {UserId}.", 
+                    recipeId, userId);
                 
                 return false;
             }

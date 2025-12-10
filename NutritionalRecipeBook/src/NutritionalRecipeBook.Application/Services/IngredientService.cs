@@ -59,7 +59,9 @@ public class IngredientService : IIngredientService
 
             await _unitOfWork.Repository<Ingredient, Guid>().InsertAsync(ingredientEntity);
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateIngredientAsync");
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateIngredientAsync");
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -127,7 +129,7 @@ public class IngredientService : IIngredientService
         return result;
     }
 
-    public async Task<IEnumerable<UnitOfMeasureDTO>> GetMeasures(bool isLiquid)
+    public async Task<IEnumerable<UnitOfMeasureDTO>> GetMeasuresAsync(bool isLiquid)
     {
         var measures = await _unitOfWork.Repository<UnitOfMeasure, Guid>()
             .GetWhereAsync(uom => uom.IsLiquidMeasure == isLiquid);

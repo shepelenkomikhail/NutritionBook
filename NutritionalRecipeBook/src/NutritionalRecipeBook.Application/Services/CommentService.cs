@@ -79,8 +79,10 @@ public class CommentService : ICommentsService
                     RecipeId = commentDto.RecipeId,
                 });
             }
+            
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateCommentAsync");
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateCommentAsync");
+            return result;
         }
         catch (Exception e)
         {
@@ -114,7 +116,9 @@ public class CommentService : ICommentsService
         {
             await _unitOfWork.Repository<Comment, Guid>().DeleteAsync(commentId.Value);
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteCommentAsync");
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateCommentAsync");
+            
+            return result;
         }
         catch (Exception e)
         {

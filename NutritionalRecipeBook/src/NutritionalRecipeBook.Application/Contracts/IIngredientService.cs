@@ -8,5 +8,5 @@ public interface IIngredientService
     Task<bool> EnsureIngredientExistsAsync(IngredientDTO ingredientDto);
     
     Task<IEnumerable<IngredientNutrientInfoDTO>> GetAllIngredientsWithNutrientInfoAsync();
-    Task<IEnumerable<UnitOfMeasureDTO>> GetMeasures(bool isLiquid);
+    Task<IEnumerable<UnitOfMeasureDTO>> GetMeasuresAsync(bool isLiquid);
 }

@@ -29,7 +29,7 @@ public class IngredientsController : ControllerBase
     [HttpGet("measures")]
     public async Task<IActionResult> GetMeasures(bool isLiquid)
     {
-        var result = await _ingredientService.GetMeasures(isLiquid);
+        var result = await _ingredientService.GetMeasuresAsync(isLiquid);
         
         return Ok(result);
     }

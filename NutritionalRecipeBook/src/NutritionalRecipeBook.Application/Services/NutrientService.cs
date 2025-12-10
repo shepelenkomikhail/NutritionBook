@@ -24,7 +24,9 @@ public class NutrientService: INutrientService
         var url = new Uri("/nutrients", UriKind.Relative);
         _logger.LogInformation("Fetching all nutrients from {Url}", url);
         
-        return await FetchNutrientsAsync(url);
+        var result = await FetchNutrientsAsync(url);
+        
+        return result;
     }
 
     public async Task<IEnumerable<IngredientNutrientApiDTO>> SearchNutrientsAsync(string query)
@@ -49,7 +51,9 @@ public class NutrientService: INutrientService
         
         _logger.LogInformation("Searching nutrients with query '{Query}' at {Url}", query, url);
         
-        return await FetchNutrientsAsync(url);
+        var result = await FetchNutrientsAsync(url);
+
+        return result;
     }
 
     private void EnsureHttpClientConfigured()
