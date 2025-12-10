@@ -1,6 +1,8 @@
 import { Drawer, Empty, List, Spin, Typography } from 'antd';
 import { useShoppingListQuery } from '@hooks';
 import { toast } from '@utils/toast.tsx';
+import DeleteFromShoppingListButton from './buttons/DeleteFromShoppingListButton.tsx';
+import MarkAsBoughtItemButton from './buttons/MarkAsBoughtItemButton.tsx';
 
 interface Props {
   isCartOpen: boolean;
@@ -49,12 +51,14 @@ function ShoppingList({ isCartOpen, handleCloseCart }: Props) {
             <List.Item>
               <List.Item.Meta
                 title={
-                  <Typography.Text>
+                  <Typography.Text className={`${item.isBought ? 'line-through !text-gray-500' : ''}`}>
                     {item.ingredient.name}
                   </Typography.Text>
                 }
                 description={`${item.amount} ${item.unitOfMeasure}`}
               />
+              <MarkAsBoughtItemButton itemId={item.ingredient.id} isBought={item.isBought} />
+              <DeleteFromShoppingListButton itemId={item.ingredient.id} />
             </List.Item>
           )}
         />

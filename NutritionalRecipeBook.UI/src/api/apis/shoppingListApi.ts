@@ -32,8 +32,80 @@ const shoppingListApi = createApi({
           ...(headers ? { headers } : {}),
           body: payload,
         };
-      }
-    })
+      },
+    }),
+    updateShoppingList: builder.mutation<UserIngredientUnitOfMeasuresModel, UserIngredientUnitOfMeasuresModel>({
+      invalidatesTags: ['ShoppingList'],
+      query: (payload) => {
+        const headers = getHeader();
+
+        return {
+          url: `/api/shoppinglist`,
+          method: 'PUT',
+          ...(headers ? { headers } : {}),
+          body: payload,
+        };
+      },
+    }),
+    deleteShoppingListItem: builder.mutation<void, string>({
+      invalidatesTags: ['ShoppingList'],
+      query: (ingredientId) => {
+        const headers = getHeader();
+
+        return {
+          url: `/api/shoppinglist/${ingredientId}`,
+          method: 'DELETE',
+          ...(headers ? { headers } : {}),
+        };
+      },
+    }),
+    clearShoppingList: builder.mutation<void, void>({
+      invalidatesTags: ['ShoppingList'],
+      query: () => {
+        const headers = getHeader();
+
+        return {
+          url: `/api/shoppinglist/clear`,
+          method: 'DELETE',
+          ...(headers ? { headers } : {}),
+        };
+      },
+    }),
+    updateShoppingListItemIsBoughtStatus: builder.mutation<
+      void,
+      { itemId: string|undefined; isBought: boolean }
+    >({
+      invalidatesTags: ['ShoppingList'],
+      query: ({ itemId, isBought }) => {
+        const headers = {
+          ...getHeader(),
+          'Content-Type': 'application/json',
+        };
+
+        return {
+          url: `/api/shoppinglist/item/${itemId}/bought`,
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(isBought),
+        };
+      },
+    }),
+    updateAllShoppingListItemsIsBoughtStatus: builder.mutation<void, boolean>({
+      invalidatesTags: ['ShoppingList'],
+      query: (isBought) => {
+        const headers = {
+          ...getHeader(),
+          'Content-Type': 'application/json',
+        };
+
+        return {
+          url: `/api/shoppinglist/bought`,
+          method: 'PUT',
+          ...(headers ? { headers } : {}),
+          body: isBought,
+        };
+      },
+    }),
   }),
 });
 
