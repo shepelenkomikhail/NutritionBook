@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Api.Filters;
 using NutritionalRecipeBook.Application.Contracts;
+using NutritionalRecipeBook.Application.DTOs;
 
 namespace NutritionalRecipeBook.Api.Controllers;
 
@@ -20,7 +21,7 @@ public class ShoppingListController: ControllerBase
     // POST: api/shoppinglist
     [HttpPost]
     [RequireUserId]
-    public async Task<IActionResult> AddItemsToShoppingList([FromBody] Application.DTOs.ShoppingListDTO newShoppingListDto)
+    public async Task<IActionResult> AddItemsToShoppingList([FromBody] ShoppingListDTO newShoppingListDto)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
         
@@ -52,7 +53,7 @@ public class ShoppingListController: ControllerBase
     // PUT: api/shoppinglist
     [HttpPut]
     [RequireUserId]
-    public async Task<IActionResult> UpdateShoppingList([FromBody] Application.DTOs.ShoppingListDTO updatedShoppingListDto)
+    public async Task<IActionResult> UpdateShoppingList([FromBody] ShoppingListDTO updatedShoppingListDto)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 

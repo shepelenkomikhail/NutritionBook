@@ -297,7 +297,6 @@ public class ShoppingListService: IShoppingListService
             var ingredientLookup = ingredients.ToDictionary(x => x.Id);
             var uomDictionary = uoms.ToDictionary(x => x.Id);
 
-            // Build DTOs defensively: skip entries when either ingredient or uom is missing to avoid KeyNotFoundException
             var dtoList = new List<IngredientUnitOfMeasureDTO>();
             foreach (var sli in listIngredients)
             {
@@ -316,7 +315,8 @@ public class ShoppingListService: IShoppingListService
                 dtoList.Add(new IngredientUnitOfMeasureDTO(
                     new IngredientDTO(ing.Id, ing.Name, ing.IsLiquid),
                     uom.Name,
-                    sli.Amount
+                    sli.Amount,
+                    sli.IsBought
                 ));
             }
 
@@ -341,7 +341,6 @@ public class ShoppingListService: IShoppingListService
         {
             _logger.LogWarning("No shopping list found for user {UserId}", userId);
 
-            // throw a specific exception so callers can distinguish this case from other failures
             throw new InvalidOperationException($"No shopping list found for user {userId}");
         }
         
