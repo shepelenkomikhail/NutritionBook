@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NutritionalRecipeBook.Api.Configurations;
 using NutritionalRecipeBook.Domain;
 using Serilog;
+using QuestPDF.Infrastructure;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
@@ -28,7 +29,9 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-
+    
+    QuestPDF.Settings.License = LicenseType.Community;
+    
     var app = builder.Build();
     
     using (var scope = app.Services.CreateScope())
