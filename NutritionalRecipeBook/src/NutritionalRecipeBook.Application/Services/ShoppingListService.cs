@@ -250,6 +250,11 @@ public class ShoppingListService: IShoppingListService
         }
     }
 
+    public async Task<(byte[] buffer, string ContentType)?> GetShoppingListFileAsync(Guid userId)
+    {
+        return new ValueTuple<byte[], string>(null, null);
+    }
+
 
     public async Task<bool> DeleteItemFromShoppingListAsync(Guid? ingredientId, Guid userId)
     {

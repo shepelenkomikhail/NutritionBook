@@ -39,7 +39,8 @@ export const {
   useDeleteShoppingListItemMutation,
   useClearShoppingListMutation,
   useUpdateAllShoppingListItemsIsBoughtStatusMutation,
-  useUpdateShoppingListItemIsBoughtStatusMutation
+  useUpdateShoppingListItemIsBoughtStatusMutation,
+  useGetPrintedShoppingListQuery
 } = shoppingListApi;
 
 export const {

@@ -106,6 +106,17 @@ const shoppingListApi = createApi({
         };
       },
     }),
+    getPrintedShoppingList: builder.query<string, void>({
+      query: () => {
+        const headers = getHeader();
+
+        return {
+          url: `/api/shoppinglist/print`,
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+        };
+      }
+    }),
   }),
 });
 

@@ -3,7 +3,7 @@ import { useIngredientsQuery, useMeasurementUnitsQuery, useShoppingListQuery } f
 import { DeleteFromShoppingListButton, MarkAsBoughtItemButton,
   ClearShoppingListButton, MarkAsBoughtAllItemsButton, UpdateListButton } from './buttons';
 import { useEffect, useState } from 'react';
-import { IngredientUnitOfMeasureModel } from '@models';
+import { IngredientModel, IngredientUnitOfMeasureModel } from '@models';
 import { lightLabelStyle } from '../../themes/modelStyles.ts';
 import IngredientFields from './recipe-form/IngredientFields.tsx';
 import { PlusOutlined } from '@ant-design/icons';
@@ -60,7 +60,7 @@ function ShoppingList({ isCartOpen, handleCloseCart }: Props) {
   const handleAddNewIngredients = (values: any) => {
     if (!values.ingredients) return;
 
-    const mapped: IngredientUnitOfMeasureModel[] = values.ingredients.map((ing) => {
+    const mapped: IngredientUnitOfMeasureModel[] = values.ingredients.map((ing: IngredientModel) => {
       const info = ingredients.find(i => i.name === ing.name);
       if (!info) return null;
 
