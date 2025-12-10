@@ -129,4 +129,20 @@ public class ShoppingListController: ControllerBase
 
         return Ok("All item statuses updated successfully.");
     }
+    
+    // GET: api/shoppinglist/print
+    [HttpGet("print")]
+    [RequireUserId]
+    public async Task<IActionResult> GetShoppingListFile()
+    {
+        var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+        
+        var result = await _shoppingListService.GetShoppingListFileAsync(userId);
+        if (result == null)
+        {
+            return NotFound();
+        }
+        
+        return File(result.Value.buffer, result.Value.ContentType);
+    }
 }

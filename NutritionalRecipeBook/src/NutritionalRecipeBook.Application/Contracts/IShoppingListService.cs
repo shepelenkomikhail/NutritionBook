@@ -10,6 +10,7 @@ public interface IShoppingListService
     Task<bool> ClearShoppingListAsync(Guid userId);
     
     Task<ShoppingListDTO?> GetShoppingListAsync(Guid userId);
+    Task<(byte[] buffer, string ContentType)?> GetShoppingListFileAsync(Guid userId);
     
     Task<bool> UpdateItemIsBoughtStatusAsync(Guid userId, Guid? ingredientId, bool? isBought);
     Task<bool> UpdateAllItemsIsBoughtStatusAsync(Guid userId, bool? isBought);

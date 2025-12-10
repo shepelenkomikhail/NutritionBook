@@ -1,17 +1,39 @@
 import { Drawer, Empty, List, Spin, Typography, InputNumber, Form, Button } from 'antd';
 import { useIngredientsQuery, useMeasurementUnitsQuery, useShoppingListQuery } from '@hooks';
-import { DeleteFromShoppingListButton, MarkAsBoughtItemButton,
-  ClearShoppingListButton, MarkAsBoughtAllItemsButton, UpdateListButton } from './buttons';
+import {
+  DeleteFromShoppingListButton, MarkAsBoughtItemButton,
+  ClearShoppingListButton, MarkAsBoughtAllItemsButton, UpdateListButton, PrintShoppingListButton
+} from './buttons';
 import { useEffect, useState } from 'react';
 import { IngredientUnitOfMeasureModel } from '@models';
 import { lightLabelStyle } from '../../themes/modelStyles.ts';
 import IngredientFields from './recipe-form/IngredientFields.tsx';
 import { PlusOutlined } from '@ant-design/icons';
+import { UNIT_CONVERSIONS } from '@utils/unitOfMeasures';
 
 interface Props {
   isCartOpen: boolean;
   handleCloseCart: () => void;
 }
+
+function toBase(amount: number, unit: string): number {
+  return amount * UNIT_CONVERSIONS[unit];
+}
+
+function fromBase(baseAmount: number, unit: string): number {
+  return baseAmount / UNIT_CONVERSIONS[unit];
+}
+
+function areUnitsCompatible(unit1: string, unit2: string): boolean {
+  const solid = ["g", "kg", "tsp", "tbsp"];
+  const liquid = ["ml", "l", "tsp", "tbsp"];
+
+  return (
+    (solid.includes(unit1) && solid.includes(unit2)) ||
+    (liquid.includes(unit1) && liquid.includes(unit2))
+  );
+}
+
 
 function ShoppingList({ isCartOpen, handleCloseCart }: Props) {
   const { shoppingList, isLoading, isFetching, isError } = useShoppingListQuery();
@@ -60,20 +82,47 @@ function ShoppingList({ isCartOpen, handleCloseCart }: Props) {
   const handleAddNewIngredients = (values: any) => {
     if (!values.ingredients) return;
 
-    const mapped: IngredientUnitOfMeasureModel[] = values.ingredients.map((ing) => {
-      const info = ingredients.find(i => i.name === ing.name);
-      if (!info) return null;
+    const mapped: IngredientUnitOfMeasureModel[] = values.ingredients
+      .map((ing: any) => {
+        const info = ingredients.find(i => i.name == ing.name);
+        console.log('info', info);
+        console.log('ing', ing.name);
+        console.log("MATCH in list:", ingredients.find(i => i.name === ing.name));
+        console.log(editableList)
+        if (!info) return null;
 
-      return {
-        ingredient: info,
-        amount: ing.amount,
-        unitOfMeasure: ing.unit,
-        isBought: false
-      };
-    }).filter(Boolean) as IngredientUnitOfMeasureModel[];
+        return {
+          ingredient: info,
+          amount: ing.amount,
+          unitOfMeasure: ing.unit,
+          isBought: false
+        };
+      })
+      .filter(Boolean) as IngredientUnitOfMeasureModel[];
 
     setEditableList(prev => {
-      const updated = [...prev, ...mapped];
+      const updated = [...prev];
+
+      mapped.forEach(newItem => {
+        const existing = updated.find(x => x.ingredient.name === newItem.ingredient.name);
+
+        if (!existing) {
+          updated.push(newItem);
+          return;
+        }
+
+        if (!areUnitsCompatible(existing.unitOfMeasure, newItem.unitOfMeasure)) {
+          updated.push(newItem);
+          return;
+        }
+
+        const existingBase = toBase(existing.amount, existing.unitOfMeasure);
+        const newBase = toBase(newItem.amount, newItem.unitOfMeasure);
+        const totalBase = existingBase + newBase;
+        const combinedAmount = fromBase(totalBase, existing.unitOfMeasure);
+
+        existing.amount = combinedAmount;
+      });
 
       const changed = JSON.stringify(updated) !== JSON.stringify(originalList);
       setIsDisabledUpdateButton(!changed);
@@ -86,7 +135,12 @@ function ShoppingList({ isCartOpen, handleCloseCart }: Props) {
 
   return (
     <Drawer
-      title="Shopping list"
+      title={
+        <>
+          Shopping List
+          <PrintShoppingListButton />
+        </>
+      }
       placement="right"
       open={isCartOpen}
       onClose={handleCloseCart}

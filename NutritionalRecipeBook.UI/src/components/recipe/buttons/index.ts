@@ -8,3 +8,4 @@ export { default as MarkAsBoughtAllItemsButton } from './MarkAsBoughtAllItemsBut
 export { default as ClearShoppingListButton } from './ClearShoppingListButton';
 export { default as UpdateListButton } from './UpdateLIstButton';
 export { default as DeleteFromShoppingListButton } from './DeleteFromShoppingListButton';
+export { default as PrintShoppingListButton } from './PrintShoppingListButton';

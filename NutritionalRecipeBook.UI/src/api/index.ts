@@ -17,15 +17,16 @@ const store = configureStore({
     [ingredientsApi.reducerPath]: ingredientsApi.reducer,
     [shoppingListApi.reducerPath]: shoppingListApi.reducer,
   },
-  middleware: (getDefaultMiddleware) => {
-    return getDefaultMiddleware().concat(
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }).concat(
       recipesApi.middleware,
       authApi.middleware,
       commentsApi.middleware,
       ingredientsApi.middleware,
       shoppingListApi.middleware
-    );
-  }
+    ),
 });
 
 export const { useRegisterMutation, useLoginMutation } = authApi;
@@ -39,7 +40,8 @@ export const {
   useDeleteShoppingListItemMutation,
   useClearShoppingListMutation,
   useUpdateAllShoppingListItemsIsBoughtStatusMutation,
-  useUpdateShoppingListItemIsBoughtStatusMutation
+  useUpdateShoppingListItemIsBoughtStatusMutation,
+  useLazyGetPrintedShoppingListQuery
 } = shoppingListApi;
 
 export const {

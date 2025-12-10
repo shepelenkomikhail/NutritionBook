@@ -56,8 +56,6 @@ export const useRecipeQuery = (
     maxCaloriesPerServing
   ]);
 
-  console.log(buildParams());
-
 
   useEffect(() => {
     const handler = setTimeout(() => {

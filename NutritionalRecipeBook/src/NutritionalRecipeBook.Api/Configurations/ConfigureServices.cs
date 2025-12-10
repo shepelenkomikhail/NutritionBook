@@ -13,6 +13,15 @@ namespace NutritionalRecipeBook.Api.Configurations
         {
             var services = builder.Services;
             
+            var baseUrl = config["NutrientsApi:BaseUrl"];
+
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                throw new InvalidOperationException(
+                    "Configuration is missing: 'NutrientsApi:BaseUrl'. "
+                );
+            }
+            
             services.AddScoped<IRepositoryFactory, RepositoryFactory>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRecipeService, RecipeService>();    
@@ -26,7 +35,7 @@ namespace NutritionalRecipeBook.Api.Configurations
 
             services.AddHttpClient<INutrientService, NutrientService>(client =>
             {
-                client.BaseAddress = new Uri(config["NutrientsApi:BaseUrl"]!);
+                client.BaseAddress = new Uri(baseUrl);
             });
             
             return services;
