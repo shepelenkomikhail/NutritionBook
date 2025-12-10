@@ -90,9 +90,9 @@ const shoppingListApi = createApi({
         };
       },
     }),
-    updateAllShoppingListItemsIsBoughtStatus: builder.mutation<void, boolean>({
+    updateAllShoppingListItemsIsBoughtStatus: builder.mutation<void, {isBought:boolean}>({
       invalidatesTags: ['ShoppingList'],
-      query: (isBought) => {
+      query: ({isBought}) => {
         const headers = {
           ...getHeader(),
           'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ const shoppingListApi = createApi({
           url: `/api/shoppinglist/bought`,
           method: 'PUT',
           ...(headers ? { headers } : {}),
-          body: isBought,
+          body: JSON.stringify(isBought),
         };
       },
     }),

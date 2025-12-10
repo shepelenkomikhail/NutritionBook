@@ -1,8 +1,10 @@
 import { Drawer, Empty, List, Spin, Typography } from 'antd';
 import { useShoppingListQuery } from '@hooks';
-import { toast } from '@utils/toast.tsx';
 import DeleteFromShoppingListButton from './buttons/DeleteFromShoppingListButton.tsx';
 import MarkAsBoughtItemButton from './buttons/MarkAsBoughtItemButton.tsx';
+import MarkAsBoughtAllItemsButton from './buttons/MarkAsBoughtAllItemsButton.tsx';
+import { useState } from 'react';
+import { ClearShoppingListButton } from './buttons';
 
 interface Props {
   isCartOpen: boolean;
@@ -12,10 +14,10 @@ interface Props {
 function ShoppingList({ isCartOpen, handleCloseCart }: Props) {
   const { shoppingList, isLoading, isFetching, isError, error } = useShoppingListQuery();
   const isBusy = isLoading || isFetching;
+  const [isAllBought, setIsAllBought] = useState(false);
 
   if(!isBusy && isError){
-    toast("Failed to load shopping list")
-    console.error(error);
+    console.log("shopping list does not exist or another error:", error);
   }
 
   return (
@@ -44,24 +46,31 @@ function ShoppingList({ isCartOpen, handleCloseCart }: Props) {
       )}
 
       {!isBusy && !isError && shoppingList && shoppingList.ingredientUnitOfMeasures.length > 0 && (
-        <List
-          itemLayout="horizontal"
-          dataSource={shoppingList.ingredientUnitOfMeasures}
-          renderItem={(item) => (
-            <List.Item>
-              <List.Item.Meta
-                title={
-                  <Typography.Text className={`${item.isBought ? 'line-through !text-gray-500' : ''}`}>
-                    {item.ingredient.name}
-                  </Typography.Text>
-                }
-                description={`${item.amount} ${item.unitOfMeasure}`}
-              />
-              <MarkAsBoughtItemButton itemId={item.ingredient.id} isBought={item.isBought} />
-              <DeleteFromShoppingListButton itemId={item.ingredient.id} />
-            </List.Item>
-          )}
-        />
+        <>
+          <div className={"flex gap-2"}>
+            <MarkAsBoughtAllItemsButton isAllBought={isAllBought} setAllBought={setIsAllBought} />
+            <ClearShoppingListButton />
+          </div>
+
+          <List
+            itemLayout="horizontal"
+            dataSource={shoppingList.ingredientUnitOfMeasures}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  title={
+                    <Typography.Text className={`${item.isBought ? 'line-through !text-gray-500' : ''}`}>
+                      {item.ingredient.name}
+                    </Typography.Text>
+                  }
+                  description={`${item.amount} ${item.unitOfMeasure}`}
+                />
+                <MarkAsBoughtItemButton itemId={item.ingredient.id} isBought={item.isBought} />
+                <DeleteFromShoppingListButton itemId={item.ingredient.id} />
+              </List.Item>
+            )}
+          />
+        </>
       )}
     </Drawer>
   );
