@@ -12,7 +12,7 @@ import { ThemeToggleButton } from '../shared';
 import { RootState } from '@api';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../api/slices/authSlice.ts';
-import { TogglePersonalizedButton, ToggleFavoriteRecipesButton } from './buttons';
+import { TogglePersonalizedButton, ToggleFavoriteRecipesButton, UploadJsonRecipe } from './buttons';
 import { setUserRecipes } from '../../api/slices/userRecipeSlice.ts';
 import ShoppingList from './ShoppingList.tsx';
 const { Content, Header } = Layout;
@@ -123,6 +123,7 @@ function Recipe() {
           setIsFavorite={setIsFavoriteRecipes}
           setIsPersonalized={setIsPersonalizedRecipes}
         />
+        <UploadJsonRecipe />
         <RecipeSearchBar
           search={search}
           onSearchChange={(v) => {
