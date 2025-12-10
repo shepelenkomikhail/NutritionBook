@@ -137,16 +137,111 @@ public class ShoppingListService: IShoppingListService
             return null;
         }
 
-        var addItemsResult = await AddItemsToShoppingListAsync(updatedShoppingList, userId);
-        if (!addItemsResult)
+        try
         {
-            _logger.LogWarning("Failed to update shopping list for user {UserId}", userId);
+            var shoppingList = await GetShoppingListEntityByUserId(userId);
+            
+            var sliRepo = _unitOfWork.Repository<ShoppingListIngredient, (Guid, Guid)>();
+            var existingItems = await sliRepo.GetWhereAsync(sli => sli.ShoppingListId == shoppingList.Id);
+
+            var existingByIngredientId = existingItems
+                .ToDictionary(x => x.IngredientId, x => x);
+
+            var ingredientNames = updatedShoppingList.IngredientUnitOfMeasures
+                .Where(i => i?.Ingredient != null)
+                .Select(i => i!.Ingredient!.Name)
+                .Distinct()
+                .ToList();
+
+            var uomNames = updatedShoppingList.IngredientUnitOfMeasures
+                .Where(i => !string.IsNullOrWhiteSpace(i?.UnitOfMeasure))
+                .Select(i => i!.UnitOfMeasure)
+                .Distinct()
+                .ToList();
+
+            var ingredients = await _unitOfWork.Repository<Ingredient, Guid>()
+                .GetWhereAsync(i => ingredientNames.Contains(i.Name));
+            var uoms = await _unitOfWork.Repository<UnitOfMeasure, Guid>()
+                .GetWhereAsync(u => uomNames.Contains(u.Name));
+
+            var ingredientByName = ingredients.ToDictionary(x => x.Name, x => x);
+            var uomByName = uoms.ToDictionary(x => x.Name, x => x);
+
+            var incomingIngredientIds = new HashSet<Guid>();
+
+            foreach (var dto in updatedShoppingList.IngredientUnitOfMeasures)
+            {
+                if (dto?.Ingredient == null)
+                {
+                    _logger.LogWarning("IngredientDTO is null in shopping list update for user {UserId}", userId);
+                    
+                    continue;
+                }
+
+                if (!ingredientByName.TryGetValue(dto.Ingredient.Name, out var ingredientEntity))
+                {
+                    _logger.LogWarning("Ingredient {IngredientName} not found in DB", dto.Ingredient.Name);
+                    
+                    continue;
+                }
+
+                if (!uomByName.TryGetValue(dto.UnitOfMeasure, out var uomEntity))
+                {
+                    _logger.LogWarning("UnitOfMeasure {UomName} not found in DB", dto.UnitOfMeasure);
+                    
+                    continue;
+                }
+
+                incomingIngredientIds.Add(ingredientEntity.Id);
+
+                if (existingByIngredientId.TryGetValue(ingredientEntity.Id, out var existingSli))
+                {
+                    existingSli.Amount = dto.Amount;
+                    existingSli.IsBought = dto.IsBought;
+
+                    await sliRepo.UpdateAsync(existingSli);
+                }
+                else
+                {
+                    var newSli = new ShoppingListIngredient
+                    {
+                        ShoppingListId = shoppingList.Id,
+                        IngredientId = ingredientEntity.Id,
+                        UnitOfMeasureId = uomEntity.Id,
+                        Amount = dto.Amount,
+                        IsBought = dto.IsBought
+                    };
+
+                    await sliRepo.InsertAsync(newSli);
+                }
+            }
+
+            foreach (var existing in existingByIngredientId.Values)
+            {
+                if (!incomingIngredientIds.Contains(existing.IngredientId))
+                {
+                    await sliRepo.DeleteAsync(existing);
+                }
+            }
+
+            var saveResult = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "Full update shopping list");
+            if (!saveResult)
+            {
+                _logger.LogWarning("Failed to persist shopping list update for user {UserId}", userId);
+                
+                return null;
+            }
+
+            return await GetShoppingListAsync(userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception occurred while fully updating shopping list for user {UserId}", userId);
             
             return null;
         }
-
-        return await GetShoppingListAsync(userId);
     }
+
 
     public async Task<bool> DeleteItemFromShoppingListAsync(Guid? ingredientId, Guid userId)
     {

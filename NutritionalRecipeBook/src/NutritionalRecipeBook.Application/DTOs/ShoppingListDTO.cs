@@ -2,6 +2,6 @@ namespace NutritionalRecipeBook.Application.DTOs;
 
 public record ShoppingListDTO(
     Guid? Id,
-    Guid UserId,
+    Guid? UserId,
     IngredientUnitOfMeasureDTO[] IngredientUnitOfMeasures
 );
