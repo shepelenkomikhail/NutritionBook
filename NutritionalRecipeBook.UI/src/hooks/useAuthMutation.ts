@@ -12,7 +12,6 @@ export function useAuthMutation(mode: 'register' | 'login') {
   const execute = async (payload: RegisterModel | LoginFormModel) => {
     try {
         if(mode === 'register') {
-          console.log('Registering user with payload:', payload);
           // @ts-ignore
           const res = await registerUser(payload).unwrap();
           if(res.token) {
@@ -22,7 +21,6 @@ export function useAuthMutation(mode: 'register' | 'login') {
             navigate('/login');
           }
         } else if (mode === 'login') {
-          console.log('Login user with payload:', payload);
           const res = await loginUser(payload).unwrap();
 
           if(res.token) {

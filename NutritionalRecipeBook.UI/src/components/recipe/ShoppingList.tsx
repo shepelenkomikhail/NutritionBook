@@ -1,7 +1,9 @@
 import { Drawer, Empty, List, Spin, Typography, InputNumber, Form, Button } from 'antd';
 import { useIngredientsQuery, useMeasurementUnitsQuery, useShoppingListQuery } from '@hooks';
-import { DeleteFromShoppingListButton, MarkAsBoughtItemButton,
-  ClearShoppingListButton, MarkAsBoughtAllItemsButton, UpdateListButton } from './buttons';
+import {
+  DeleteFromShoppingListButton, MarkAsBoughtItemButton,
+  ClearShoppingListButton, MarkAsBoughtAllItemsButton, UpdateListButton, PrintShoppingListButton
+} from './buttons';
 import { useEffect, useState } from 'react';
 import { IngredientModel, IngredientUnitOfMeasureModel } from '@models';
 import { lightLabelStyle } from '../../themes/modelStyles.ts';
@@ -86,7 +88,12 @@ function ShoppingList({ isCartOpen, handleCloseCart }: Props) {
 
   return (
     <Drawer
-      title="Shopping list"
+      title={
+        <>
+          Shopping List
+          <PrintShoppingListButton />
+        </>
+      }
       placement="right"
       open={isCartOpen}
       onClose={handleCloseCart}

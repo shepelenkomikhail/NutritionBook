@@ -34,8 +34,6 @@ function UpdateLIstButton({ updatedList, disabled }: { updatedList: any, disable
         ingredientUnitOfMeasures,
       };
 
-      console.log('Updating shopping list payload', payload);
-
       await updateList(payload).unwrap();
       toast('Successfully updated list!');
     } catch (e) {

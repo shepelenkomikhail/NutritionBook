@@ -131,7 +131,8 @@ public class ShoppingListController: ControllerBase
     }
     
     // GET: api/shoppinglist/print
-    [HttpGet]
+    [HttpGet("print")]
+    [RequireUserId]
     public async Task<IActionResult> GetShoppingListFile()
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;

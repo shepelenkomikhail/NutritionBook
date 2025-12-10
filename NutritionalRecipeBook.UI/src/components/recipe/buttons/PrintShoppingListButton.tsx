@@ -1,41 +1,34 @@
-import { useGetPrintedShoppingListQuery } from '@api';
-import { toast } from '@utils/toast.tsx';
-import { Button, Popconfirm } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { useLazyGetPrintedShoppingListQuery } from '@api';
+import { Button } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
 
 function PrintShoppingListButton() {
-  const result = useGetPrintedShoppingListQuery();
+  const [downloadPdf, { isLoading }] = useLazyGetPrintedShoppingListQuery();
 
-  const handleClick = async () => {
-    try {
-      if (!result.data) {
-        toast('Failed to generate shopping list!');
-      }
+  const handleDownload = async () => {
+    const pdfBlob = await downloadPdf().unwrap();
 
-      toast('Recipe deleted successfully!');
-    } catch (error) {
-      console.error('Failed to delete recipe:', error);
-      toast('Failed to delete recipe');
-    }
+    const url = URL.createObjectURL(pdfBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "shopping-list.pdf";
+    link.click();
+
+    URL.revokeObjectURL(url);
   };
 
+
   return (
-    <Popconfirm
-      title="Are you sure you want to delete this recipe?"
-      onConfirm={handleClick}
-      okText="Yes"
-      cancelText="No"
+    <Button
+      type="primary"
+      icon={!isLoading ? <DownloadOutlined /> : null}
+      loading={isLoading}
+      disabled={isLoading}
+      onClick={handleDownload}
+      className="flex items-center gap-2 ml-4"
     >
-      <Button
-        type="primary"
-        danger
-        icon={<DeleteOutlined />}
-        loading={result.isLoading}
-        onClick={(e) => e.stopPropagation()}
-      >
-        Delete All Items
-      </Button>
-    </Popconfirm>
+      {isLoading ? "Preparing PDF..." : "Download PDF"}
+    </Button>
   );
 }
 

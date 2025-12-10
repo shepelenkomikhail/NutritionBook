@@ -106,7 +106,7 @@ const shoppingListApi = createApi({
         };
       },
     }),
-    getPrintedShoppingList: builder.query<string, void>({
+    getPrintedShoppingList: builder.query<Blob, void>({
       query: () => {
         const headers = getHeader();
 
@@ -114,6 +114,9 @@ const shoppingListApi = createApi({
           url: `/api/shoppinglist/print`,
           method: 'GET',
           ...(headers ? { headers } : {}),
+          responseType: 'blob',
+
+          responseHandler: (response) => response.blob(),
         };
       }
     }),

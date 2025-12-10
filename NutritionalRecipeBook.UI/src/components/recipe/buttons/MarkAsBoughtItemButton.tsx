@@ -9,7 +9,6 @@ function MarkAsBoughtItemButton({ itemId, isBought }: { itemId: string | undefin
 
   const handleConfirm = async () => {
     try {
-      console.log('Updating item status', { itemId, isBought: !isBought });
       await updateItemStatus({ itemId, isBought: !isBought }).unwrap();
     } catch (e) {
       console.error(e);
