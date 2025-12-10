@@ -165,7 +165,7 @@ public class ShoppingListService: IShoppingListService
                 .GetWhereAsync(u => uomNames.Contains(u.Name));
 
             var ingredientByName = ingredients.ToDictionary(x => x.Name, x => x);
-            var uomByName = uoms.ToDictionary(x => x.Name, x => x);
+            var uomByName = uoms.ToLookup(x => x.Name, x => x);
 
             var incomingIngredientIds = new HashSet<Guid>();
 
@@ -184,14 +184,18 @@ public class ShoppingListService: IShoppingListService
                     
                     continue;
                 }
+                
+                var units = uomByName[dto.UnitOfMeasure];
 
-                if (!uomByName.TryGetValue(dto.UnitOfMeasure, out var uomEntity))
+                if (!units.Any())
                 {
                     _logger.LogWarning("UnitOfMeasure {UomName} not found in DB", dto.UnitOfMeasure);
                     
                     continue;
                 }
-
+ 
+                var uomEntity = units.First();
+                
                 incomingIngredientIds.Add(ingredientEntity.Id);
 
                 if (existingByIngredientId.TryGetValue(ingredientEntity.Id, out var existingSli))
