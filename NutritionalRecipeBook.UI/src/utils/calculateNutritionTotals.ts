@@ -1,4 +1,5 @@
 import type { FormIngredientModel } from '@models';
+import { UNIT_CONVERSIONS } from '@utils/unitOfMeasures';
 
 export type NutritionTotals = {
   calories: number;
@@ -9,14 +10,6 @@ export type NutritionTotals = {
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
-const UNIT_CONVERSIONS: Record<string, number> = {
-  g: 1,
-  kg: 1000,
-  ml: 1,
-  l: 1000,
-  tsp: 5,
-  tbsp: 15,
-};
 
 export function calculateNutritionTotals(
   rows: FormIngredientModel[] | undefined
