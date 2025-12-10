@@ -44,7 +44,6 @@ function IngredientFields({ form, field, ingredients, liquidUnits, normalUnits, 
             const ingMeta = ingredients.find((i) => i.name === val);
             applyIngredientMetaToForm(form, name, ingMeta);
 
-            // Reset unit if incompatible
             const inferred = ingMeta?.isLiquid ?? false;
             const currentUnit = form.getFieldValue(['ingredients', name, 'unit']);
             const availableUnits = inferred ? liquidUnits : normalUnits;
@@ -90,7 +89,6 @@ function IngredientFields({ form, field, ingredients, liquidUnits, normalUnits, 
         }}
       </Form.Item>
 
-      {/* hidden fields to preserve meta */}
       <Form.Item {...restField} name={[name, 'id']} hidden>
         <Input type="hidden" />
       </Form.Item>

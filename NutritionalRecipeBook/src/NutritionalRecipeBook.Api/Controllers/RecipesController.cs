@@ -13,13 +13,11 @@ namespace NutritionalRecipeBook.Api.Controllers
     public class RecipesController : ControllerBase
     {
         private readonly IRecipeService _recipeService;
-        private readonly ILogger<RecipesController> _logger;
         private readonly IWebHostEnvironment _env;
 
-        public RecipesController(IRecipeService recipeService, ILogger<RecipesController> logger, IWebHostEnvironment env)
+        public RecipesController(IRecipeService recipeService, IWebHostEnvironment env)
         {
             _recipeService = recipeService;
-            _logger = logger;
             _env = env;
         }
 
@@ -46,7 +44,6 @@ namespace NutritionalRecipeBook.Api.Controllers
         public async Task<IActionResult> UploadImage([FromForm(Name = "file")] IFormFile file)
         {
             var webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            _logger.LogInformation("Uploading image to {FileName}", file.FileName);
             
             var url = await _recipeService.UploadImageAsync(file.OpenReadStream(), file.FileName, webRootPath);
             if (string.IsNullOrWhiteSpace(url))
@@ -54,8 +51,6 @@ namespace NutritionalRecipeBook.Api.Controllers
                 return BadRequest("Failed to upload image.");
             }
             
-            _logger.LogInformation("Image uploaded successfully: {Url}", url);
-
             return Created(new Uri(url, UriKind.Relative), new { url });
         }
 
@@ -185,7 +180,7 @@ namespace NutritionalRecipeBook.Api.Controllers
             return Ok("Recipe marked as favorite successfully.");
         }
         
-        // GET api/recipes/favorite/
+        // GET api/recipes/favorite
         [HttpGet("favorite")]
         [RequireUserId]
         public async Task<IActionResult> GetFavoriteRecipes(

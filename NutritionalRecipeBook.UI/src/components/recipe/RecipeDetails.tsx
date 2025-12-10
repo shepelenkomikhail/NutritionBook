@@ -71,7 +71,8 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   const handleAddToShoppingList = async () => {
     if (!recipeData?.ingredients) return;
 
-    const ingredientUnitOfMeasures: IngredientUnitOfMeasureModel[] = recipeData.ingredients.map((item) => {
+    const ingredientUnitOfMeasures: IngredientUnitOfMeasureModel[] =
+      recipeData.ingredients.map((item) => {
       const ingredient: IngredientModel = {
         id: item.ingredientDTO.id ?? undefined,
         name: item.ingredientDTO.name,
@@ -84,6 +85,7 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
         ingredient,
         unitOfMeasure: item.unit,
         amount: Number(item.amount),
+        isBought: false,
       };
     });
 

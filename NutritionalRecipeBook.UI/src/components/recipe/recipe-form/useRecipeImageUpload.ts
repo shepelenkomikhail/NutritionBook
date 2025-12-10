@@ -36,7 +36,7 @@ export function useRecipeImageUpload(opts?: Options) {
     return isJpgOrPng && isLt2M;
   }, []);
 
-  const handleChange: UploadProps['onChange'] = useCallback((info) => {
+  const handleChange: UploadProps['onChange'] = useCallback((info: any) => {
     if (info.file.status === 'uploading') {
       notifyLoading(true);
       return;

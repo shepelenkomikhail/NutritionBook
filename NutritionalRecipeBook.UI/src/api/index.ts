@@ -32,7 +32,15 @@ export const { useRegisterMutation, useLoginMutation } = authApi;
 
 export const { useGetIngredientsQuery, useGetMeasurementUnitsQuery } = ingredientsApi;
 
-export const { useGetShoppingListQuery, useCreateShoppingListMutation } = shoppingListApi;
+export const {
+  useGetShoppingListQuery,
+  useCreateShoppingListMutation,
+  useUpdateShoppingListMutation,
+  useDeleteShoppingListItemMutation,
+  useClearShoppingListMutation,
+  useUpdateAllShoppingListItemsIsBoughtStatusMutation,
+  useUpdateShoppingListItemIsBoughtStatusMutation
+} = shoppingListApi;
 
 export const {
   useCreateRecipeMutation,
@@ -50,7 +58,6 @@ export const {
   useCreateCommentMutation,
   useLazyGetCommentsQuery,
   useDeleteCommentMutation,
-  useGetMyCommentsQuery,
   useLazyGetMyCommentsQuery,
 } = commentsApi;
 

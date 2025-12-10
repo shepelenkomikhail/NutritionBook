@@ -10,12 +10,10 @@ namespace NutritionalRecipeBook.Api.Controllers;
 public class IngredientsController : ControllerBase
 {
     private readonly IIngredientService _ingredientService;
-    private readonly ILogger<RecipesController> _logger;
 
-    public IngredientsController(IIngredientService ingredientService, ILogger<RecipesController> logger)
+    public IngredientsController(IIngredientService ingredientService)
     {
         _ingredientService = ingredientService;
-        _logger = logger;
     }
     
     // GET api/ingredients
@@ -31,7 +29,7 @@ public class IngredientsController : ControllerBase
     [HttpGet("measures")]
     public async Task<IActionResult> GetMeasures(bool isLiquid)
     {
-        var result = await _ingredientService.GetMeasures(isLiquid);
+        var result = await _ingredientService.GetMeasuresAsync(isLiquid);
         
         return Ok(result);
     }

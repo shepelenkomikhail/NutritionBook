@@ -152,7 +152,9 @@ namespace NutritionalRecipeBook.Application.Services
                 
                 _logger.LogInformation("Recipe with ID {Id} and ingredients updated successfully.", id);
                 
-                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UpdateRecipeAsync");
+                var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UpdateRecipeAsync");
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -218,31 +220,6 @@ namespace NutritionalRecipeBook.Application.Services
                 return null;
             }
         }
-
-        public async Task<Guid?> GetRecipeIdByNameAsync(string name)
-        {
-            try
-            {
-                var recipe = await _unitOfWork.Repository<Recipe, Guid>()
-                    .GetSingleOrDefaultAsync(r => r.Name.ToLower() == name.ToLower());
-
-                if (recipe == null)
-                {
-                    _logger.LogWarning("Recipe with name '{RecipeName}' not found.", name);
-                   
-                    return null;
-                }
-
-                return recipe.Id;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, 
-                    "An unexpected error occurred while retrieving recipe name {RecipeName}.", name);
-                
-                return null;
-            }
-        }
         
         public async Task<bool> DeleteRecipeAsync(Guid id, Guid userId)
         {
@@ -261,7 +238,9 @@ namespace NutritionalRecipeBook.Application.Services
 
                 _logger.LogInformation("Recipe with ID {Id} deleted successfully.", id);
                 
-                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteRecipeAsync");
+                var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteRecipeAsync");
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -365,23 +344,6 @@ namespace NutritionalRecipeBook.Application.Services
                 _logger.LogError(ex, "An unexpected error occurred while retrieving recipe ID {Id}.", id);
                 
                 return null;
-            }
-        }
-        
-        public IEnumerable<RecipeDTO> GetAllRecipesAsync()
-        {
-            try
-            {
-                var recipeEntities = _unitOfWork.Repository<Recipe, Guid>().GetAll();
-                var recipeDtos = recipeEntities.Select(recipeEntity => RecipeMapper.ToDto(recipeEntity));
-
-                return recipeDtos;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An unexpected error occurred while retrieving all recipes.");
-                
-                return Enumerable.Empty<RecipeDTO>();
             }
         }
         
@@ -498,7 +460,9 @@ namespace NutritionalRecipeBook.Application.Services
                     connections.Count, recipeId, userId);
             }
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "MarkFavoriteRecipeAsync");
+
+            return result;
         }
 
         public async Task<PagedResultDTO<RecipeDTO>> GetFavoriteRecipesAsync(Guid userId, int pageNumber, int pageSize, RecipeFilterDTO? filterDto = null)
@@ -557,13 +521,17 @@ namespace NutritionalRecipeBook.Application.Services
                     await _unitOfWork.Repository<UserRecipe, Guid>().UpdateAsync(ur);
                 }
 
-                _logger.LogInformation("Unmarked favorite for {Count} connection(s) of recipe {RecipeId} for user {UserId}.", connections.Count, recipeId, userId);
+                _logger.LogInformation("Unmarked favorite for {Count} connection(s) of recipe {RecipeId} for user {UserId}.",
+                    connections.Count, recipeId, userId);
 
-                return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UnmarkFavoriteRecipeAsync");
+                var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "UnmarkFavoriteRecipeAsync");
+
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error unmarking favorite recipe {RecipeId} for user {UserId}.", recipeId, userId);
+                _logger.LogError(ex, "Error unmarking favorite recipe {RecipeId} for user {UserId}.", 
+                    recipeId, userId);
                 
                 return false;
             }

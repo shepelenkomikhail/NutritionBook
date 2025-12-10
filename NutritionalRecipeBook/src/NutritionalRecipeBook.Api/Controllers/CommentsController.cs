@@ -1,8 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NutritionalRecipeBook.Api.Filters;
-using NutritionalRecipeBook.Api.Models;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs;
 
@@ -13,19 +11,17 @@ namespace NutritionalRecipeBook.Api.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : ControllerBase
 {
-    private readonly ILogger<CommentsController> _logger;
     private readonly ICommentsService _commentsService;
     
-    public CommentsController(ILogger<CommentsController> logger, ICommentsService commentsService)
+    public CommentsController(ICommentsService commentsService)
     {
-        _logger = logger;
         _commentsService = commentsService;
     }
     
     // POST: api/comments
     [RequireUserId]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CommentDTO newCommentDto)
+    public async Task<IActionResult> CreateComment([FromBody] CommentDTO newCommentDto)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
@@ -43,7 +39,7 @@ public class CommentsController : ControllerBase
     
     // GET api/comments
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetAllCommentsForRecipeAsync(Guid? recipeId)
+    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetAllCommentsForRecipe(Guid? recipeId)
     {
         var comments = await _commentsService.GetAllCommentsForRecipeAsync(recipeId);
         
@@ -53,7 +49,7 @@ public class CommentsController : ControllerBase
     // GET api/comments/mine
     [RequireUserId]
     [HttpGet("mine")]
-    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetMyCommentsForRecipeAsync(Guid? recipeId)
+    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetMyCommentsForRecipe(Guid? recipeId)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
 
@@ -65,7 +61,7 @@ public class CommentsController : ControllerBase
     // DELETE api/comments
     [RequireUserId]
     [HttpDelete]
-    public async Task<IActionResult> DeleteCommentAsync(Guid commentId)
+    public async Task<IActionResult> DeleteComment(Guid commentId)
     {
         var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
         

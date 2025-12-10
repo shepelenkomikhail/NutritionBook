@@ -9,5 +9,5 @@ public interface IJWTService
     Task<string> GenerateJwtTokenAsync(User user,
         IConfiguration _configuration,
         UserManager<User> _userManager
-        );
+    );
 }

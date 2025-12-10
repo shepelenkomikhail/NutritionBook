@@ -79,8 +79,10 @@ public class CommentService : ICommentsService
                     RecipeId = commentDto.RecipeId,
                 });
             }
+            
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateCommentAsync");
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateCommentAsync");
+            return result;
         }
         catch (Exception e)
         {
@@ -114,7 +116,9 @@ public class CommentService : ICommentsService
         {
             await _unitOfWork.Repository<Comment, Guid>().DeleteAsync(commentId.Value);
 
-            return await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "DeleteCommentAsync");
+            var result = await PersistenceHelper.TrySaveAsync(_unitOfWork, _logger, "CreateCommentAsync");
+            
+            return result;
         }
         catch (Exception e)
         {
@@ -122,27 +126,6 @@ public class CommentService : ICommentsService
             
             return false;
         }
-    }
-
-    public async Task<CommentDTO?> GetCommentByIdAsync(Guid? commentId)
-    {
-        if (commentId == null)
-        {
-            _logger.LogWarning("Comment ID is null.");
-            
-            return null;
-        }
-
-        var existingComment = await _unitOfWork.Repository<Comment, Guid>()
-            .GetByIdAsync(commentId.Value);
-        if (existingComment == null)
-        {
-            _logger.LogWarning("Comment with ID '{Id}' not found.", commentId);
-            
-            return null;
-        }
-        
-        return CommentMapper.ToDto(existingComment);
     }
 
     public async Task<IEnumerable<CommentDTO>> GetAllCommentsForRecipeAsync(Guid? recipeId)
