@@ -1,4 +1,5 @@
 using System.IO;
+using Microsoft.AspNetCore.Http;
 using NutritionalRecipeBook.Application.DTOs;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 
@@ -6,9 +7,10 @@ namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface IRecipeService
 {
-    Task<Guid?> CreateRecipeAsync(RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
+    Task<RecipeIngredientNutrientDTO?> CreateRecipeAsync(RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
     Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
     Task<bool> DeleteRecipeAsync(Guid id, Guid userId);
+    Task<RecipeIngredientNutrientDTO[]> ParseRecipeFromJsonAsync(IFormFile? file, Guid userId);
     
     Task<RecipeIngredientNutrientDTO?> GetRecipeByIdAsync(Guid id);
     Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(

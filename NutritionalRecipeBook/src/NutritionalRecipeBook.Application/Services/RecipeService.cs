@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
@@ -9,6 +10,7 @@ using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Application.Services.Extensions;
 using NutritionalRecipeBook.Application.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace NutritionalRecipeBook.Application.Services
 {
@@ -26,7 +28,7 @@ namespace NutritionalRecipeBook.Application.Services
             _ingredientService = ingredientService;
         }
 
-        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientNutrientDTO? recipeDto, Guid userId)
+        public async Task<RecipeIngredientNutrientDTO?> CreateRecipeAsync(RecipeIngredientNutrientDTO? recipeDto, Guid userId)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -87,7 +89,9 @@ namespace NutritionalRecipeBook.Application.Services
                 _logger.LogInformation("Recipe '{Name}' created successfully with ID {Id}. Linked to user {UserId}.",
                     recipeEntity.Name, recipeEntity.Id, userId);
                
-                return recipeEntity.Id;
+                var createdDto = await GetRecipeByIdAsync(recipeEntity.Id);
+                
+                return createdDto;
             }
             catch (Exception ex)
             {
@@ -534,6 +538,58 @@ namespace NutritionalRecipeBook.Application.Services
                     recipeId, userId);
                 
                 return false;
+            }
+        }
+
+        public async Task<RecipeIngredientNutrientDTO[]> ParseRecipeFromJsonAsync(IFormFile? file, Guid userId)
+        {
+            if (file == null || file.Length == 0)
+            {
+                _logger.LogWarning("ParseRecipeFromJsonAsync: No file provided or file is empty.");
+
+                return Array.Empty<RecipeIngredientNutrientDTO>();
+            }
+
+            var extension = Path.GetExtension(file.FileName);
+
+            if (!string.Equals(extension, ".json", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning("ParseRecipeFromJsonAsync: Invalid file format.");
+
+                return Array.Empty<RecipeIngredientNutrientDTO>();
+            }
+
+            using var reader = new StreamReader(file.OpenReadStream());
+            string json = await reader.ReadToEndAsync();
+            
+            try
+            {
+                var recipeIngredientNutrientDtos = 
+                    JsonConvert.DeserializeObject<RecipeIngredientNutrientDTO[]>(json);
+
+                if (recipeIngredientNutrientDtos == null || recipeIngredientNutrientDtos.Length == 0)
+                {
+                    return Array.Empty<RecipeIngredientNutrientDTO>();
+                }
+                
+                var results = new List<RecipeIngredientNutrientDTO>();
+
+                foreach (var dto in recipeIngredientNutrientDtos)
+                {
+                    var createdDto = await CreateRecipeAsync(dto, userId);
+                    if (createdDto != null)
+                    {
+                        results.Add(createdDto);
+                    }
+                }
+                
+                return results.ToArray();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Error parsing uploaded JSON file.");
+                
+                return Array.Empty<RecipeIngredientNutrientDTO>();
             }
         }
 
