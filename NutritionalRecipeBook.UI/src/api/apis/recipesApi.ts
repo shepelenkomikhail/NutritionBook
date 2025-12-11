@@ -160,6 +160,20 @@ const recipesApi = createApi({
         };
       },
     }),
+    exportMyRecipes: builder.query<Blob, void>({
+      query: () => {
+        const headers = getHeader();
+
+        return {
+          url: `/api/recipes/export/json`,
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+          responseType: 'blob',
+
+          responseHandler: (response) => response.blob(),
+        };
+      }
+    }),
   })
 });
 

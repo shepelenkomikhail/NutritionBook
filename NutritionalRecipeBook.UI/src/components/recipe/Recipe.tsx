@@ -15,6 +15,7 @@ import { logout } from '../../api/slices/authSlice.ts';
 import { TogglePersonalizedButton, ToggleFavoriteRecipesButton, UploadJsonRecipe } from './buttons';
 import { setUserRecipes } from '../../api/slices/userRecipeSlice.ts';
 import ShoppingList from './ShoppingList.tsx';
+import ExportMyRecipesButton from './buttons/ExportMyRecipesButton.tsx';
 const { Content, Header } = Layout;
 
 function Recipe() {
@@ -155,6 +156,10 @@ function Recipe() {
             setPageNumber(1);
           }}
         />
+
+        {isPersonalizedRecipes && (
+          <ExportMyRecipesButton />
+        )}
 
         <RecipeList
           recipes={recipes}

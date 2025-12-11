@@ -24,6 +24,7 @@ public interface IRecipeService
         Guid? userId,
         RecipeFilterDTO? filterDto = null
     );
+    Task<(byte[] buffer, string ContentType)?> ExportRecipesForUserJsonAsync(Guid userId);
     
     Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath);
     Task<(byte[] buffer, string ContentType)?> GetImageAsync(string fileName, string webRootPath);

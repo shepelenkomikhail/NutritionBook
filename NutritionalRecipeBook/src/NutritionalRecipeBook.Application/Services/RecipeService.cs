@@ -19,13 +19,15 @@ namespace NutritionalRecipeBook.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RecipeService> _logger;
         private readonly IIngredientService _ingredientService;
+        private readonly ICommentsService _commentsService;
 
         public RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger, 
-            IIngredientService ingredientService)
+            IIngredientService ingredientService, ICommentsService commentsService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _ingredientService = ingredientService;
+            _commentsService = commentsService;
         }
 
         public async Task<RecipeIngredientNutrientDTO?> CreateRecipeAsync(RecipeIngredientNutrientDTO? recipeDto, Guid userId)
@@ -593,6 +595,70 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
+        public async Task<(byte[] buffer, string ContentType)?> ExportRecipesForUserJsonAsync(Guid userId)
+        {
+            try
+            {
+                var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
+                    .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId && ur.IsOwner))
+                    .Include(r => r.RecipeIngredients)
+                        .ThenInclude(ri => ri.Ingredient)
+                    .Include(r => r.RecipeIngredients)
+                        .ThenInclude(ri => ri.UnitOfMeasure)
+                    .Include(r => r.Comments);
+                
+                var userRecipes = await query
+                    .Select(r => new
+                    {
+                        r.Name,
+                        r.Description,
+                        r.Instructions,
+                        r.CookingTimeInMin,
+                        r.Servings,
+                        r.ImageUrl,
+                        r.CaloriesPerServing,
+                        RecipeIngredients = r.RecipeIngredients.Select(ri => new
+                        {
+                            Ingredient = new {
+                                ri.Ingredient.Id,
+                                ri.Ingredient.Name,
+                                ri.Ingredient.IsLiquid
+                            },
+                            ri.Amount,
+                            UnitOfMeasureName =  ri.UnitOfMeasure.Name
+                        }).ToList(),
+                        Comments = r.Comments.Select(c => new
+                            {
+                                c.Content, 
+                                c.CreatedAt, 
+                                c.UserId, 
+                                c.Rating
+                            })
+                            .ToList()
+                    })
+                    .ToListAsync();
+ 
+                if (!userRecipes.Any())
+                {
+                    _logger.LogWarning("ExportRecipesForUserJsonAsync: No recipes found for user {UserId}.", userId);
+                
+                    return null;
+                }
+                
+                var json = JsonConvert.SerializeObject(userRecipes, Formatting.Indented);
+                var buffer = System.Text.Encoding.UTF8.GetBytes(json);
+                
+                return (buffer, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ExportRecipesForUserJsonAsync: " +
+                                     "Unexpected error while exporting recipes for user {UserId}.", userId);
+                
+                return null;
+            }
+        }
+ 
         public async Task<(byte[] buffer, string ContentType)?> GetImageAsync(string fileName, string webRootPath)
         {
             try
@@ -600,6 +666,7 @@ namespace NutritionalRecipeBook.Application.Services
                 if (string.IsNullOrWhiteSpace(fileName))
                 {
                     _logger.LogWarning("GetImageAsync called with empty file name.");
+                   
                     return null;
                 }
 
@@ -609,6 +676,7 @@ namespace NutritionalRecipeBook.Application.Services
                 if (!System.IO.File.Exists(fullPath))
                 {
                     _logger.LogInformation("Image not found at path: {FullPath}", fullPath);
+                   
                     return null;
                 }
 
@@ -623,7 +691,7 @@ namespace NutritionalRecipeBook.Application.Services
                     _ => "application/octet-stream"
                 };
 
-                using var stream = new FileStream(
+                await using var stream = new FileStream(
                     fullPath,
                     FileMode.Open,
                     FileAccess.Read,
@@ -632,7 +700,7 @@ namespace NutritionalRecipeBook.Application.Services
                     useAsync: true);
 
                 var buffer = new byte[stream.Length];
-                await stream.ReadAsync(buffer, 0, buffer.Length);
+                await stream.ReadExactlyAsync(buffer, 0, buffer.Length);
 
                 return (buffer, contentType);
             }

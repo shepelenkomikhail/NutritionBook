@@ -232,7 +232,28 @@ namespace NutritionalRecipeBook.Api.Controllers
             
             var parsedRecipeDto = await _recipeService.ParseRecipeFromJsonAsync(file, userId);
 
+            if (parsedRecipeDto.Length == 0)
+            {
+                return BadRequest("Recipe was not parsed.");
+            }
+            
             return Ok(parsedRecipeDto);
+        }
+        
+        // GET: api/shoppinglist/print
+        [HttpGet("export/json")]
+        [RequireUserId]
+        public async Task<IActionResult> GetShoppingListFile()
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+        
+            var result = await _recipeService.ExportRecipesForUserJsonAsync(userId);
+            if (result == null)
+            {
+                return NotFound();
+            }
+        
+            return File(result.Value.buffer, result.Value.ContentType);
         }
     }
 }
