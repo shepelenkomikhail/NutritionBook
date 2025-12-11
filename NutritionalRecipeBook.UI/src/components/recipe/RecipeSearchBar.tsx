@@ -27,7 +27,7 @@ function RecipeSearchBar({ search, onSearchChange, minCookingTimeInMin, maxCooki
                            onMaxCaloriesChange, onClearFilters, }: Props) {
 
   return (
-    <div className="flex flex-col mb-6 w-3/4 self-center">
+    <div className="flex flex-col mb-12 -mt-18 w-3/4 self-center">
       <div className="flex justify-center mb-4">
         <Input
           prefix={<SearchOutlined />}

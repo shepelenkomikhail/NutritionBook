@@ -28,13 +28,13 @@ namespace NutritionalRecipeBook.Api.Controllers
         {
             var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
             
-            Guid? newRecipeId = await _recipeService.CreateRecipeAsync(newRecipeDto, userId);
-            if (newRecipeId == null)
+            var createdRecipe = await _recipeService.CreateRecipeAsync(newRecipeDto, userId);
+            if (createdRecipe == null)
             {
                 return BadRequest("Failed to create recipe.");
             }
-
-            return Created($"/api/recipes/{newRecipeId}", newRecipeDto);
+            
+            return Created($"/api/recipes/{newRecipeDto.RecipeDTO.Id}", newRecipeDto);
         }
         
         // POST: api/recipes/image
@@ -220,6 +220,40 @@ namespace NutritionalRecipeBook.Api.Controllers
             }
             
             return Ok("Recipe removed from favorites successfully.");
+        }
+        
+        // POST api/recipes/parse/json
+        [HttpPost("parse/json")]
+        [Consumes("multipart/form-data")]
+        [RequireUserId]
+        public async Task<IActionResult> ParseRecipeFromJson(IFormFile? file)
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+            
+            var parsedRecipeDto = await _recipeService.ParseRecipeFromJsonAsync(file, userId);
+
+            if (parsedRecipeDto.Length == 0)
+            {
+                return BadRequest("Recipe was not parsed.");
+            }
+            
+            return Ok(parsedRecipeDto);
+        }
+        
+        // GET: api/shoppinglist/print
+        [HttpGet("export/json")]
+        [RequireUserId]
+        public async Task<IActionResult> GetShoppingListFile()
+        {
+            var userId = (Guid)HttpContext.Items[RequireUserIdAttribute.UserIdItemKey]!;
+        
+            var result = await _recipeService.ExportRecipesForUserJsonAsync(userId);
+            if (result == null)
+            {
+                return NotFound();
+            }
+        
+            return File(result.Value.buffer, result.Value.ContentType);
         }
     }
 }

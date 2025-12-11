@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NutritionalRecipeBook.Application.Contracts;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
@@ -9,6 +10,7 @@ using NutritionalRecipeBook.Infrastructure.Contracts;
 using NutritionalRecipeBook.Application.Services.Extensions;
 using NutritionalRecipeBook.Application.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace NutritionalRecipeBook.Application.Services
 {
@@ -17,16 +19,18 @@ namespace NutritionalRecipeBook.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RecipeService> _logger;
         private readonly IIngredientService _ingredientService;
+        private readonly ICommentsService _commentsService;
 
         public RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger, 
-            IIngredientService ingredientService)
+            IIngredientService ingredientService, ICommentsService commentsService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _ingredientService = ingredientService;
+            _commentsService = commentsService;
         }
 
-        public async Task<Guid?> CreateRecipeAsync(RecipeIngredientNutrientDTO? recipeDto, Guid userId)
+        public async Task<RecipeIngredientNutrientDTO?> CreateRecipeAsync(RecipeIngredientNutrientDTO? recipeDto, Guid userId)
         {
             if (recipeDto?.RecipeDTO == null)
             {
@@ -87,7 +91,9 @@ namespace NutritionalRecipeBook.Application.Services
                 _logger.LogInformation("Recipe '{Name}' created successfully with ID {Id}. Linked to user {UserId}.",
                     recipeEntity.Name, recipeEntity.Id, userId);
                
-                return recipeEntity.Id;
+                var createdDto = await GetRecipeByIdAsync(recipeEntity.Id);
+                
+                return createdDto;
             }
             catch (Exception ex)
             {
@@ -537,6 +543,122 @@ namespace NutritionalRecipeBook.Application.Services
             }
         }
 
+        public async Task<RecipeIngredientNutrientDTO[]> ParseRecipeFromJsonAsync(IFormFile? file, Guid userId)
+        {
+            if (file == null || file.Length == 0)
+            {
+                _logger.LogWarning("ParseRecipeFromJsonAsync: No file provided or file is empty.");
+
+                return Array.Empty<RecipeIngredientNutrientDTO>();
+            }
+
+            var extension = Path.GetExtension(file.FileName);
+
+            if (!string.Equals(extension, ".json", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning("ParseRecipeFromJsonAsync: Invalid file format.");
+
+                return Array.Empty<RecipeIngredientNutrientDTO>();
+            }
+
+            using var reader = new StreamReader(file.OpenReadStream());
+            string json = await reader.ReadToEndAsync();
+            
+            try
+            {
+                var recipeIngredientNutrientDtos = 
+                    JsonConvert.DeserializeObject<RecipeIngredientNutrientDTO[]>(json);
+
+                if (recipeIngredientNutrientDtos == null || recipeIngredientNutrientDtos.Length == 0)
+                {
+                    return Array.Empty<RecipeIngredientNutrientDTO>();
+                }
+                
+                var results = new List<RecipeIngredientNutrientDTO>();
+
+                foreach (var dto in recipeIngredientNutrientDtos)
+                {
+                    var createdDto = await CreateRecipeAsync(dto, userId);
+                    if (createdDto != null)
+                    {
+                        results.Add(createdDto);
+                    }
+                }
+                
+                return results.ToArray();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Error parsing uploaded JSON file.");
+                
+                return Array.Empty<RecipeIngredientNutrientDTO>();
+            }
+        }
+
+        public async Task<(byte[] buffer, string ContentType)?> ExportRecipesForUserJsonAsync(Guid userId)
+        {
+            try
+            {
+                var query = _unitOfWork.Repository<Recipe, Guid>().GetQueryable()
+                    .Where(r => r.UserRecipes.Any(ur => ur.UserId == userId && ur.IsOwner))
+                    .Include(r => r.RecipeIngredients)
+                        .ThenInclude(ri => ri.Ingredient)
+                    .Include(r => r.RecipeIngredients)
+                        .ThenInclude(ri => ri.UnitOfMeasure)
+                    .Include(r => r.Comments);
+                
+                var userRecipes = await query
+                    .Select(r => new
+                    {
+                        r.Name,
+                        r.Description,
+                        r.Instructions,
+                        r.CookingTimeInMin,
+                        r.Servings,
+                        r.ImageUrl,
+                        r.CaloriesPerServing,
+                        RecipeIngredients = r.RecipeIngredients.Select(ri => new
+                        {
+                            Ingredient = new {
+                                ri.Ingredient.Id,
+                                ri.Ingredient.Name,
+                                ri.Ingredient.IsLiquid
+                            },
+                            ri.Amount,
+                            UnitOfMeasureName =  ri.UnitOfMeasure.Name
+                        }).ToList(),
+                        Comments = r.Comments.Select(c => new
+                            {
+                                c.Content, 
+                                c.CreatedAt, 
+                                c.UserId, 
+                                c.Rating
+                            })
+                            .ToList()
+                    })
+                    .ToListAsync();
+ 
+                if (!userRecipes.Any())
+                {
+                    _logger.LogWarning("ExportRecipesForUserJsonAsync: No recipes found for user {UserId}.", userId);
+                
+                    return null;
+                }
+                
+                var json = JsonConvert.SerializeObject(userRecipes, Formatting.Indented);
+                var buffer = System.Text.Encoding.UTF8.GetBytes(json);
+                
+                return (buffer, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ExportRecipesForUserJsonAsync: " +
+                                     "Unexpected error while exporting recipes for user {UserId}.", userId);
+                
+                return null;
+            }
+        }
+ 
         public async Task<(byte[] buffer, string ContentType)?> GetImageAsync(string fileName, string webRootPath)
         {
             try
@@ -544,6 +666,7 @@ namespace NutritionalRecipeBook.Application.Services
                 if (string.IsNullOrWhiteSpace(fileName))
                 {
                     _logger.LogWarning("GetImageAsync called with empty file name.");
+                   
                     return null;
                 }
 
@@ -553,6 +676,7 @@ namespace NutritionalRecipeBook.Application.Services
                 if (!System.IO.File.Exists(fullPath))
                 {
                     _logger.LogInformation("Image not found at path: {FullPath}", fullPath);
+                   
                     return null;
                 }
 
@@ -567,7 +691,7 @@ namespace NutritionalRecipeBook.Application.Services
                     _ => "application/octet-stream"
                 };
 
-                using var stream = new FileStream(
+                await using var stream = new FileStream(
                     fullPath,
                     FileMode.Open,
                     FileAccess.Read,
@@ -576,7 +700,7 @@ namespace NutritionalRecipeBook.Application.Services
                     useAsync: true);
 
                 var buffer = new byte[stream.Length];
-                await stream.ReadAsync(buffer, 0, buffer.Length);
+                await stream.ReadExactlyAsync(buffer, 0, buffer.Length);
 
                 return (buffer, contentType);
             }

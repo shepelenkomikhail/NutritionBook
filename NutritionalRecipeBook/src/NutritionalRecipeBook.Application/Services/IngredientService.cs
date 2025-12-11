@@ -51,6 +51,15 @@ public class IngredientService : IIngredientService
                 return false;
             }
 
+            var isApiIngredient = await _nutrientService.SearchNutrientsAsync(ingredientDto.Name);
+
+            if (!isApiIngredient.Any())
+            {
+                _logger.LogWarning("Ingredient '{Name}' not found.", ingredientDto.Name);
+                
+                return false;
+            }
+            
             var ingredientEntity = new Ingredient
             {
                 Name = ingredientDto.Name.Trim(),

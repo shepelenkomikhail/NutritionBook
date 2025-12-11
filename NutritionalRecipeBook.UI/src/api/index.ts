@@ -54,6 +54,8 @@ export const {
   useLazyGetFavoriteRecipesQuery,
   useMarkFavoriteRecipeMutation,
   useUnmarkFavoriteRecipeMutation,
+  useUploadRecipeJsonMutation,
+  useLazyExportMyRecipesQuery
 } = recipesApi;
 
 export const {

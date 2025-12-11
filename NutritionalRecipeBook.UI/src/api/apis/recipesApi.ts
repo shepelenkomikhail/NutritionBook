@@ -145,6 +145,35 @@ const recipesApi = createApi({
         };
       },
     }),
+    uploadRecipeJson: builder.mutation<void, File>({
+      query: (file) => {
+        const headers = getHeader();
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        return {
+          url: "/api/recipes/parse/json",
+          method: "POST",
+          ...(headers ? { headers } : {}),
+          body: formData,
+        };
+      },
+    }),
+    exportMyRecipes: builder.query<Blob, void>({
+      query: () => {
+        const headers = getHeader();
+
+        return {
+          url: `/api/recipes/export/json`,
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+          responseType: 'blob',
+
+          responseHandler: (response) => response.blob(),
+        };
+      }
+    }),
   })
 });
 
