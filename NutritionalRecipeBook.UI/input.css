@@ -77,3 +77,10 @@ body {
 .recipe-details-modal .ant-image-mask:hover {
     border-radius: 0.375rem;
 }
+
+.scroll-hide {
+    scrollbar-width: none;
+}
+.scroll-hide::-webkit-scrollbar {
+    display: none;
+}

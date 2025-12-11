@@ -15,8 +15,7 @@ function ToggleFavoriteRecipesButton({ isFavorite, setIsFavorite, setIsPersonali
   return (
     <Button
       onClick={handleClick}
-      className={"!absolute"}
-      style={{ left: "10rem" }}
+      className={"w-32"}
     >
       {!isFavorite ? 'Favorite Recipes' : 'All Recipes'}
     </Button>

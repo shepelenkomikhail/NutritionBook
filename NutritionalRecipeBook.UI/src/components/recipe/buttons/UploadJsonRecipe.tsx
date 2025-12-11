@@ -35,14 +35,13 @@ function UploadJsonRecipe() {
 
   return (
     <div
-      className={"!absolute flex flex-col justify-end"}
-       style={{right: "2rem" }}
+      className={"flex flex-col gap-4 w-40 !relative"}
     >
       <Upload beforeUpload={() => false} accept=".json" maxCount={1} onChange={handleChange}>
         <Button icon={<UploadOutlined />}>Choose JSON file</Button>
       </Upload>
 
-      <Button type="primary" onClick={handleUpload} loading={isLoading} disabled={!file} style={{ marginTop: 16 }}>
+      <Button type="primary" onClick={handleUpload} loading={isLoading} disabled={!file}>
         Upload
       </Button>
     </div>

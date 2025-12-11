@@ -15,7 +15,7 @@ function TogglePersonalizedButton({ isPersonalized, setIsPersonalized, setIsFavo
   return (
     <Button
       onClick={handleClick}
-      className={"!absolute"}
+      className={"w-32"}
     >
       {!isPersonalized ? 'My Recipes' : 'All Recipes'}
     </Button>

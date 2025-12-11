@@ -35,7 +35,8 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
       <div onClick={handleOpen} className="w-full">
         <Card
           hoverable
-          className={`!rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 relative ds-card`}
+          className={`!rounded-2xl shadow-md hover:shadow-lg transition-all 
+                        duration-300 relative ds-card h-92 overflow-auto scroll-hide`}
           cover={(() => {
             const src = buildImageSrc(recipe.imageUrl);
             return src ? (
@@ -76,7 +77,7 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
             <HeartFavoriteButton recipeId={recipe.id} />
           </div>
           <div className={"w-full flex flex-col justify-center items-center gap-2 "}>
-            <p className={`text-sm mb-2 text-[var(--fg-muted)]`}>
+            <p className={`text-sm mb-2 text-[var(--fg-muted)] w-5/6 text-center`}>
               {recipe.description}
             </p>
             <p className={`text-xs text-[var(--fg-muted)]`}>

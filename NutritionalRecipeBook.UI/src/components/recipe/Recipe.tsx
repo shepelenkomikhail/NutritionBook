@@ -77,9 +77,21 @@ function Recipe() {
   return (
     <>
       <Header className={`w-full !bg-[var(--bg)] !text-[var(--fg)] border-b border-[var(--border)]`}>
-        <div className="max-w-7xl mx-auto px-4 h-16 grid grid-cols-3 items-center">
-          <div className="flex items-center gap-3">
-            <ThemeToggleButton variant="inline" />
+        <div className="max-w-7xl mx-auto h-16 grid grid-cols-3 items-center">
+          <div className="flex items-center">
+            <div className={"flex gap-4"}>
+              <ThemeToggleButton variant="inline" />
+              <TogglePersonalizedButton
+                isPersonalized={isPersonalizedRecipes}
+                setIsPersonalized={setIsPersonalizedRecipes}
+                setIsFavorite={setIsFavoriteRecipes}
+              />
+              <ToggleFavoriteRecipesButton
+                isFavorite={isFavoriteRecipes}
+                setIsFavorite={setIsFavoriteRecipes}
+                setIsPersonalized={setIsPersonalizedRecipes}
+              />
+            </div>
           </div>
 
           <div className="flex items-center justify-center">
@@ -113,17 +125,8 @@ function Recipe() {
       </Header>
 
       <Content className={`flex flex-col p-6 transition-all duration-100 bg-[var(--bg)] text-[var(--fg)] min-h-screen`}>
-        <TogglePersonalizedButton
-          isPersonalized={isPersonalizedRecipes}
-          setIsPersonalized={setIsPersonalizedRecipes}
-          setIsFavorite={setIsFavoriteRecipes}
-        />
-        <ToggleFavoriteRecipesButton
-          isFavorite={isFavoriteRecipes}
-          setIsFavorite={setIsFavoriteRecipes}
-          setIsPersonalized={setIsPersonalizedRecipes}
-        />
         <UploadJsonRecipe />
+
         <RecipeSearchBar
           search={search}
           onSearchChange={(v) => {
