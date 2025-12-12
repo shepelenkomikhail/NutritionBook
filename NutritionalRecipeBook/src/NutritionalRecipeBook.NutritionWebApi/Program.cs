@@ -70,6 +70,18 @@ namespace NutritionalRecipeBook.NutritionWebApi
                     };
                 });
             
+            if (jwtSettings == null)
+            {
+                throw new Exception("JWT SETTINGS ARE NULL");
+            }
+
+            if (string.IsNullOrWhiteSpace(jwtSettings.SigningKey))
+            {
+                throw new Exception("JWT SIGNING KEY IS EMPTY");
+            }
+            
+            builder.Services.AddAuthorization();
+
             builder.Services.AddControllers();
             
             var app = builder.Build();

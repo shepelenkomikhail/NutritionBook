@@ -5,6 +5,7 @@ using NutritionalRecipeBook.NutritionWebApi.Models;
 namespace NutritionalRecipeBook.NutritionWebApi.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class NutrientsController : ControllerBase
     {

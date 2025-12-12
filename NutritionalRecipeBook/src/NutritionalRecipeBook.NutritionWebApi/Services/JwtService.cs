@@ -20,9 +20,8 @@ public class JwtService : IJwtService
     public JwtService(JwtSettings settings)
     {
         _settings = settings;
-        _key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(settings.SigningKey));
-        Directory.CreateDirectory("data");
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.SigningKey));
+        Directory.CreateDirectory("Data");
         EnsureFile(_usersPath);
         EnsureFile(_tokensPath);
     }
@@ -33,11 +32,9 @@ public class JwtService : IJwtService
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim("scope", "nutrition.read")
         };
 
-        var credentials = new SigningCredentials(
-            _key, SecurityAlgorithms.HmacSha256);
+        var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: _settings.Issuer,
