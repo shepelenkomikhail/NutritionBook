@@ -1,7 +1,12 @@
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.IdentityModel.Tokens;
 using NutritionalRecipeBook.NutritionWebApi.Context;
+using NutritionalRecipeBook.NutritionWebApi.Contracts;
 using NutritionalRecipeBook.NutritionWebApi.Models;
+using NutritionalRecipeBook.NutritionWebApi.Services;
 
 namespace NutritionalRecipeBook.NutritionWebApi
 {
@@ -10,19 +15,19 @@ namespace NutritionalRecipeBook.NutritionWebApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateSlimBuilder(args);
-
-            builder.Services.ConfigureHttpJsonOptions(options =>
+            var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
+            const string dataNutrientsJson = "Data/nutrients.json";
+            
+            var baseUrl = builder.Configuration["App:ApiUrl"];
+            if (string.IsNullOrWhiteSpace(baseUrl))
             {
-                options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-            });
-
-            var app = builder.Build();
+                throw new InvalidOperationException(
+                    "Configuration is missing: 'App:ApiUrl'. "
+                );
+            }
             
-            const string fileName = "nutrients.json";
-
-            var nutrientsFilePath = Path.Combine(builder.Environment.ContentRootPath, fileName);
+            var nutrientsFilePath = Path.Combine(builder.Environment.ContentRootPath, dataNutrientsJson);
             Nutrient[] nutrients;
-            
             if (File.Exists(nutrientsFilePath))
             {
                 var json = File.ReadAllText(nutrientsFilePath);
@@ -33,25 +38,55 @@ namespace NutritionalRecipeBook.NutritionWebApi
             {
                 nutrients = Array.Empty<Nutrient>();
             }
-
-            app.MapGet("/nutrients", () => nutrients);
-
-            app.MapGet("/search", (string? query) =>
+            
+            builder.Services.AddSingleton(nutrients);
+            builder.Services.AddSingleton(jwtSettings);
+            builder.Services.AddSingleton<IJwtService, JwtService>();
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.AddTransient<IEmailSenderService, EmailSender>();
+            builder.Services.AddSingleton<IUserService, UserService>();
+            
+            builder.Services.ConfigureHttpJsonOptions(options =>
             {
-                if (string.IsNullOrWhiteSpace(query))
+                options.SerializerOptions.TypeInfoResolverChain
+                    .Insert(0, AppJsonSerializerContext.Default);
+            });
+            
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
                 {
-                    return Results.BadRequest(new { error = "Query parameter 'query' is required." });
-                }
+                    options.TokenValidationParameters = new()
+                    {
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwtSettings.SigningKey)),
 
-                var q = query.Trim();
-                var matches = nutrients
-                    .Where(n => n.Name != null && n.Name.Contains(q, StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
-               
-                return Results.Ok(matches);
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.FromSeconds(30)
+                    };
+                });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("NutritionRead", policy =>
+                    policy.RequireClaim("scope", "nutrition.read"));
             });
 
+            builder.Services.AddControllers();
+            
+            var app = builder.Build();
+             
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            
+            app.MapControllers();
+              
             app.Run();
-        }
-    }
-}
+          }
+      }
+  }
