@@ -69,13 +69,7 @@ namespace NutritionalRecipeBook.NutritionWebApi
                         ClockSkew = TimeSpan.FromSeconds(30)
                     };
                 });
-
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("NutritionRead", policy =>
-                    policy.RequireClaim("scope", "read.nutrients"));
-            });
-
+            
             builder.Services.AddControllers();
             
             var app = builder.Build();
