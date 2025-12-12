@@ -17,9 +17,13 @@ namespace NutritionalRecipeBook.NutritionWebApi
             var builder = WebApplication.CreateSlimBuilder(args);
             var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
             const string dataNutrientsJson = "Data/nutrients.json";
-            
             var baseUrl = builder.Configuration["App:ApiUrl"];
-            if (string.IsNullOrWhiteSpace(baseUrl))
+            
+            if (jwtSettings == null)
+            {
+                throw new Exception("JWT SETTINGS ARE NULL");
+            }
+            if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(jwtSettings.SigningKey))
             {
                 throw new InvalidOperationException(
                     "Configuration is missing: 'App:ApiUrl'. "
@@ -70,15 +74,7 @@ namespace NutritionalRecipeBook.NutritionWebApi
                     };
                 });
             
-            if (jwtSettings == null)
-            {
-                throw new Exception("JWT SETTINGS ARE NULL");
-            }
-
-            if (string.IsNullOrWhiteSpace(jwtSettings.SigningKey))
-            {
-                throw new Exception("JWT SIGNING KEY IS EMPTY");
-            }
+            
             
             builder.Services.AddAuthorization();
 
