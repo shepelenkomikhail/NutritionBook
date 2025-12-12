@@ -16,14 +16,14 @@ namespace NutritionalRecipeBook.NutritionWebApi.Controllers
         }
 
         [HttpGet("/nutrients")]
-        [Authorize(Policy = "nutrition.read")]
+        [Authorize(Policy = "read.nutrients")]
         public ActionResult<IEnumerable<Nutrient>> GetAll()
         {
             return Ok(_nutrients);
         }
 
         [HttpGet("/search")]
-        [Authorize(Policy = "nutrition.read")]
+        [Authorize(Policy = "read.nutrients")]
         public ActionResult<IEnumerable<Nutrient>> Search([FromQuery] string? query)
         {
             if (string.IsNullOrWhiteSpace(query))

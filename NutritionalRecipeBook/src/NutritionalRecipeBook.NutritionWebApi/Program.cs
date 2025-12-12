@@ -73,7 +73,7 @@ namespace NutritionalRecipeBook.NutritionWebApi
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("NutritionRead", policy =>
-                    policy.RequireClaim("scope", "nutrition.read"));
+                    policy.RequireClaim("scope", "read.nutrients"));
             });
 
             builder.Services.AddControllers();
