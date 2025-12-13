@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
@@ -15,36 +16,27 @@ namespace NutritionalRecipeBook.NutritionWebApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateSlimBuilder(args);
-            var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
-            const string dataNutrientsJson = "Data/nutrients.json";
+            
+            var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!; 
             var baseUrl = builder.Configuration["App:ApiUrl"];
+            var apiKey = builder.Configuration["Gemini:ApiKey"];
             
             if (jwtSettings == null)
             {
                 throw new Exception("JWT SETTINGS ARE NULL");
             }
-            if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(jwtSettings.SigningKey))
+            if (string.IsNullOrWhiteSpace(baseUrl) || 
+                string.IsNullOrWhiteSpace(jwtSettings.SigningKey) || 
+                string.IsNullOrWhiteSpace(apiKey))
             {
                 throw new InvalidOperationException(
-                    "Configuration is missing: 'App:ApiUrl'. "
+                    "Some configuration is missing"
                 );
             }
             
-            var nutrientsFilePath = Path.Combine(builder.Environment.ContentRootPath, dataNutrientsJson);
-            Nutrient[] nutrients;
-            if (File.Exists(nutrientsFilePath))
-            {
-                var json = File.ReadAllText(nutrientsFilePath);
-                nutrients = JsonSerializer.Deserialize(json, AppJsonSerializerContext.Default.NutrientArray)
-                            ?? Array.Empty<Nutrient>();
-            }
-            else
-            {
-                nutrients = Array.Empty<Nutrient>();
-            }
-            
-            builder.Services.AddSingleton(nutrients);
             builder.Services.AddSingleton(jwtSettings);
+            builder.Services.AddSingleton<IGeminiService>(sp => new GeminiService(apiKey));            
+            builder.Services.AddSingleton<INutrientsService, NutrientsService>();
             builder.Services.AddSingleton<IJwtService, JwtService>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddTransient<IEmailSenderService, EmailSender>();
@@ -73,8 +65,6 @@ namespace NutritionalRecipeBook.NutritionWebApi
                         ClockSkew = TimeSpan.FromSeconds(30)
                     };
                 });
-            
-            
             
             builder.Services.AddAuthorization();
 
