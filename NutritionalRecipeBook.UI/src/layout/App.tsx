@@ -1,4 +1,3 @@
-import { observer } from 'mobx-react';
 import { Toaster } from 'react-hot-toast';
 import { Outlet } from 'react-router-dom';
 import { MainLayout } from './MainLayout';
@@ -15,5 +14,4 @@ function App() {
   );
 }
 
-const ObservedApp = observer(App);
-export default ObservedApp;
+export default App;
