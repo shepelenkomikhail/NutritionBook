@@ -29,6 +29,22 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("Frontend", policy =>
+        {
+            policy
+                .WithOrigins(
+                    "http://localhost:3000",
+                    "https://nutrition-book.shepelenkomykhailo.com",
+                    "https://www.nutrition-book.shepelenkomykhailo.com"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+    });
+
     
     QuestPDF.Settings.License = LicenseType.Community;
     
@@ -48,14 +64,7 @@ try
 
     app.UseStaticFiles();
     app.UseHttpsRedirection();
-    app.UseCors((options) =>
-    {
-        options
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials()
-            .WithOrigins("http://localhost:3000");
-    });
+    app.UseCors("Frontend");
 
     app.UseAuthentication();
     app.UseAuthorization();
