@@ -37,6 +37,7 @@
       "@stores": ["stores"],
       "@stores/*": ["stores/*"],
       "@themes": ["themes"],
+      "@hooks": ["hooks"],
       "@utils/*": ["utils/*"]
     },
     "types": ["vite/client"]

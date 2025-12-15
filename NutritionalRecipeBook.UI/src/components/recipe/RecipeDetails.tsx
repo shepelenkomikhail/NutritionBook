@@ -1,8 +1,20 @@
-import { useContext, useEffect } from 'react';
-import { useLazyGetRecipeByIdQuery } from '@api';
-import { ThemeContext } from '../../layout/App.tsx';
-import { Descriptions, Divider, List, Modal, Spin, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { useLazyGetRecipeByIdQuery, useLazyGetCommentsQuery, useDeleteCommentMutation, useLazyGetMyCommentsQuery } from '@api';
+import { Divider, Modal, Spin, Typography, List, Button } from 'antd';
+import { type CommentModel, ShowIngredientModel, type PagedResult, IngredientNutritionInfoModel, type IngredientUnitOfMeasureModel, type UserIngredientUnitOfMeasuresModel } from '@models';
+import { useCommentMutation, useShoppingListMutation } from '@hooks';
+import { toast } from '@utils/toast.tsx';
+import RecipeRatingSummary from './details/RecipeRatingSummary';
+import RecipeImage from './details/RecipeImage';
+import RecipeMeta from './details/RecipeMeta';
+import CommentsList from './details/CommentsList';
+import { HeartFavoriteButton } from './buttons';
+import { useIngredientsQuery } from '@hooks';
+import CommentForm from './details/CommentForm.tsx';
 const { Title } = Typography;
+import { calculateNutritionTotals } from '@utils/calculateNutritionTotals';
+import type { FormIngredientModel } from '@models';
+import type { IngredientModel } from '@models';
 
 interface RecipeModalProps {
   open: boolean;
@@ -12,20 +24,139 @@ interface RecipeModalProps {
 
 function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
   const [getData, { data: recipeData, isLoading }] = useLazyGetRecipeByIdQuery();
-  const { theme } = useContext(ThemeContext);
+  const { submit, isLoading: isSubmitting } = useCommentMutation();
+  const { execute: saveShoppingList, isLoading: isSavingShoppingList } = useShoppingListMutation();
+  const [triggerComments, { data: commentsData, isLoading: isCommentsLoading }] = useLazyGetCommentsQuery();
+  const [triggerMyComments, { data: myCommentsData }] = useLazyGetMyCommentsQuery();
+  const { ingredients: catalog } = useIngredientsQuery();
+  const [page, setPage] = useState<number>(1);
+  const pageSize = 3;
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteComment] = useDeleteCommentMutation();
+  
+  const handleSubmit = async (values: { rating: number; content: string }) => {
+    if (!recipeId) return;
+    const ok = await submit({ recipeId, rating: values.rating, content: values.content?.trim() });
+    if (ok) {
+      getData(recipeId);
+      triggerComments({ recipeId });
+      triggerMyComments({ recipeId });
+    }
+  }
+
+  const handleDeleteComment = async (item: CommentModel, currentPageCount: number) => {
+    if (!item.id) return;
+    const allow = myCommentIds.has(item.id);
+    if (!allow) {
+      toast('You can only delete your own comments.');
+      return;
+    }
+    try {
+      setDeletingId(item.id);
+      if (currentPageCount === 1 && page > 1) {
+        setPage(page - 1);
+      }
+      await deleteComment({ commentId: item.id }).unwrap();
+      toast('Comment deleted successfully!');
+      triggerComments({ recipeId });
+      triggerMyComments({ recipeId });
+    } catch (err) {
+      console.error('Failed to delete comment:', err);
+      toast('Failed to delete comment');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleAddToShoppingList = async () => {
+    if (!recipeData?.ingredients) return;
+
+    const ingredientUnitOfMeasures: IngredientUnitOfMeasureModel[] =
+      recipeData.ingredients.map((item) => {
+      const ingredient: IngredientModel = {
+        id: item.ingredientDTO.id ?? undefined,
+        name: item.ingredientDTO.name,
+        isLiquid: item.ingredientDTO.isLiquid,
+        amount: Number(item.amount),
+        unit: item.unit,
+      };
+
+      return {
+        ingredient,
+        unitOfMeasure: item.unit,
+        amount: Number(item.amount),
+        isBought: false,
+      };
+    });
+
+    const payload: UserIngredientUnitOfMeasuresModel = {
+      ingredientUnitOfMeasures,
+    };
+
+    await saveShoppingList(payload);
+  };
 
   useEffect(() => {
     if (open && recipeId) {
       getData(recipeId);
+
+      triggerComments({ recipeId });
+      triggerMyComments({ recipeId });
+      setPage(1);
     }
-  }, [open, recipeId, getData]);
+  }, [open, recipeId, getData, triggerComments, triggerMyComments]);
 
-  const isDark = theme === 'dark';
+  const comments: CommentModel[] = useMemo(() => {
+    const list = (commentsData ?? []) as CommentModel[];
 
-  const containerClass = `
-    p-4 rounded-lg
-   ${isDark ? 'bg-slate-800 text-gray-100' : 'bg-white text-gray-900'}
-  `;
+    return Array.isArray(list) ? list : [];
+  }, [commentsData]);
+
+  const averageRating = useMemo(() => {
+    if (!comments.length) return 0;
+    const sum = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+
+    return Number((sum / comments.length).toFixed(1));
+  }, [comments]);
+
+  const myCommentIds = useMemo(() => {
+    const raw = (myCommentsData ?? []) as CommentModel[] | PagedResult<CommentModel>;
+    const items = Array.isArray(raw) ? raw : (raw?.items ?? []);
+    const ids = (items as CommentModel[])
+      .map(c => c.id)
+      .filter((id): id is string => typeof id === 'string' && !!id);
+    return new Set(ids);
+  }, [myCommentsData]);
+
+  const nutritionTotals = useMemo(() => {
+    if (!recipeData?.ingredients) {
+      return { calories: 0, proteins: 0, carbs: 0, fats: 0 } as const;
+    }
+
+    const formIngredients: FormIngredientModel[] = recipeData.ingredients
+      .map(item => {
+        const ingInfo: IngredientNutritionInfoModel | undefined =
+          catalog.find(c => c.name === item.ingredientDTO.name);
+
+        if (!ingInfo) return null;
+
+        return {
+          id: item.ingredientDTO.id ?? undefined,
+          name: item.ingredientDTO.name,
+          amount: Number(item.amount),
+          unit: item.unit,
+          uom: ingInfo.uom,
+          caloriesPer100: ingInfo.calories ?? 0,
+          proteinsPer100: ingInfo.proteins ?? 0,
+          carbsPer100: ingInfo.carbs ?? 0,
+          fatsPer100: ingInfo.fats ?? 0,
+          isLiquid: ingInfo.isLiquid ?? false,
+        } as FormIngredientModel;
+      })
+      .filter((x): x is FormIngredientModel => x !== null);
+
+    return calculateNutritionTotals(formIngredients);
+  }, [recipeData?.ingredients, catalog]);
 
   return (
     <Modal
@@ -34,67 +165,50 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
       onCancel={onClose}
       footer={null}
       width={700}
+      rootClassName="recipe-details-modal"
       destroyOnClose
-      className={isDark ? 'dark-modal' : ''}
-      bodyStyle={{
-        backgroundColor: isDark ? '#1e293b' : 'whitesmoke',
+      styles={{ body: {
+        color: 'var(--fg)',
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)'
+        }
       }}
     >
       {isLoading ? (
-        <Spin className="w-full flex justify-center py-10" tip="Loading recipe details..." />
+        <Spin className="w-full flex justify-center py-10" />
       ) : recipeData ? (
-        <div className={containerClass}>
-          <Descriptions
-            bordered
-            column={1}
-            size="small"
-            labelStyle={{
-              color: isDark ? 'rgb(203 213 225)' : 'rgb(55 65 81)',
-              backgroundColor: isDark ? 'rgb(30 41 59)' : 'rgb(243 244 246)',
-              borderColor: isDark ? 'rgb(71 85 105)' : 'rgb(209 213 219)',
-            }}
-            contentStyle={{
-              color: isDark ? 'rgb(241 245 249)' : 'rgb(17 24 39)',
-              backgroundColor: isDark ? 'rgb(15 23 42)' : 'rgb(255 255 255)',
-              borderColor: isDark ? 'rgb(71 85 105)' : 'rgb(209 213 219)',
-            }}
-          >
-            <Descriptions.Item label="Description">
-              {recipeData.recipeDTO.description}
-            </Descriptions.Item>
-            <Descriptions.Item label="Instructions">
-              {recipeData.recipeDTO.instructions}
-            </Descriptions.Item>
-            <Descriptions.Item label="Cooking Time">
-              {recipeData.recipeDTO.cookingTimeInMin} min
-            </Descriptions.Item>
-            <Descriptions.Item label="Servings">
-              {recipeData.recipeDTO.servings}
-            </Descriptions.Item>
-          </Descriptions>
+        <div className="p-4 rounded-lg bg-[var(--card)] text-[var(--fg)]">
+          <div className="absolute right-12 top-20 z-10 flex gap-2">
+            <HeartFavoriteButton recipeId={recipeId} />
+          </div>
 
-          <Divider className={`my-4}`} style={{
-            borderColor: isDark ? 'rgb(71 85 105)' : 'rgb(209 213 219)',
-          }}/>
+          <RecipeRatingSummary averageRating={averageRating} totalCount={comments.length} />
 
-          <Title
-            level={4}
-            style={{
-              color: isDark ? 'rgb(203 213 225)' : 'rgb(55 65 81)'
-            }}
-          >
+          <Divider className="my-4" />
+
+          <div className="w-full mb-4 relative">
+            <RecipeImage
+              name={recipeData.recipeDTO?.name}
+              imageUrl={recipeData.recipeDTO?.imageUrl}
+              className="object-cover"
+              style={{ height: '180px', width: '100%', padding: '12px', borderRadius: '20px' }}
+            />
+          </div>
+
+          <Title level={4} className="!text-[var(--fg)]">
+            Description
+          </Title>
+          <Title level={5}> { recipeData.recipeDTO.description } </Title>
+
+          <Divider className="my-4" />
+
+          <Title level={4} className="!text-[var(--fg)]">
             Ingredients
           </Title>
           <List
-            dataSource={recipeData.ingredients}
-            renderItem={(item: any) => (
-              <List.Item
-                className="border-b last:border-0"
-                style={{
-                  borderColor: isDark ? 'rgb(51 65 85)' : 'rgb(209 213 219)',
-                  color: isDark ? 'rgb(203 213 225)' : 'rgb(55 65 81)'
-                }}
-              >
+            dataSource={recipeData.ingredients as ShowIngredientModel[]}
+            renderItem={(item) => (
+              <List.Item className="border-b last:border-0 border-[var(--border)] text-[var(--fg)]">
                 <div className="flex justify-between w-full">
                   <span>{item.ingredientDTO.name}</span>
                   <span>
@@ -104,13 +218,82 @@ function RecipeDetails({ open, onClose, recipeId }: RecipeModalProps) {
               </List.Item>
             )}
           />
+          <Button
+            type="primary"
+            size="small"
+            loading={isSavingShoppingList}
+            onClick={handleAddToShoppingList}
+          >
+            Add to shopping list
+          </Button>
+
+          <div className="mt-4 border border-[var(--border)] rounded-md p-3">
+            <div className="font-medium mb-2">Nutritional Content</div>
+            <div className="grid grid-cols-4 gap-2 text-[var(--fg)]">
+              <div>
+                <div className="text-[var(--fg-muted)]">Calories</div>
+                <div>{nutritionTotals.calories} kcal</div>
+              </div>
+              <div>
+                <div className="text-[var(--fg-muted)]">Proteins</div>
+                <div>{nutritionTotals.proteins} g</div>
+              </div>
+              <div>
+                <div className="text-[var(--fg-muted)]">Carbs</div>
+                <div>{nutritionTotals.carbs} g</div>
+              </div>
+              <div>
+                <div className="text-[var(--fg-muted)]">Fats</div>
+                <div>{nutritionTotals.fats} g</div>
+              </div>
+            </div>
+          </div>
+
+          <Divider className="my-4" />
+
+          <Title level={4} className="!text-[var(--fg)]">
+            Instructions
+          </Title>
+          <Title level={5}> { recipeData.recipeDTO.instructions } </Title>
+
+          <Divider className="my-4" />
+
+          <RecipeMeta
+            cookingTimeInMin={recipeData.recipeDTO.cookingTimeInMin}
+            servings={recipeData.recipeDTO.servings}
+          />
+
+          <Divider className="my-4" />
+          <Title level={4} className="!text-[var(--fg)]">
+            Comments
+          </Title>
+
+          <Spin spinning={isCommentsLoading} >
+            {comments.length === 0 ? (
+              <p className="text-[var(--fg-muted)]">No comments yet. Be the first to leave one!</p>
+            ) : (
+              <CommentsList
+                comments={comments}
+                page={page}
+                setPage={setPage}
+                pageSize={pageSize}
+                myCommentIds={myCommentIds}
+                deletingId={deletingId}
+                onDelete={handleDeleteComment}
+              />
+            )}
+          </Spin>
+
+          <Divider className="my-4" />
+
+          <Title level={4} className="!text-[var(--fg)]">
+            Leave a Comment
+          </Title>
+
+          <CommentForm onSubmit={handleSubmit} loading={isSubmitting} />
         </div>
       ) : (
-        <p
-          className={`text-center py-6 ${
-            isDark ? 'text-gray-400' : 'text-gray-500'
-          }`}
-        >
+        <p className="text-center py-6 text-[var(--fg-muted)]">
           No recipe data found.
         </p>
       )}

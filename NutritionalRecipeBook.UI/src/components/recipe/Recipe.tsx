@@ -1,20 +1,40 @@
 import 'simplebar-react/dist/simplebar.min.css';
 import SimpleBar from 'simplebar-react';
-import { useContext, useState } from 'react';
-import { PlusOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
-import { FloatButton, Layout, Modal, Spin, Button } from 'antd';
+import { useEffect, useState } from 'react';
+import { PlusOutlined, LogoutOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { Button, FloatButton, Layout, Modal, Spin } from 'antd';
 import Title from 'antd/es/typography/Title';
-const { Content, Header } = Layout;
-import { ThemeContext } from '../../layout/App';
-import { useRecipeQuery } from '../../hooks/useRecipeQuery';
+import { useRecipeQuery } from '@hooks';
+import { useLazyGetRecipesByUserQuery } from '@api';
 import { RecipeModel } from '@models'
 import { RecipeList, RecipeSearchBar, RecipeForm } from './index.ts';
+import { ThemeToggleButton } from '../shared';
+import { RootState } from '@api';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../api/slices/authSlice.ts';
+import { TogglePersonalizedButton, ToggleFavoriteRecipesButton, UploadJsonRecipe } from './buttons';
+import { setUserRecipes } from '../../api/slices/userRecipeSlice.ts';
+import ShoppingList from './ShoppingList.tsx';
+import ExportMyRecipesButton from './buttons/ExportMyRecipesButton.tsx';
+const { Content, Header } = Layout;
 
 function Recipe() {
-  const { theme, setTheme } = useContext(ThemeContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [, setIsLoading] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeModel | null>(null);
+  const { username, token } = useSelector((state: RootState) => state.auth);
+  const ownedRecipes = useSelector((state: RootState) => state.userRecipes.recipes || []);
+  const [isPersonalizedRecipes, setIsPersonalizedRecipes] = useState<boolean>(false);
+  const [isFavoriteRecipes, setIsFavoriteRecipes] = useState<boolean>(false);
+
+  const dispatch = useDispatch();
+  const [triggerOwnedFetch] = useLazyGetRecipesByUserQuery();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    window.location.reload();
+  };
 
   const handleOpen = () => setIsModalOpen(true);
   const handleCancel = () => {
@@ -22,11 +42,14 @@ function Recipe() {
     setIsModalOpen(false);
   };
 
+  const handleOpenCart = () => setIsCartOpen(true);
+  const handleCloseCart = () => setIsCartOpen(false);
+
   const {
     recipes, totalCount, search, setSearch, pageNumber, setPageNumber, pageSize, isLoadingQuery,
-    minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, setMinCookingTimeInMin,
-    setMaxCookingTimeInMin, setMinServings, setMaxServings,
-  } = useRecipeQuery();
+    minCookingTimeInMin, maxCookingTimeInMin, minServings, maxServings, minCaloriesPerServing, maxCaloriesPerServing,
+    setMinCookingTimeInMin, setMaxCookingTimeInMin, setMinServings, setMaxServings, setMinCalories, setMaxCalories
+  } = useRecipeQuery(isPersonalizedRecipes, isFavoriteRecipes);
 
   const handleOpenEdit = (recipe: RecipeModel) => {
     setEditingRecipe(recipe);
@@ -38,50 +61,73 @@ function Recipe() {
     setEditingRecipe(null);
   };
 
-  const handleThemeToggle = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  useEffect(() => {
+    const shouldBootstrap = Boolean(token) && ownedRecipes.length === 0;
+    if (!shouldBootstrap) return;
+
+    triggerOwnedFetch({ pageNumber: 1, pageSize: 50 })
+      .unwrap()
+      .then((res) => {
+        const items = res?.items ?? [];
+        dispatch(setUserRecipes({ recipes: items }));
+      })
+      .catch(() => {
+      });
+  }, [token, ownedRecipes.length, triggerOwnedFetch, dispatch]);
 
   return (
     <>
-      <Header className={`flex items-center justify-center w-full relative`}
-        style={{
-          backgroundColor: theme === 'dark' ? undefined : '#f9f5f0',
-          color: theme === 'dark' ? '#ffffff' : '#ffffff',
-          paddingTop: '24px',
-        }}
-      >
-        <Button
-          icon={
-            theme === 'dark' ? (
-              <SunOutlined style={{ color: 'white', fontSize: '24px' }} />
-            ) : (
-              <MoonOutlined style={{ color: 'white', fontSize: '24px' }} />
-            )
-          }
-          type="primary"
-          className="!absolute !h-12 !w-12"
-          style={{ top: '16px', left: '16px', borderRadius: '50%' }}
-          onClick={() => handleThemeToggle()}
-        />
-        <Title
-          className="mb-0"
-          style={{
-            color: theme == 'dark' ? 'rgb(203 213 225)' : 'rgb(55 65 81)'
-          }}
-        >
-          Recipes
-        </Title>
+      <Header className={`w-full !bg-[var(--bg)] !text-[var(--fg)] border-b border-[var(--border)]`}>
+        <div className="max-w-7xl mx-auto h-16 grid grid-cols-3 items-center">
+          <div className="flex items-center">
+            <div className={"flex gap-4"}>
+              <ThemeToggleButton variant="inline" />
+              <TogglePersonalizedButton
+                isPersonalized={isPersonalizedRecipes}
+                setIsPersonalized={setIsPersonalizedRecipes}
+                setIsFavorite={setIsFavoriteRecipes}
+              />
+              <ToggleFavoriteRecipesButton
+                isFavorite={isFavoriteRecipes}
+                setIsFavorite={setIsFavoriteRecipes}
+                setIsPersonalized={setIsPersonalizedRecipes}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center">
+            <Title level={3} className="!mb-0 !text-[var(--fg)]">
+              Recipes
+            </Title>
+          </div>
+
+          <div className="flex items-center justify-end gap-4">
+            <Button
+              type="text"
+              size={"large"}
+              icon={<ShoppingCartOutlined />}
+              aria-label="Open shopping list"
+              onClick={handleOpenCart}
+            />
+            <Title level={5} className="!mb-0 !text-[var(--fg-muted)]">
+              Hello, {username || 'Guest'}
+            </Title>
+            <Button
+              type="primary"
+              icon={<LogoutOutlined />}
+              danger
+              size="small"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
+        </div>
       </Header>
 
-      <Content
-        className={`flex flex-col p-6 transition-all duration-300
-        ${theme === 'dark' ? 'bg-slate-900 text-gray-100' : 'text-gray-800'}`}
-        style={{
-          backgroundColor: theme === 'dark' ? undefined : '#f9f5f0',
-          minHeight: '100vh'
-      }}
-      >
+      <Content className={`flex flex-col p-6 transition-all duration-100 bg-[var(--bg)] text-[var(--fg)] min-h-screen`}>
+        <UploadJsonRecipe />
+
         <RecipeSearchBar
           search={search}
           onSearchChange={(v) => {
@@ -92,18 +138,28 @@ function Recipe() {
           maxCookingTimeInMin={maxCookingTimeInMin}
           minServings={minServings}
           maxServings={maxServings}
+          minCalories={minCaloriesPerServing}
+          maxCalories={maxCaloriesPerServing}
           onMinCookingTimeChange={setMinCookingTimeInMin}
           onMaxCookingTimeChange={setMaxCookingTimeInMin}
           onMinServingsChange={setMinServings}
           onMaxServingsChange={setMaxServings}
+          onMinCaloriesChange={setMinCalories}
+          onMaxCaloriesChange={setMaxCalories}
           onClearFilters={() => {
             setMinCookingTimeInMin(undefined);
             setMaxCookingTimeInMin(undefined);
             setMinServings(undefined);
             setMaxServings(undefined);
+            setMinCalories(undefined);
+            setMaxCalories(undefined);
             setPageNumber(1);
           }}
         />
+
+        {isPersonalizedRecipes && (
+          <ExportMyRecipesButton />
+        )}
 
         <RecipeList
           recipes={recipes}
@@ -111,7 +167,7 @@ function Recipe() {
           pageNumber={pageNumber}
           pageSize={pageSize}
           onPageChange={setPageNumber}
-          isLoading={isLoading}
+          isLoading={isLoadingQuery}
           onEdit={handleOpenEdit}
         />
 
@@ -129,12 +185,15 @@ function Recipe() {
           destroyOnClose
           footer={null}
           className="max-h-[70vh]"
-          bodyStyle={{
-            color: theme == 'dark' ? undefined : 'rgb(31 41 55)',
-            backgroundColor: theme == 'dark' ? undefined : 'whitesmoke'
+          styles={{
+            body: {
+              color: 'var(--fg)',
+              backgroundColor: 'var(--card)',
+              borderColor: 'var(--border)'
+            }
           }}
         >
-          <Spin spinning={isLoadingQuery} tip="Processing...">
+          <Spin spinning={isLoadingQuery}>
             <SimpleBar style={{ maxHeight: '60vh' }} autoHide={false}>
               <RecipeForm
                 id={editingRecipe?.id || null}
@@ -146,6 +205,8 @@ function Recipe() {
             </SimpleBar>
           </Spin>
         </Modal>
+
+        <ShoppingList isCartOpen={isCartOpen} handleCloseCart={handleCloseCart} />
       </Content>
     </>
   );

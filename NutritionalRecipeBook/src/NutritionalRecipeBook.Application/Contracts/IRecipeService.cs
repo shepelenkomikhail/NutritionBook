@@ -1,3 +1,5 @@
+using System.IO;
+using Microsoft.AspNetCore.Http;
 using NutritionalRecipeBook.Application.DTOs;
 using NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 
@@ -5,15 +7,34 @@ namespace NutritionalRecipeBook.Application.Contracts;
 
 public interface IRecipeService
 {
-    Task<Guid?> CreateRecipeAsync(RecipeIngredientDTO recipeUpdateDto);
-    Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientDTO recipeUpdateDto);
-    Task<Guid?> GetRecipeIdByNameAsync(string name);
-    Task<bool> DeleteRecipeAsync(Guid id);
-    Task<RecipeIngredientDTO?> GetRecipeByIdAsync(Guid id);
-    IEnumerable<RecipeDTO> GetAllRecipesAsync();
-    PagedResultDTO<RecipeDTO> GetRecipesAsync(
+    Task<RecipeIngredientNutrientDTO?> CreateRecipeAsync(RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
+    Task<bool> UpdateRecipeAsync(Guid id, RecipeIngredientNutrientDTO recipeUpdateDto, Guid userId);
+    Task<bool> DeleteRecipeAsync(Guid id, Guid userId);
+    Task<RecipeIngredientNutrientDTO[]> ParseRecipeFromJsonAsync(IFormFile? file, Guid userId);
+    
+    Task<RecipeIngredientNutrientDTO?> GetRecipeByIdAsync(Guid id);
+    Task<PagedResultDTO<RecipeDTO>> GetRecipesAsync(
             int pageNumber,
             int pageSize,
             RecipeFilterDTO? filterDto = null
+    );
+    Task<PagedResultDTO<RecipeDTO>> GetRecipesForUserAsync(
+        int pageNumber,
+        int pageSize,
+        Guid? userId,
+        RecipeFilterDTO? filterDto = null
+    );
+    Task<(byte[] buffer, string ContentType)?> ExportRecipesForUserJsonAsync(Guid userId);
+    
+    Task<string?> UploadImageAsync(Stream? fileStream, string originalFileName, string webRootPath);
+    Task<(byte[] buffer, string ContentType)?> GetImageAsync(string fileName, string webRootPath);
+
+    Task<bool> MarkFavoriteRecipeAsync(Guid? recipeId, Guid userId);
+    Task<bool> UnmarkFavoriteRecipeAsync(Guid recipeId, Guid userId);
+    Task<PagedResultDTO<RecipeDTO>> GetFavoriteRecipesAsync(
+        Guid userId,
+        int pageNumber,
+        int pageSize,
+        RecipeFilterDTO? filterDto = null
     );
 }

@@ -1,6 +1,7 @@
 namespace NutritionalRecipeBook.Application.DTOs.RecipeControllerDTOs;
 
-public record RecipeIngredientDTO(
+public record RecipeIngredientNutrientDTO(
     RecipeDTO RecipeDTO,
-    List<IngredientAmountDTO> Ingredients
+    List<IngredientAmountDTO> Ingredients,
+    List<NutrientDTO> Nutrients
 );

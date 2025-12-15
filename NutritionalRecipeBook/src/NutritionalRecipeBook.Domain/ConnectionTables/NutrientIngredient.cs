@@ -10,5 +10,5 @@ public class NutrientIngredient: BaseEntity<(Guid RecipeId, Guid IngredientId)>
     public Guid IngredientId { get; set; }
     public virtual Ingredient Ingredient { get; set; } = null!;
     
-    public int IngredientAmountPer100G { get; set; }
+    public decimal IngredientAmountPer100G { get; set; }
 }

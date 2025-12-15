@@ -12,5 +12,5 @@ const StyledLayout = styled(Layout)`
 `;
 
 export const MainLayout = ({ children }: Props) => (
-  <StyledLayout>{children}</StyledLayout>
+  <StyledLayout className="scroll-hide overflow-auto">{children}</StyledLayout>
 );

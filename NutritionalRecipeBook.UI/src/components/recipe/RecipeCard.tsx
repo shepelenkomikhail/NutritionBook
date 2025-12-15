@@ -1,9 +1,12 @@
 import { RecipeModel } from '@models';
-import { DeleteRecipeButton, EditRecipeButton } from './buttons/index.ts';
+import { DeleteRecipeButton, EditRecipeButton, HeartFavoriteButton } from './buttons/index.ts';
 import { Card, Space } from 'antd';
-import { useContext, useState } from 'react';
+import { PictureOutlined } from '@ant-design/icons';
+import SecureImage from '../shared/SecureImage';
+import { useState } from 'react';
 import { RecipeDetails } from './index.ts';
-import { ThemeContext } from '../../layout/App';
+import { useSelector } from 'react-redux';
+import { RootState } from '@api';
 
 interface RecipeCardProps {
   recipe: RecipeModel;
@@ -12,8 +15,11 @@ interface RecipeCardProps {
 
 function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const {theme, } = useContext(ThemeContext);
-  const isDark = theme === 'dark';
+
+  const buildImageSrc = (url?: string) => {
+    if (!url || url.trim() === '') return undefined;
+    return url.trim();
+  };
 
   const handleOpen = () => {
     setIsModalOpen(true);
@@ -21,46 +27,65 @@ function RecipeCard({ recipe, onEdit }: RecipeCardProps) {
 
   const handleClose = () => setIsModalOpen(false);
 
+  const ownedRecipes = useSelector((state: RootState) => state.userRecipes.recipes || []);
+  const isOwnedRecipe = ownedRecipes.some((r: RecipeModel) => r.id === recipe.id);
+
   return (
     <>
-      <button onClick={handleOpen} className="w-full">
+      <div onClick={handleOpen} className="w-full">
         <Card
           hoverable
-          className={`
-            !rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 relative
-            ${isDark ? 'text-gray-100' : 'text-gray-900'}
-          `}
-          style={{backgroundColor: isDark ? '#1e293b' : 'whitesmoke'}}
+          className={`!rounded-2xl shadow-md hover:shadow-lg transition-all 
+                        duration-300 relative ds-card h-92 overflow-auto scroll-hide`}
+          cover={(() => {
+            const src = buildImageSrc(recipe.imageUrl);
+            return src ? (
+              <SecureImage
+                alt={recipe.name}
+                src={src}
+                preview={false}
+                className="object-cover"
+                style={{ height: '180px', width: '100%', padding: '12px', borderRadius: '20px' }}
+              />
+            ) : (
+              <div
+                className="h-[180px] mt-2 w-full flex items-center justify-center bg-[var(--card)] text-[var(--fg-muted)] rounded-xl"
+                aria-label="No image available"
+                title="No image available"
+              >
+                <PictureOutlined style={{ fontSize: 124, marginLeft: '35%', marginTop: '10%' }} />
+              </div>
+            );
+          })()}
           title={
             <span
-              className={`font-semibold text-lg flex justify-between items-center ${
-                isDark ? 'text-gray-100' : 'text-gray-900'
-              }`}
+              className={`font-semibold text-lg flex justify-between items-center text-[var(--fg)]`}
             >
               {recipe.name}
               <Space>
-                <EditRecipeButton recipe={recipe} onEdit={onEdit} />
-                <DeleteRecipeButton id={recipe.id || 'error'} />
+                { isOwnedRecipe &&
+                  <>
+                    <EditRecipeButton recipe={recipe} onEdit={onEdit} />
+                    <DeleteRecipeButton id={recipe.id || 'error'} />
+                  </>
+                }
               </Space>
             </span>
           }
         >
-          <p
-            className={`text-sm mb-2 ${
-              isDark ? 'text-gray-300' : 'text-gray-600'
-            }`}
-          >
-            {recipe.description}
-          </p>
-          <p
-            className={`text-xs ${
-              isDark ? 'text-gray-400' : 'text-gray-500'
-            }`}
-          >
-            ⏱️ {recipe.cookingTimeInMin} min | 🍽️ Serves {recipe.servings}
-          </p>
+          <div className="absolute left-4 z-10" onClick={(e) => e.stopPropagation()}>
+            <HeartFavoriteButton recipeId={recipe.id} />
+          </div>
+          <div className={"w-full flex flex-col justify-center items-center gap-2 "}>
+            <p className={`text-sm mb-2 text-[var(--fg-muted)] w-5/6 text-center`}>
+              {recipe.description}
+            </p>
+            <p className={`text-xs text-[var(--fg-muted)]`}>
+              ⏱️ {recipe.cookingTimeInMin} min | 🍽️ Serves {recipe.servings}
+            </p>
+          </div>
         </Card>
-      </button>
+      </div>
 
       <RecipeDetails
         open={isModalOpen}

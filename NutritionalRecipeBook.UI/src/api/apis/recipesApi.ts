@@ -1,7 +1,7 @@
-import { RecipePayload } from '@models';
+import { RecipePayload, PagedResult, RecipeModel } from '@models';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
+import { getHeader } from '@utils/getHeader';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -12,50 +12,168 @@ const recipesApi = createApi({
   endpoints: (builder) => ({
     createRecipe: builder.mutation({
       invalidatesTags: ['Recipe'],
-      query: (payload: RecipePayload) => ({
-        url: '/api/recipes',
-        method: 'POST',
-        body: payload,
-      }),
+      query: (payload: RecipePayload) => {
+        const headers = getHeader();
+        return {
+          url: '/api/recipes',
+          method: 'POST',
+          ...(headers ? { headers } : {}),
+          body: payload,
+        };
+      },
     }),
-    updateRecipe: builder.mutation<void, { id: string; data: RecipePayload }>({
+    updateRecipe: builder.mutation<void, { id: string | undefined; data: RecipePayload }>({
       invalidatesTags: ['Recipe'],
-      query: ({ id, data }) => ({
-        url: `/api/recipes/${id}`,
-        method: 'PUT',
-        body: data,
-      }),
+      query: ({ id, data }) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/${id}`,
+          method: 'PUT',
+          ...(headers ? { headers } : {}),
+          body: data,
+        };
+      },
     }),
     deleteRecipe: builder.mutation({
       invalidatesTags: ['Recipe'],
-      query: (id: string) => ({
-        url: `/api/recipes/${id}`,
-        method: 'DELETE',
-      }),
+      query: (id: string) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/${id}`,
+          method: 'DELETE',
+          ...(headers ? { headers } : {}),
+        };
+      },
     }),
-    getRecipes: builder.query({
+    getRecipes: builder.query<PagedResult<RecipeModel>, {
+      search?: string;
+      pageNumber?: number;
+      pageSize?: number;
+      minCookingTimeInMin?: number;
+      maxCookingTimeInMin?: number;
+      minServings?: number;
+      maxServings?: number;
+      minCaloriesPerServing?: number;
+      maxCaloriesPerServing?: number;
+    } | void>({
       providesTags: ['Recipe'],
-      query: (params?: {
-        search?: string;
-        pageNumber?: number;
-        pageSize?: number;
-        minCookingTimeInMin?: number;
-        maxCookingTimeInMin?: number;
-        minServings?: number;
-        maxServings?: number;
-      }) => ({
-        url: '/api/recipes',
-        method: 'GET',
-        params,
-      }),
+      query: (params) => {
+        const headers = getHeader();
+        return {
+          url: '/api/recipes',
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+          ...(params ? { params } : {}),
+        };
+      },
     }),
-    getRecipeById: builder.query({
+    getRecipeById: builder.query<RecipePayload, string>({
       providesTags: ['Recipe'],
-      query: (id: string) => ({
-        url: `/api/recipes/${id}`,
-        method: 'GET',
-      })
-    })
+      query: (id: string) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/${id}`,
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+        };
+      }
+    }),
+    getRecipesByUser: builder.query<PagedResult<RecipeModel>, {
+      search?: string;
+      pageNumber?: number;
+      pageSize?: number;
+      minCookingTimeInMin?: number;
+      maxCookingTimeInMin?: number;
+      minServings?: number;
+      maxServings?: number;
+      minCaloriesPerServing?: number;
+      maxCaloriesPerServing?: number;
+    } | void>({
+      providesTags: ['Recipe'],
+      query: (params)=>  {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/mine`,
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+          ...(params ? { params } : {}),
+        };
+      }
+    }),
+    getFavoriteRecipes: builder.query<PagedResult<RecipeModel>, {
+      search?: string;
+      pageNumber?: number;
+      pageSize?: number;
+      minCookingTimeInMin?: number;
+      maxCookingTimeInMin?: number;
+      minServings?: number;
+      maxServings?: number;
+      minCaloriesPerServing?: number;
+      maxCaloriesPerServing?: number;
+    } | void>({
+      providesTags: ['Recipe'],
+      query: (params) => {
+        const headers = getHeader();
+        return {
+          url: '/api/recipes/favorite',
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+          ...(params ? { params } : {}),
+        };
+      },
+    }),
+    markFavoriteRecipe: builder.mutation({
+      invalidatesTags: ['Recipe'],
+      query: (params) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/favorite/${params.id}`,
+          method: 'POST',
+          ...(headers ? { headers } : {}),
+          ...(params ? { params } : {})
+        };
+      },
+    }),
+    unmarkFavoriteRecipe: builder.mutation({
+      invalidatesTags: ['Recipe'],
+      query: (params) => {
+        const headers = getHeader();
+        return {
+          url: `/api/recipes/favorite/${params.id}`,
+          method: 'DELETE',
+          ...(headers ? { headers } : {}),
+        };
+      },
+    }),
+    uploadRecipeJson: builder.mutation<void, File>({
+      query: (file) => {
+        const headers = getHeader();
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        return {
+          url: "/api/recipes/parse/json",
+          method: "POST",
+          ...(headers ? { headers } : {}),
+          body: formData,
+        };
+      },
+    }),
+    exportMyRecipes: builder.query<Blob, void>({
+      query: () => {
+        const headers = getHeader();
+
+        return {
+          url: `/api/recipes/export/json`,
+          method: 'GET',
+          ...(headers ? { headers } : {}),
+          responseType: 'blob',
+
+          responseHandler: (response) => response.blob(),
+        };
+      }
+    }),
   })
 });
 

@@ -5,6 +5,8 @@ export type RecipePayload = {
     instructions?: string;
     cookingTimeInMin: number;
     servings: number;
+    imageUrl?: string;
+    caloriesPerServing?: number;
   };
   ingredients: Array<{
     ingredientDTO: {
@@ -14,5 +16,14 @@ export type RecipePayload = {
     };
     amount: number;
     unit: string;
+  }>;
+  nutrients?: Array<{
+    name: string;
+    unitOfMeasureDTO: {
+      id: string | null;
+      name: string;
+      isLiquidMeasure: boolean;
+    };
+    amount: number;
   }>;
 };

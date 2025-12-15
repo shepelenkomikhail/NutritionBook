@@ -9,6 +9,14 @@ namespace NutritionalRecipeBook.Domain.EntityConfigurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("Users");
+            
+            builder.Property(u => u.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+            
+            builder.Property(u => u.Surname)
+                .IsRequired()
+                .HasMaxLength(50);
 
             builder.HasOne(u => u.ShoppingList)
                 .WithOne(sl => sl.User)

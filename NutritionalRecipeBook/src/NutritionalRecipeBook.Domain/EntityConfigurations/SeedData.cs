@@ -12,7 +12,9 @@ public static class SeedData
             users.Add(new User
             {
                 Id = Guid.Parse($"00000000-0000-0000-0000-0000000000{i:D2}"),
-                UserName = $"User{i}"
+                UserName = $"UserName{i}",
+                Name = $"Name{i}",
+                Surname = $"Surname{i}",
             });
         }
         return users;
@@ -27,7 +29,6 @@ public static class SeedData
             lists.Add(new ShoppingList
             {
                 Id = Guid.Parse($"10000000-0000-0000-0000-0000000000{users.IndexOf(user) + 1:D2}"),
-                Name = $"{user.UserName}'s Shopping List",
                 UserId = user.Id
             });
         }
@@ -99,6 +100,7 @@ public static class SeedData
                 Id = Guid.Parse($"50000000-0000-0000-0000-0000000000{i:D2}"),
                 Content = $"Comment {i} by {user.UserName} on {recipe.Name}",
                 CreatedAt = DateTime.UtcNow.AddMinutes(-i * 10),
+                Rating = (i % 5) + 1,
                 UserId = user.Id,
                 RecipeId = recipe.Id
             });
@@ -106,22 +108,43 @@ public static class SeedData
         return comments;
     }
 
+    // --- UNIT OF MEASURES ---
+    public static List<UnitOfMeasure> GetUnitOfMeasures()
+    {
+        return new List<UnitOfMeasure>
+        {
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000001"), Name = "g", IsLiquidMeasure = false},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000002"), Name = "kg", IsLiquidMeasure = false},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000003"), Name = "ml", IsLiquidMeasure = true},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000004"), Name = "l", IsLiquidMeasure = true },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000005"), Name = "tsp", IsLiquidMeasure = false },
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000006"), Name = "tbsp", IsLiquidMeasure = false},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000007"), Name = "tsp", IsLiquidMeasure = true},
+            new UnitOfMeasure { Id = Guid.Parse("80000000-0000-0000-0000-000000000008"), Name = "tbsp", IsLiquidMeasure = true}
+        };
+    }
+
     // --- RECIPE INGREDIENTS ---
-    public static List<RecipeIngredient> GetRecipeIngredients(List<Recipe> recipes, List<Ingredient> ingredients)
+    public static List<RecipeIngredient> GetRecipeIngredients(List<Recipe> recipes, 
+        List<Ingredient> ingredients, List<UnitOfMeasure> units)
     {
         var list = new List<RecipeIngredient>();
+        var gramUom = units.First(u => u.Name == "g");
+        var mlUom = units.First(u => u.Name == "ml");
+
         for (int i = 0; i < recipes.Count; i++)
         {
             var recipe = recipes[i];
             for (int j = 0; j < 3; j++)
             {
                 var ingredient = ingredients[(i + j) % ingredients.Count];
+                var selectedUom = ingredient.IsLiquid ? mlUom : gramUom;
                 list.Add(new RecipeIngredient
                 {
                     RecipeId = recipe.Id,
                     IngredientId = ingredient.Id,
-                    Amount = 50 + j * 25,
-                    Unit = ingredient.IsLiquid ? "ml" : "g"
+                    Amount = (decimal)(50 + j * 25),
+                    UnitOfMeasureId = selectedUom.Id
                 });
             }
         }
@@ -159,7 +182,6 @@ public static class SeedData
                 ShoppingListId = sl.Id,
                 IngredientId = ingredient.Id,
                 Amount = 1 + i,
-                Unit = ingredient.IsLiquid ? "L" : "kg"
             });
         }
         return list;
@@ -175,9 +197,9 @@ public static class SeedData
             var recipe = recipes[i % recipes.Count];
             list.Add(new UserRecipe
             {
+                Id = Guid.Parse($"70000000-0000-0000-0000-0000000000{i:D2}"),
                 UserId = user.Id,
                 RecipeId = recipe.Id,
-                Rating = (i % 5) + 1,
                 IsOwner = i % 2 == 0,
                 IsFavourite = i % 3 == 0
             });

@@ -1,1 +1,86 @@
 @import "tailwindcss";
+
+:root {
+  --brand: #722ED1;
+  --brand-fg: #ffffff;
+  --fg: #111827;
+  --fg-muted: #4B5563;
+  --fg-on-muted: #111827;
+  --bg: #FFFFFF;
+  --bg-muted: #F9FAFB;
+  --card: #FFFFFF;
+  --border: #E5E7EB;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #2563EB;
+  --ring: rgba(114, 46, 209, 0.4);
+  --radius: 8;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.ds-card {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 1px);
+}
+
+.ds-muted {
+  background: var(--bg-muted);
+  color: var(--fg-muted);
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.input:hover {
+    border-color: var(--ring);
+}
+
+.avatar-uploader .ant-upload-select-picture-card {
+    width: 100% !important;
+    height: auto !important;
+}
+.avatar-uploader .ant-upload {
+    width: 100% !important;
+}
+
+.avatar-uploader .ant-upload-select-picture-card {
+    min-height: 180px;
+}
+
+.recipe-details-modal .ant-image {
+    display: block;
+    width: 100% !important;
+}
+
+.recipe-details-modal .ant-image-img {
+    display: block;
+    width: 100% !important;
+    height: 14rem;
+    object-fit: cover;
+    border-radius: 0.375rem;
+}
+
+.recipe-details-modal .ant-image-mask,
+.recipe-details-modal .ant-image-mask:hover {
+    border-radius: 0.375rem;
+}
+
+.scroll-hide {
+    scrollbar-width: none;
+}
+.scroll-hide::-webkit-scrollbar {
+    display: none;
+}

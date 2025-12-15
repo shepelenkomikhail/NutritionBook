@@ -1,8 +1,6 @@
 import { RecipeModel } from '@models';
 import { RecipeCard } from './index.ts';
 import { Col, Empty, Pagination, Row, Spin } from 'antd';
-import { useContext } from 'react';
-import { ThemeContext } from '../../layout/App.tsx';
 
 interface Props {
   recipes: RecipeModel[];
@@ -16,10 +14,8 @@ interface Props {
 
 function RecipeList({ recipes, totalCount, pageNumber, pageSize,
                              onPageChange, isLoading, onEdit }: Props) {
-  const {theme, } = useContext(ThemeContext);
-  const isDark = theme === 'dark';
 
-  if (isLoading) return <Spin className="m-auto" tip="Loading recipes..." />;
+  if (isLoading) return <Spin className="m-auto" />;
   if (!recipes.length) return <Empty description="No recipes found" />;
 
   return (
@@ -39,9 +35,6 @@ function RecipeList({ recipes, totalCount, pageNumber, pageSize,
           total={totalCount}
           onChange={onPageChange}
           showSizeChanger={false}
-          style={{
-            color: isDark ? 'rgb(241 245 249)' : 'rgb(17 24 39)',
-          }}
         />
       </div>
     </div>

@@ -24,11 +24,6 @@ public class Repository<T, TId> : IRepository<T, TId> where T : class, IBaseEnti
     {
         return _context.Set<T>();
     }
-    
-    public IQueryable<T> GetWhereIf(IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicate)
-    {
-        return condition ? source.Where(predicate) : source;
-    }
 
     public async Task<T?> GetByIdAsync(Guid id)
     {
@@ -37,12 +32,12 @@ public class Repository<T, TId> : IRepository<T, TId> where T : class, IBaseEnti
 
     public async Task<T?> GetSingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _context.Set<T>().SingleOrDefaultAsync(predicate);
+        return await _context.Set<T>().AsNoTracking().SingleOrDefaultAsync(predicate);
     }
 
     public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _context.Set<T>().Where(predicate).ToListAsync();
+        return await _context.Set<T>().AsNoTracking().Where(predicate).ToListAsync();
     }
     
     public async Task<bool> InsertAsync(T entity)

@@ -10,6 +10,8 @@ public class RecipeIngredient: BaseEntity<(Guid RecipeId, Guid IngredientId)>
     public Guid IngredientId { get; set; }
     public virtual Ingredient Ingredient { get; set; } = null!;
     
+    public Guid UnitOfMeasureId { get; set; }
+    public virtual UnitOfMeasure UnitOfMeasure { get; set; } = null!;
+    
     public decimal Amount { get; set; }
-    public string Unit { get; set; } = string.Empty;
 }

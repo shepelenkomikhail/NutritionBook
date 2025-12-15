@@ -1,0 +1,12 @@
+using NutritionalRecipeBook.Application.DTOs;
+
+namespace NutritionalRecipeBook.Application.Contracts;
+
+public interface ICommentsService
+{
+    Task<bool> CreateCommentAsync(CommentDTO? newComment);
+    Task<bool> DeleteCommentAsync(Guid? commentId, Guid userId);
+    
+    Task<IEnumerable<CommentDTO>> GetAllCommentsForRecipeAsync(Guid? recipeId);
+    Task<IEnumerable<CommentDTO>> GetUserCommentsForRecipeAsync(Guid? recipeId, Guid userId);
+}

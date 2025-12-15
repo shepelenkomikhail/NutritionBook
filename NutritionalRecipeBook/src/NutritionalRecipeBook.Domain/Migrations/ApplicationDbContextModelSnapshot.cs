@@ -161,8 +161,8 @@ namespace NutritionalRecipeBook.Domain.Migrations
                     b.Property<Guid>("IngredientId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("IngredientAmountPer100G")
-                        .HasColumnType("int");
+                    b.Property<decimal>("IngredientAmountPer100G")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("NutrientId", "IngredientId");
 
@@ -175,61 +175,61 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000001"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            IngredientAmountPer100G = 10
+                            IngredientAmountPer100G = 10m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000002"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            IngredientAmountPer100G = 11
+                            IngredientAmountPer100G = 11m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000003"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            IngredientAmountPer100G = 12
+                            IngredientAmountPer100G = 12m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000004"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            IngredientAmountPer100G = 13
+                            IngredientAmountPer100G = 13m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000005"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000005"),
-                            IngredientAmountPer100G = 14
+                            IngredientAmountPer100G = 14m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000006"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000006"),
-                            IngredientAmountPer100G = 15
+                            IngredientAmountPer100G = 15m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000007"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000007"),
-                            IngredientAmountPer100G = 16
+                            IngredientAmountPer100G = 16m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000008"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000008"),
-                            IngredientAmountPer100G = 17
+                            IngredientAmountPer100G = 17m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000009"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000009"),
-                            IngredientAmountPer100G = 18
+                            IngredientAmountPer100G = 18m
                         },
                         new
                         {
                             NutrientId = new Guid("30000000-0000-0000-0000-000000000010"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000010"),
-                            IngredientAmountPer100G = 19
+                            IngredientAmountPer100G = 19m
                         });
                 });
 
@@ -245,14 +245,14 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<Guid>("UnitOfMeasureId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RecipeId", "IngredientId");
 
                     b.HasIndex("IngredientId");
+
+                    b.HasIndex("UnitOfMeasureId");
 
                     b.ToTable("RecipeIngredients", (string)null);
 
@@ -262,210 +262,210 @@ namespace NutritionalRecipeBook.Domain.Migrations
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000001"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000001"),
                             Amount = 50m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000001"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000002"),
                             Amount = 75m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000001"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000003"),
                             Amount = 100m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000002"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000002"),
                             Amount = 50m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000002"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000003"),
                             Amount = 75m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000002"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000004"),
                             Amount = 100m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000003"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000003"),
                             Amount = 50m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000003"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000004"),
                             Amount = 75m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000003"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000005"),
                             Amount = 100m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000004"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000004"),
                             Amount = 50m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000004"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000005"),
                             Amount = 75m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000004"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000006"),
                             Amount = 100m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000005"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000005"),
                             Amount = 50m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000005"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000006"),
                             Amount = 75m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000005"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000007"),
                             Amount = 100m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000006"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000006"),
                             Amount = 50m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000006"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000007"),
                             Amount = 75m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000006"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000008"),
                             Amount = 100m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000007"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000007"),
                             Amount = 50m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000007"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000008"),
                             Amount = 75m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000007"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000009"),
                             Amount = 100m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000008"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000008"),
                             Amount = 50m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000008"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000009"),
                             Amount = 75m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000008"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000010"),
                             Amount = 100m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000009"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000009"),
                             Amount = 50m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000009"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000010"),
                             Amount = 75m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000009"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000001"),
                             Amount = 100m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000010"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000010"),
                             Amount = 50m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000010"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000001"),
                             Amount = 75m,
-                            Unit = "g"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000010"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000002"),
                             Amount = 100m,
-                            Unit = "ml"
+                            UnitOfMeasureId = new Guid("80000000-0000-0000-0000-000000000003")
                         });
                 });
 
@@ -481,14 +481,17 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<bool>("IsBought")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("UnitOfMeasureId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ShoppingListId", "IngredientId");
 
                     b.HasIndex("IngredientId");
+
+                    b.HasIndex("UnitOfMeasureId");
 
                     b.ToTable("ShoppingListIngredients", (string)null);
 
@@ -498,80 +501,89 @@ namespace NutritionalRecipeBook.Domain.Migrations
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000001"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000001"),
                             Amount = 1m,
-                            Unit = "kg"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000002"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000002"),
                             Amount = 2m,
-                            Unit = "L"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000003"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000003"),
                             Amount = 3m,
-                            Unit = "kg"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000004"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000004"),
                             Amount = 4m,
-                            Unit = "L"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000005"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000005"),
                             Amount = 5m,
-                            Unit = "kg"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000006"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000006"),
                             Amount = 6m,
-                            Unit = "L"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000007"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000007"),
                             Amount = 7m,
-                            Unit = "kg"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000008"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000008"),
                             Amount = 8m,
-                            Unit = "L"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000009"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000009"),
                             Amount = 9m,
-                            Unit = "kg"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             ShoppingListId = new Guid("10000000-0000-0000-0000-000000000010"),
                             IngredientId = new Guid("20000000-0000-0000-0000-000000000010"),
                             Amount = 10m,
-                            Unit = "L"
+                            IsBought = false,
+                            UnitOfMeasureId = new Guid("00000000-0000-0000-0000-000000000000")
                         });
                 });
 
             modelBuilder.Entity("NutritionalRecipeBook.Domain.ConnectionTables.UserRecipe", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RecipeId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<bool>("IsFavourite")
                         .HasColumnType("bit");
@@ -579,95 +591,100 @@ namespace NutritionalRecipeBook.Domain.Migrations
                     b.Property<bool>("IsOwner")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("UserId", "RecipeId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RecipeId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserRecipes", (string)null);
 
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000001"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000000"),
+                            IsFavourite = true,
+                            IsOwner = true,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000001"),
-                            IsFavourite = true,
-                            IsOwner = true,
-                            Rating = 1
+                            UserId = new Guid("00000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000002"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000001"),
+                            IsFavourite = false,
+                            IsOwner = false,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000002"),
-                            IsFavourite = false,
-                            IsOwner = false,
-                            Rating = 2
+                            UserId = new Guid("00000000-0000-0000-0000-000000000002")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000003"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000002"),
+                            IsFavourite = false,
+                            IsOwner = true,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000003"),
-                            IsFavourite = false,
-                            IsOwner = true,
-                            Rating = 3
+                            UserId = new Guid("00000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000004"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000003"),
+                            IsFavourite = true,
+                            IsOwner = false,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000004"),
-                            IsFavourite = true,
-                            IsOwner = false,
-                            Rating = 4
+                            UserId = new Guid("00000000-0000-0000-0000-000000000004")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000005"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000004"),
+                            IsFavourite = false,
+                            IsOwner = true,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000005"),
-                            IsFavourite = false,
-                            IsOwner = true,
-                            Rating = 5
+                            UserId = new Guid("00000000-0000-0000-0000-000000000005")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000006"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000005"),
+                            IsFavourite = false,
+                            IsOwner = false,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000006"),
-                            IsFavourite = false,
-                            IsOwner = false,
-                            Rating = 1
+                            UserId = new Guid("00000000-0000-0000-0000-000000000006")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000007"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000006"),
+                            IsFavourite = true,
+                            IsOwner = true,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000007"),
-                            IsFavourite = true,
-                            IsOwner = true,
-                            Rating = 2
+                            UserId = new Guid("00000000-0000-0000-0000-000000000007")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000008"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000007"),
+                            IsFavourite = false,
+                            IsOwner = false,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000008"),
-                            IsFavourite = false,
-                            IsOwner = false,
-                            Rating = 3
+                            UserId = new Guid("00000000-0000-0000-0000-000000000008")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            RecipeId = new Guid("40000000-0000-0000-0000-000000000009"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000008"),
                             IsFavourite = false,
                             IsOwner = true,
-                            Rating = 4
+                            RecipeId = new Guid("40000000-0000-0000-0000-000000000009"),
+                            UserId = new Guid("00000000-0000-0000-0000-000000000009")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            RecipeId = new Guid("40000000-0000-0000-0000-000000000010"),
+                            Id = new Guid("70000000-0000-0000-0000-000000000009"),
                             IsFavourite = true,
                             IsOwner = false,
-                            Rating = 5
+                            RecipeId = new Guid("40000000-0000-0000-0000-000000000010"),
+                            UserId = new Guid("00000000-0000-0000-0000-000000000010")
                         });
                 });
 
@@ -684,6 +701,9 @@ namespace NutritionalRecipeBook.Domain.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("RecipeId")
                         .HasColumnType("uniqueidentifier");
@@ -705,80 +725,90 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000001"),
-                            Content = "Comment 1 by User1 on Recipe 1",
-                            CreatedAt = new DateTime(2025, 11, 11, 9, 11, 11, 371, DateTimeKind.Utc).AddTicks(9948),
+                            Content = "Comment 1 by UserName1 on Recipe 1",
+                            CreatedAt = new DateTime(2025, 12, 9, 8, 8, 15, 854, DateTimeKind.Utc).AddTicks(2703),
+                            Rating = 2,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000001"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000002"),
-                            Content = "Comment 2 by User2 on Recipe 2",
-                            CreatedAt = new DateTime(2025, 11, 11, 9, 1, 11, 371, DateTimeKind.Utc).AddTicks(9965),
+                            Content = "Comment 2 by UserName2 on Recipe 2",
+                            CreatedAt = new DateTime(2025, 12, 9, 7, 58, 15, 854, DateTimeKind.Utc).AddTicks(2716),
+                            Rating = 3,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000002"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000002")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000003"),
-                            Content = "Comment 3 by User3 on Recipe 3",
-                            CreatedAt = new DateTime(2025, 11, 11, 8, 51, 11, 371, DateTimeKind.Utc).AddTicks(9970),
+                            Content = "Comment 3 by UserName3 on Recipe 3",
+                            CreatedAt = new DateTime(2025, 12, 9, 7, 48, 15, 854, DateTimeKind.Utc).AddTicks(2721),
+                            Rating = 4,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000003"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000004"),
-                            Content = "Comment 4 by User4 on Recipe 4",
-                            CreatedAt = new DateTime(2025, 11, 11, 8, 41, 11, 371, DateTimeKind.Utc).AddTicks(9974),
+                            Content = "Comment 4 by UserName4 on Recipe 4",
+                            CreatedAt = new DateTime(2025, 12, 9, 7, 38, 15, 854, DateTimeKind.Utc).AddTicks(2726),
+                            Rating = 5,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000004"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000004")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000005"),
-                            Content = "Comment 5 by User5 on Recipe 5",
-                            CreatedAt = new DateTime(2025, 11, 11, 8, 31, 11, 371, DateTimeKind.Utc).AddTicks(9979),
+                            Content = "Comment 5 by UserName5 on Recipe 5",
+                            CreatedAt = new DateTime(2025, 12, 9, 7, 28, 15, 854, DateTimeKind.Utc).AddTicks(2731),
+                            Rating = 1,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000005"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000005")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000006"),
-                            Content = "Comment 6 by User6 on Recipe 6",
-                            CreatedAt = new DateTime(2025, 11, 11, 8, 21, 11, 371, DateTimeKind.Utc).AddTicks(9985),
+                            Content = "Comment 6 by UserName6 on Recipe 6",
+                            CreatedAt = new DateTime(2025, 12, 9, 7, 18, 15, 854, DateTimeKind.Utc).AddTicks(2736),
+                            Rating = 2,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000006"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000006")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000007"),
-                            Content = "Comment 7 by User7 on Recipe 7",
-                            CreatedAt = new DateTime(2025, 11, 11, 8, 11, 11, 371, DateTimeKind.Utc).AddTicks(9990),
+                            Content = "Comment 7 by UserName7 on Recipe 7",
+                            CreatedAt = new DateTime(2025, 12, 9, 7, 8, 15, 854, DateTimeKind.Utc).AddTicks(2741),
+                            Rating = 3,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000007"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000007")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000008"),
-                            Content = "Comment 8 by User8 on Recipe 8",
-                            CreatedAt = new DateTime(2025, 11, 11, 8, 1, 11, 371, DateTimeKind.Utc).AddTicks(9995),
+                            Content = "Comment 8 by UserName8 on Recipe 8",
+                            CreatedAt = new DateTime(2025, 12, 9, 6, 58, 15, 854, DateTimeKind.Utc).AddTicks(2746),
+                            Rating = 4,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000008"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000008")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000009"),
-                            Content = "Comment 9 by User9 on Recipe 9",
-                            CreatedAt = new DateTime(2025, 11, 11, 7, 51, 11, 372, DateTimeKind.Utc),
+                            Content = "Comment 9 by UserName9 on Recipe 9",
+                            CreatedAt = new DateTime(2025, 12, 9, 6, 48, 15, 854, DateTimeKind.Utc).AddTicks(2751),
+                            Rating = 5,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000009"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000009")
                         },
                         new
                         {
                             Id = new Guid("50000000-0000-0000-0000-000000000010"),
-                            Content = "Comment 10 by User10 on Recipe 10",
-                            CreatedAt = new DateTime(2025, 11, 11, 7, 41, 11, 372, DateTimeKind.Utc).AddTicks(6),
+                            Content = "Comment 10 by UserName10 on Recipe 10",
+                            CreatedAt = new DateTime(2025, 12, 9, 6, 38, 15, 854, DateTimeKind.Utc).AddTicks(2757),
+                            Rating = 1,
                             RecipeId = new Guid("40000000-0000-0000-0000-000000000010"),
                             UserId = new Guid("00000000-0000-0000-0000-000000000010")
                         });
@@ -960,6 +990,9 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("CaloriesPerServing")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("CookingTimeInMin")
                         .HasColumnType("int");
 
@@ -967,6 +1000,11 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Instructions")
                         .IsRequired()
@@ -989,8 +1027,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000001"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 20,
                             Description = "Description for recipe 1.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 1.",
                             Name = "Recipe 1",
                             Servings = 3
@@ -998,8 +1038,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000002"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 25,
                             Description = "Description for recipe 2.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 2.",
                             Name = "Recipe 2",
                             Servings = 4
@@ -1007,8 +1049,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000003"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 30,
                             Description = "Description for recipe 3.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 3.",
                             Name = "Recipe 3",
                             Servings = 2
@@ -1016,8 +1060,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000004"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 35,
                             Description = "Description for recipe 4.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 4.",
                             Name = "Recipe 4",
                             Servings = 3
@@ -1025,8 +1071,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000005"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 40,
                             Description = "Description for recipe 5.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 5.",
                             Name = "Recipe 5",
                             Servings = 4
@@ -1034,8 +1082,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000006"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 45,
                             Description = "Description for recipe 6.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 6.",
                             Name = "Recipe 6",
                             Servings = 2
@@ -1043,8 +1093,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000007"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 50,
                             Description = "Description for recipe 7.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 7.",
                             Name = "Recipe 7",
                             Servings = 3
@@ -1052,8 +1104,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000008"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 55,
                             Description = "Description for recipe 8.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 8.",
                             Name = "Recipe 8",
                             Servings = 4
@@ -1061,8 +1115,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000009"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 60,
                             Description = "Description for recipe 9.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 9.",
                             Name = "Recipe 9",
                             Servings = 2
@@ -1070,8 +1126,10 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000010"),
+                            CaloriesPerServing = 0m,
                             CookingTimeInMin = 65,
                             Description = "Description for recipe 10.",
+                            ImageUrl = "",
                             Instructions = "Instructions for recipe 10.",
                             Name = "Recipe 10",
                             Servings = 3
@@ -1083,11 +1141,6 @@ namespace NutritionalRecipeBook.Domain.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -1103,62 +1156,121 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000001"),
-                            Name = "User1's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Name = "User2's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000002")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Name = "User3's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Name = "User4's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000004")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000005"),
-                            Name = "User5's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000005")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000006"),
-                            Name = "User6's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000006")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000007"),
-                            Name = "User7's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000007")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000008"),
-                            Name = "User8's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000008")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000009"),
-                            Name = "User9's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000009")
                         },
                         new
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000010"),
-                            Name = "User10's Shopping List",
                             UserId = new Guid("00000000-0000-0000-0000-000000000010")
+                        });
+                });
+
+            modelBuilder.Entity("NutritionalRecipeBook.Domain.Entities.UnitOfMeasure", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsLiquidMeasure")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UnitOfMeasure", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000001"),
+                            IsLiquidMeasure = false,
+                            Name = "g"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000002"),
+                            IsLiquidMeasure = false,
+                            Name = "kg"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000003"),
+                            IsLiquidMeasure = true,
+                            Name = "ml"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000004"),
+                            IsLiquidMeasure = true,
+                            Name = "l"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000005"),
+                            IsLiquidMeasure = false,
+                            Name = "tsp"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000006"),
+                            IsLiquidMeasure = false,
+                            Name = "tbsp"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000007"),
+                            IsLiquidMeasure = true,
+                            Name = "tsp"
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000008"),
+                            IsLiquidMeasure = true,
+                            Name = "tbsp"
                         });
                 });
 
@@ -1188,6 +1300,11 @@ namespace NutritionalRecipeBook.Domain.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -1207,6 +1324,11 @@ namespace NutritionalRecipeBook.Domain.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -1231,104 +1353,133 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            Username = "User1"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "8a726c2b-e230-4a60-993f-a2dd2b2483d9",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name1",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname1",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName1"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
-                            Username = "User2"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "af276e50-535d-435f-9e23-3fd05b6bd1ef",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name2",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname2",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName2"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
-                            Username = "User3"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "61f4162d-df52-45bb-99d8-4c63d1fd3cde",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name3",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname3",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName3"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
-                            Username = "User4"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "638bb929-dddc-40ff-b9ef-28e2445a3ef3",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name4",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname4",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName4"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000005"),
-                            Username = "User5"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "f0904a85-c4b9-4dea-b520-a658748c445b",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name5",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname5",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName5"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000006"),
-                            Username = "User6"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "62da842b-cf06-4919-837e-464bb0c51e8d",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name6",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname6",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName6"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000007"),
-                            Username = "User7"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "09b7b1e0-62df-4efd-a217-fa55f43aa919",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name7",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname7",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName7"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000008"),
-                            Username = "User8"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "13dc2c00-b9cd-4c75-8d1b-dc8ed28a4f36",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name8",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname8",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName8"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000009"),
-                            Username = "User9"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "ad8b6fac-2bdf-4a6d-b623-174278d8b1ef",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name9",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname9",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName9"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000010"),
-                            Username = "User10"
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "642fffed-c7be-45bf-83d7-9c385b13c452",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            Name = "Name10",
+                            PhoneNumberConfirmed = false,
+                            Surname = "Surname10",
+                            TwoFactorEnabled = false,
+                            UserName = "UserName10"
                         });
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
-                {
-                    b.HasOne("NutritionalRecipeBook.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
-                {
-                    b.HasOne("NutritionalRecipeBook.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NutritionalRecipeBook.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
-                {
-                    b.HasOne("NutritionalRecipeBook.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1415,9 +1566,17 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NutritionalRecipeBook.Domain.Entities.UnitOfMeasure", "UnitOfMeasure")
+                        .WithMany("RecipeIngredients")
+                        .HasForeignKey("UnitOfMeasureId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Ingredient");
 
                     b.Navigation("Recipe");
+
+                    b.Navigation("UnitOfMeasure");
                 });
 
             modelBuilder.Entity("NutritionalRecipeBook.Domain.ConnectionTables.ShoppingListIngredient", b =>
@@ -1434,9 +1593,17 @@ namespace NutritionalRecipeBook.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NutritionalRecipeBook.Domain.Entities.UnitOfMeasure", "UnitOfMeasure")
+                        .WithMany("ShoppingListIngredients")
+                        .HasForeignKey("UnitOfMeasureId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Ingredient");
 
                     b.Navigation("ShoppingList");
+
+                    b.Navigation("UnitOfMeasure");
                 });
 
             modelBuilder.Entity("NutritionalRecipeBook.Domain.ConnectionTables.UserRecipe", b =>
@@ -1513,6 +1680,13 @@ namespace NutritionalRecipeBook.Domain.Migrations
 
             modelBuilder.Entity("NutritionalRecipeBook.Domain.Entities.ShoppingList", b =>
                 {
+                    b.Navigation("ShoppingListIngredients");
+                });
+
+            modelBuilder.Entity("NutritionalRecipeBook.Domain.Entities.UnitOfMeasure", b =>
+                {
+                    b.Navigation("RecipeIngredients");
+
                     b.Navigation("ShoppingListIngredients");
                 });
 

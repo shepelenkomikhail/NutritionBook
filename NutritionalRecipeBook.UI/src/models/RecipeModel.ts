@@ -1,8 +1,11 @@
+import { FormIngredientModel } from './FormIngredientModel.ts';
+
 export interface RecipeModel {
   id?: string;
   name: string;
   description: string;
-  ingredients: string;
+  imageUrl: string;
+  ingredients: FormIngredientModel[];
   instructions: string;
   cookingTimeInMin: number;
   servings: number;
