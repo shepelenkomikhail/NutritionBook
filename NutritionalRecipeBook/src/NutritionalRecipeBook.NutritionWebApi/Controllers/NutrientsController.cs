@@ -26,6 +26,16 @@ namespace NutritionalRecipeBook.NutritionWebApi.Controllers
             }
 
             var results = await _nutrientsService.SearchAsync(query);
+           
+            return Ok(results);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/nutrients")]
+        public async Task<ActionResult<IEnumerable<Nutrient>>> GetAllNutrients()
+        {
+            var results = await _nutrientsService.GetAllNutrientsAsync();
+            
             return Ok(results);
         }
     }

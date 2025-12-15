@@ -8,10 +8,12 @@ namespace NutritionalRecipeBook.NutritionWebApi.Services;
 public class NutrientsService : INutrientsService
 {
     private readonly IGeminiService _geminiService;
+    private readonly IEnumerable<Nutrient> _nutrients; 
 
-    public NutrientsService(IGeminiService geminiService)
+    public NutrientsService(IGeminiService geminiService, IEnumerable<Nutrient> nutrients)
     {
         _geminiService = geminiService ?? throw new ArgumentNullException(nameof(geminiService));
+        _nutrients = nutrients ?? throw new ArgumentNullException(nameof(nutrients));
     }
 
     public async Task<IEnumerable<Nutrient>> SearchAsync(string query)
@@ -55,6 +57,11 @@ public class NutrientsService : INutrientsService
         {
             return Array.Empty<Nutrient>();
         }
+    }
+
+    public async Task<IEnumerable<Nutrient>> GetAllNutrientsAsync()
+    {
+        return await Task.FromResult(_nutrients);
     }
 
     private static string CleanJson(string json)

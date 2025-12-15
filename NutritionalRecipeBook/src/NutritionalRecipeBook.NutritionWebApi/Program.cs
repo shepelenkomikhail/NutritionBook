@@ -21,6 +21,19 @@ namespace NutritionalRecipeBook.NutritionWebApi
             var baseUrl = builder.Configuration["App:ApiUrl"];
             var apiKey = builder.Configuration["Gemini:ApiKey"];
             
+            var nutrientsPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "nutrients.json");
+            if (!File.Exists(nutrientsPath))
+            {
+                throw new FileNotFoundException($"Nutrients file not found: {nutrientsPath}");
+            }
+
+            var nutrientsJson = File.ReadAllText(nutrientsPath);
+            var nutrients = JsonSerializer
+                .Deserialize<List<Nutrient>>(nutrientsJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new List<Nutrient>();
+            
             if (jwtSettings == null)
             {
                 throw new Exception("JWT SETTINGS ARE NULL");
@@ -35,6 +48,8 @@ namespace NutritionalRecipeBook.NutritionWebApi
             }
             
             builder.Services.AddSingleton(jwtSettings);
+            builder.Services.AddSingleton<IEnumerable<Nutrient>>(nutrients);
+ 
             builder.Services.AddSingleton<IGeminiService>(sp => new GeminiService(apiKey));            
             builder.Services.AddSingleton<INutrientsService, NutrientsService>();
             builder.Services.AddSingleton<IJwtService, JwtService>();

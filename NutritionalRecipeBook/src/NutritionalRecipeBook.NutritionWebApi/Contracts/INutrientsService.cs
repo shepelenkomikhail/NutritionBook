@@ -5,4 +5,5 @@ namespace NutritionalRecipeBook.NutritionWebApi.Contracts;
 public interface INutrientsService
 {
     Task<IEnumerable<Nutrient>> SearchAsync(string query);
+    Task<IEnumerable<Nutrient>> GetAllNutrientsAsync();
 }
