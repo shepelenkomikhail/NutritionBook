@@ -40,9 +40,9 @@ try
                     "https://www.nutrition-book.shepelenkomykhailo.com"
                 )
                 .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
+                .AllowAnyMethod();
         });
+        
     });
 
     
@@ -64,7 +64,18 @@ try
 
     app.UseStaticFiles();
     app.UseHttpsRedirection();
+    
+    app.UseRouting();
+    
     app.UseCors("Frontend");
+    app.Use(async (context, next) =>
+    {
+        context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+        context.Response.Headers["Access-Control-Allow-Methods"] = "*";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+
+        await next();
+    });
 
     app.UseAuthentication();
     app.UseAuthorization();
