@@ -139,6 +139,7 @@ namespace NutritionalRecipeBook.Application.Services
                 existingRecipe.Description = updated.Description?.Trim() ?? string.Empty;
                 existingRecipe.Instructions = updated.Instructions?.Trim() ?? string.Empty;
                 existingRecipe.CookingTimeInMin = updated.CookingTimeInMin;
+                existingRecipe.CaloriesPerServing = updated.CaloriesPerServing;
                 existingRecipe.Servings = updated.Servings;
                 existingRecipe.ImageUrl = updated.ImageUrl;
 
@@ -358,14 +359,7 @@ namespace NutritionalRecipeBook.Application.Services
         {
             try
             {
-                _logger.LogInformation(filterDto.ToString());
                 var query =  _unitOfWork.Repository<Recipe, Guid>().GetQueryable();
-                _logger.LogInformation("Building query for recipes with search '{Search}', " +
-                                         "page {PageNumber}, size {PageSize}, minTime {MinTime}, maxTime {MaxTime}, " +
-                                       "minServ {MinServ}, maxServ {MaxServ}, minCal {MinCal}, maxCal {MaxCal}.",
-                    filterDto.Search, pageNumber, pageSize, filterDto.MinCookingTimeInMin, 
-                    filterDto.MaxCookingTimeInMin, filterDto.MinServings, filterDto.MaxServings,
-                    filterDto.MinCaloriesPerServing, filterDto.MaxCaloriesPerServing);
                 
                 query = query.ApplyFilter(filterDto);
 
